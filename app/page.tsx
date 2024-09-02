@@ -1,11 +1,15 @@
+import Header from '@/components/layout/Header'
+import MockupEditor from '@/components/shared/MockupEditor'
 import ScreenshotEditor from '@/components/shared/ScreenshotEditor'
 import React from 'react'
 
 const App = () => {
   return (
-    <div>
+    <div className='min-h-screen flex flex-col'>
+      <Header />
 
-      <ScreenshotEditor />
+      <MockupEditor />
+
     </div>
   )
 }
