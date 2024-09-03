@@ -13,11 +13,12 @@ export default function Header() {
   const { theme, setTheme } = useTheme()
 
   return (
-    <header className="bg-background sticky top-0 z-40 w-full border-b">
+    <header className="bg-background sticky top-0 z-40 w-full">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center space-x-4 sm:justify-between sm:space-x-0">
         <div className="flex items-center space-x-4">
           <Sheet>
             <SheetTrigger asChild>
+              
               <Button variant="ghost" size="icon" className="lg:hidden">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Open menu</span>
@@ -54,8 +55,8 @@ export default function Header() {
             <span className="text-2xl font-bold">Mockly</span>
           </div>
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="hidden lg:flex items-center space-x-6">
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          <nav className="hidden lg:flex items-center space-x-4">
             <Link href={siteConfig.links.github} target="_blank" rel="noopener noreferrer">
               <div
                 className={buttonVariants({

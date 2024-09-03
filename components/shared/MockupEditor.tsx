@@ -198,9 +198,9 @@ export default function MockupEditor() {
       <Header />
       <main className="flex-grow container mx-auto p-4">
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/4 space-y-4">
+          <div className="w-full lg:w-1/4 space-y-8">
             <div>
-              <Label htmlFor="image-upload" className="block mb-2">Upload Image</Label>
+              <Label htmlFor="image-upload" className="block mb-4">Upload Image</Label>
               <div 
                 {...getRootProps()} 
                 className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
@@ -224,7 +224,7 @@ export default function MockupEditor() {
               </div>
             </div>
             <div>
-              <Label htmlFor="background" className="block mb-2">Background</Label>
+              <Label htmlFor="background" className="block mb-4">Background</Label>
               <Tabs defaultValue="color" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="color">Color</TabsTrigger>
@@ -288,7 +288,7 @@ export default function MockupEditor() {
               </Tabs>
             </div>
             <div>
-              <Label htmlFor="screen-size" className="block mb-2">Screen Size</Label>
+              <Label htmlFor="screen-size" className="block mb-4">Screen Size</Label>
               <Select
                 onValueChange={(value) => setScreenSize(screenSizes[parseInt(value)])}
                 value={screenSizes.indexOf(screenSize).toString()}
@@ -306,7 +306,7 @@ export default function MockupEditor() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="zoom" className="block mb-2">Zoom: {zoom}%</Label>
+              <Label htmlFor="zoom" className="block mb-4">Zoom: {zoom}%</Label>
               <Slider
                 id="zoom"
                 min={10}
@@ -317,7 +317,7 @@ export default function MockupEditor() {
               />
             </div>
             <div>
-              <Label htmlFor="transparency" className="block mb-2">Transparency: {transparency}%</Label>
+              <Label htmlFor="transparency" className="block mb-4">Transparency: {transparency}%</Label>
               <Slider
                 id="transparency"
                 min={0}
@@ -328,7 +328,7 @@ export default function MockupEditor() {
               />
             </div>
             <div>
-              <Label htmlFor="border-radius" className="block mb-2">Border Radius: {borderRadius}px</Label>
+              <Label htmlFor="border-radius" className="block mb-4">Border Radius: {borderRadius}px</Label>
               <Slider
                 id="border-radius"
                 min={0}
@@ -339,7 +339,7 @@ export default function MockupEditor() {
               />
             </div>
             <div>
-              <Label htmlFor="shadow" className="block mb-2">Shadow: {shadow}px</Label>
+              <Label htmlFor="shadow" className="block mb-4">Shadow: {shadow}px</Label>
               <Slider
                 id="shadow"
                 min={0}
