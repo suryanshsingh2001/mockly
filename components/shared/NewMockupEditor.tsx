@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, use } from "react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import { Slider } from "@/components/ui/slider";
@@ -166,11 +166,7 @@ export default function MockupEditor() {
     return () => window.removeEventListener("resize", updateCanvasScale);
   }, [updateCanvasScale]);
 
-
-
-  
-
-  useEffect(() => {
+  const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (canvas && ctx) {
@@ -182,8 +178,8 @@ export default function MockupEditor() {
         const img = new Image();
         img.onload = () => {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          drawImage();
-          drawText();
+          drawImage(ctx);
+          drawText(ctx);
         };
         img.setAttribute("crossOrigin", "anonymous");
         img.src = background;
@@ -198,13 +194,13 @@ export default function MockupEditor() {
         gradient.addColorStop(1, customColor2);
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage();
-        drawText();
+        drawImage(ctx);
+        drawText(ctx);
       } else {
         ctx.fillStyle = background;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage();
-        drawText();
+        drawImage(ctx);
+        drawText(ctx);
       }
     }
   }, [
@@ -226,10 +222,68 @@ export default function MockupEditor() {
     textColor,
   ]);
 
-  const drawImage = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (canvas && ctx && image) {
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
+
+  // useEffect(() => {
+  //   const canvas = canvasRef.current;
+  //   const ctx = canvas?.getContext("2d");
+  //   if (canvas && ctx) {
+  //     canvas.width = screenSize.width;
+  //     canvas.height = screenSize.height;
+
+  //     // Draw background
+  //     if (background.startsWith("http")) {
+  //       const img = new Image();
+  //       img.onload = () => {
+  //         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  //         drawImage();
+  //         drawText();
+  //       };
+  //       img.setAttribute("crossOrigin", "anonymous");
+  //       img.src = background;
+  //     } else if (background === "gradient") {
+  //       const gradient = ctx.createLinearGradient(
+  //         0,
+  //         0,
+  //         Math.cos((gradientAngle * Math.PI) / 180) * canvas.width,
+  //         Math.sin((gradientAngle * Math.PI) / 180) * canvas.height
+  //       );
+  //       gradient.addColorStop(0, customColor1);
+  //       gradient.addColorStop(1, customColor2);
+  //       ctx.fillStyle = gradient;
+  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //       drawImage();
+  //       drawText();
+  //     } else {
+  //       ctx.fillStyle = background;
+  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //       drawImage();
+  //       drawText();
+  //     }
+  //   }
+  // }, [
+  //   image,
+  //   background,
+  //   customColor1,
+  //   customColor2,
+  //   gradientAngle,
+  //   screenSize,
+  //   zoom,
+  //   transparency,
+  //   borderRadius,
+  //   shadow,
+  //   imagePosition,
+  //   text,
+  //   textPosition,
+  //   fontSize,
+  //   fontWeight,
+  //   textColor,
+  // ]);
+
+  const drawImage = (ctx: CanvasRenderingContext2D) => {
+    if (image) {
       const img = new Image();
       img.onload = () => {
         const scale = zoom / 100;
@@ -259,10 +313,8 @@ export default function MockupEditor() {
     }
   };
 
-  const drawText = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (canvas && ctx && text) {
+  const drawText = (ctx: CanvasRenderingContext2D) => {
+    if (text) {
       ctx.font = `${fontWeight} ${fontSize}px Arial`;
       ctx.fillStyle = textColor;
       ctx.fillText(text, textPosition.x, textPosition.y);
