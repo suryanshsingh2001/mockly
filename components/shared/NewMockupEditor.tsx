@@ -535,7 +535,8 @@ export default function MockupEditor() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+
+            {/* <div>
               <Label htmlFor="zoom" className="block mb-4">
                 Zoom: {zoom}%
               </Label>
@@ -655,11 +656,138 @@ export default function MockupEditor() {
               >
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
               </Button>
-            </div>
+            </div>*/}
+
+            <Tabs defaultValue="design" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="design">Design</TabsTrigger>
+                <TabsTrigger value="text">Text</TabsTrigger>
+              </TabsList>
+              <TabsContent value="design" className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="zoom">Zoom: {zoom}%</Label>
+                  <Slider
+                    id="zoom"
+                    min={10}
+                    max={200}
+                    step={1}
+                    value={[zoom]}
+                    onValueChange={(value) => setZoom(value[0])}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="transparency">
+                    Transparency: {transparency}%
+                  </Label>
+                  <Slider
+                    id="transparency"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[transparency]}
+                    onValueChange={(value) => setTransparency(value[0])}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="border-radius">
+                    Border Radius: {borderRadius}px
+                  </Label>
+                  <Slider
+                    id="border-radius"
+                    min={0}
+                    max={50}
+                    step={1}
+                    value={[borderRadius]}
+                    onValueChange={(value) => setBorderRadius(value[0])}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="shadow">Shadow: {shadow}px</Label>
+                  <Slider
+                    id="shadow"
+                    min={0}
+                    max={50}
+                    step={1}
+                    value={[shadow]}
+                    onValueChange={(value) => setShadow(value[0])}
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="text" className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="text">Text</Label>
+                  <Input
+                    id="text"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="Enter text"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="font-size">Font Size: {fontSize}px</Label>
+                  <Slider
+                    id="font-size"
+                    min={12}
+                    max={72}
+                    step={1}
+                    value={[fontSize]}
+                    onValueChange={(value) => setFontSize(value[0])}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="font-weight">Font Weight</Label>
+                  <Select
+                    onValueChange={(value) => setFontWeight(value)}
+                    value={fontWeight}
+                  >
+                    <SelectTrigger id="font-weight">
+                      <SelectValue placeholder="Select font weight" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="bold">Bold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="text-color">Text Color</Label>
+                  <Input
+                    id="text-color"
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="w-full h-10"
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+
+
+
+
+            <div className="flex space-x-2">
+              <Button
+                onClick={handleDownload}
+                className="w-full"
+                disabled={!image && !text}
+              >
+                <Download className="mr-2 h-4 w-4" /> Download
+              </Button>
+              <Button
+                onClick={handleReset}
+                variant="outline"
+                className="w-full"
+              >
+                <RotateCcw className="mr-2 h-4 w-4" /> Reset
+              </Button>
+
+
+              </div>
           </div>
+
           <div
             ref={containerRef}
-            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-gray-100 h-[calc(100vh-12rem)] lg:h-auto"
+            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-gray-100 h-[calc(100vh-12rem)] lg:h-auto overflow-y-auto "
           >
             <div
               className="relative overflow-hidden"
