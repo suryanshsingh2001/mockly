@@ -282,17 +282,25 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="flex space-x-4">
-               <Link href="/editor"> 
-                <Button size="lg" variant="outline" className="text-lg">
-                  Try Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                <Link href="/editor">
+                  <Button
+                    size="lg"
+                    variant={"secondary"}
+                    className="text-lg group transition-all duration-300 transform hover:scale-105"
+                  >
+                    Try Now
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Button>
                 </Link>
-               <Link href={siteConfig.socialLinks.github} target="_blank" rel="noopener noreferrer"> 
-                <Button size="lg" variant="ghost" className="text-lg">
-                  <Github className="mr-2 h-5 w-5" />
-                  Contribute
-                </Button>
+                <Link
+                  href={siteConfig.socialLinks.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button size="lg" variant="ghost" className="text-lg">
+                    <Github className="mr-2 h-5 w-5" />
+                    Contribute
+                  </Button>
                 </Link>
               </div>
             </div>
