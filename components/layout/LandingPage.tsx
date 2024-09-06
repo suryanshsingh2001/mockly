@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +19,9 @@ import {
   X,
   Github,
   ArrowRight,
+  ZoomIn,
+  Type,
+  ImagePlus,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -29,7 +31,6 @@ import { useTheme } from "next-themes";
 import ShowcaseImage from "../shared/ShowcaseImage";
 
 export default function LandingPage() {
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <LandingHeader />
@@ -44,19 +45,20 @@ export default function LandingPage() {
                     Create Stunning Screenshots in Seconds
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground text-lg sm:text-xl animate-fade-in-up">
-                    ScreenCraft is the all-in-one tool for creating beautiful
-                    mockups, presentations, and marketing materials.
+                    ScreenCraft lets you whip up beautiful mockups and
+                    presentations in no time. No stress, just pick, place, zoom,
+                    done. Perfect for developers who'd rather code than design.
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 min-[400px]:flex-row animate-fade-in-up">
                   <Link href="/editor">
-                  <Button
-                    size="lg"
-                    className="text-lg group transition-all duration-300 transform hover:scale-105"
-                  >
-                    Try Now
-                    <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-                  </Button>
+                    <Button
+                      size="lg"
+                      className="text-lg group transition-all duration-300 transform hover:scale-105"
+                    >
+                      Try Now
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                    </Button>
                   </Link>
                   <Button
                     size="lg"
@@ -100,7 +102,7 @@ export default function LandingPage() {
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  Powerful Features
+                  Feature-Packed, Yet Lazy-Friendly
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground text-lg sm:text-xl">
                   Everything you need to create professional-looking screenshots
@@ -108,7 +110,18 @@ export default function LandingPage() {
                 </p>
               </div>
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-12">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mt-12">
+              <Card className="bg-card text-card-foreground rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <CardHeader>
+                  <ImagePlus className="h-10 w-10 mb-4 text-primary" />
+                  <CardTitle className="text-xl">Instant Mockups</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Upload, tweak, done. It’s like magic, but without the wand.
+                  </p>
+                </CardContent>
+              </Card>
               <Card className="bg-card text-card-foreground rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                 <CardHeader>
                   <Monitor className="h-10 w-10 mb-4 text-primary" />
@@ -118,33 +131,32 @@ export default function LandingPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Visualize your designs on various screen sizes instantly
+                    Instantly see how your designs look on any screen
+                    size—because nobody has time for resizing.
                   </p>
                 </CardContent>
               </Card>
               <Card className="bg-card text-card-foreground rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                 <CardHeader>
-                  <ImageIcon className="h-10 w-10 mb-4 text-primary" />
-                  <CardTitle className="text-xl">
-                    Smart Background Removal
-                  </CardTitle>
+                  <ZoomIn className="h-10 w-10 mb-4 text-primary" />
+                  <CardTitle className="text-xl">Zoom & Place</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Automatically remove backgrounds with AI-powered tools
+                    Put your screenshots exactly where you want, and zoom in
+                    like a pro—minus the struggle.
                   </p>
                 </CardContent>
               </Card>
               <Card className="bg-card text-card-foreground rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                 <CardHeader>
-                  <Sliders className="h-10 w-10 mb-4 text-primary" />
-                  <CardTitle className="text-xl">
-                    Advanced Editing Tools
-                  </CardTitle>
+                  <Type className="h-10 w-10 mb-4 text-primary" />
+                  <CardTitle className="text-xl">Text & Style</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Fine-tune your images with professional-grade adjustments
+                    Add text, pick your font, and make it pop. Because plain
+                    screenshots are so last year.
                   </p>
                 </CardContent>
               </Card>
@@ -163,13 +175,13 @@ export default function LandingPage() {
                   Simple, Transparent Pricing
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground text-lg sm:text-xl">
-                  Choose the plan that's right for you
+                  Pick a plan that works for you—no surprises, no hidden fees,
+                  just straight-up value.
                 </p>
               </div>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-12">
-              {
-              siteConfig.pricing.map((plan) => (
+              {siteConfig.pricing.map((plan) => (
                 <Card
                   key={plan.name}
                   className="flex flex-col bg-card text-card-foreground rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
@@ -199,7 +211,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section
+        {/* <section
           id="testimonials"
           className="w-full py-12 md:py-24 lg:py-32 bg-secondary/20"
         >
@@ -255,7 +267,7 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         <section className="w-full py-12 md:py-24 lg:py-32 bg-primary text-primary-foreground">
           <div className="container px-4 md:px-6 mx-auto">
@@ -265,14 +277,24 @@ export default function LandingPage() {
                   Ready to Get Started?
                 </h2>
                 <p className="max-w-[600px] text-primary-foreground/80 text-lg sm:text-xl">
-                  Join thousands of satisfied users and start creating amazing
-                  screenshots today
+                  Take control of your projects with powerful tools and a
+                  flexible, open-source platform. We are proudly open source!
                 </p>
               </div>
-              <Button size="lg" variant="secondary" className="text-lg">
-                Start Your Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <div className="flex space-x-4">
+               <Link href="/editor"> 
+                <Button size="lg" variant="outline" className="text-lg">
+                  Try Now
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                </Link>
+               <Link href={siteConfig.socialLinks.github} target="_blank" rel="noopener noreferrer"> 
+                <Button size="lg" variant="ghost" className="text-lg">
+                  <Github className="mr-2 h-5 w-5" />
+                  Contribute
+                </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -432,7 +454,7 @@ export default function LandingPage() {
           </div>
           <div className="mt-8 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              © 2023 ScreenCraft. All rights reserved.
+              © 2024 ScreenCraft. All rights reserved.
             </p>
             <div className="flex space-x-4 mt-4 sm:mt-0">
               <Link

@@ -679,6 +679,7 @@ export default function MockupEditor() {
               }}
             >
               <canvas
+              className=""
                 ref={canvasRef}
                 style={{
                   transform: `scale(${scale})`,
