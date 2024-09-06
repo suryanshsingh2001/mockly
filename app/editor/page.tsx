@@ -1,11 +1,7 @@
-import MockupEditor from '@/components/shared/NewMockupEditor'
-import React from 'react'
+import MockupEditor from "@/components/shared/NewMockupEditor"
+import EditorNotAvailable from "@/components/shared/NotAvailable"
+import { siteConfig } from "@/config/config"
 
-
-const EditorPage = () => {
-  return (
-   <MockupEditor />
-  )
+export default function EditorPage() {
+  return siteConfig.isEditorActive ? <MockupEditor /> : <EditorNotAvailable />
 }
-
-export default EditorPage
