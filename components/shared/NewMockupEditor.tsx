@@ -399,7 +399,7 @@ export default function MockupEditor() {
       <Header />
       <main className="flex-grow container mx-auto p-2">
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/4 space-y-8">
+          <div className="w-full lg:w-1/4 space-y-8 h-screen">
             <div>
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
@@ -536,127 +536,7 @@ export default function MockupEditor() {
               </Select>
             </div>
 
-            {/* <div>
-              <Label htmlFor="zoom" className="block mb-4">
-                Zoom: {zoom}%
-              </Label>
-              <Slider
-                id="zoom"
-                min={10}
-                max={200}
-                step={1}
-                value={[zoom]}
-                onValueChange={(value) => setZoom(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="transparency" className="block mb-4">
-                Transparency: {transparency}%
-              </Label>
-              <Slider
-                id="transparency"
-                min={0}
-                max={100}
-                step={1}
-                value={[transparency]}
-                onValueChange={(value) => setTransparency(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="border-radius" className="block mb-4">
-                Border Radius: {borderRadius}px
-              </Label>
-              <Slider
-                id="border-radius"
-                min={0}
-                max={50}
-                step={1}
-                value={[borderRadius]}
-                onValueChange={(value) => setBorderRadius(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="shadow" className="block mb-4">
-                Shadow: {shadow}px
-              </Label>
-              <Slider
-                id="shadow"
-                min={0}
-                max={50}
-                step={1}
-                value={[shadow]}
-                onValueChange={(value) => setShadow(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="text" className="block mb-4">
-                Text
-              </Label>
-              <Input
-                id="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Enter text"
-              />
-            </div>
-            <div>
-              <Label htmlFor="font-size" className="block mb-4">
-                Font Size: {fontSize}px
-              </Label>
-              <Slider
-                id="font-size"
-                min={12}
-                max={72}
-                step={1}
-                value={[fontSize]}
-                onValueChange={(value) => setFontSize(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="font-weight" className="block mb-4">
-                Font Weight
-              </Label>
-              <Select
-                onValueChange={(value) => setFontWeight(value)}
-                value={fontWeight}
-              >
-                <SelectTrigger id="font-weight">
-                  <SelectValue placeholder="Select font weight" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="bold">Bold</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="text-color" className="block mb-4">
-                Text Color
-              </Label>
-              <Input
-                id="text-color"
-                type="color"
-                value={textColor}
-                onChange={(e) => setTextColor(e.target.value)}
-                className="w-full h-10"
-              />
-            </div>
-            <div className="flex space-x-2">
-              <Button
-                onClick={handleDownload}
-                className="w-full"
-                disabled={!image && !text}
-              >
-                <Download className="mr-2 h-4 w-4" /> Download
-              </Button>
-              <Button
-                onClick={handleReset}
-                variant="outline"
-                className="w-full"
-              >
-                <RotateCcw className="mr-2 h-4 w-4" /> Reset
-              </Button>
-            </div>*/}
+          
 
             <Tabs defaultValue="design" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -787,17 +667,16 @@ export default function MockupEditor() {
 
           <div
             ref={containerRef}
-            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-gray-100 h-[calc(100vh-12rem)] lg:h-auto overflow-y-auto "
+            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-auto"
           >
             <div
-              className="relative overflow-hidden"
+              className="relative"
               style={{
                 width: `${screenSize.width * scale}px`,
                 height: `${screenSize.height * scale}px`,
               }}
             >
               <canvas
-                className="absolute top-0 left-0"
                 ref={canvasRef}
                 style={{
                   transform: `scale(${scale})`,

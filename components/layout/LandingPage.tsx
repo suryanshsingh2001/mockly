@@ -22,9 +22,9 @@ export default function LandingPage() {
       <LandingHeader />
      
       <main className="flex-1 pt-16">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-background">
+      <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-background">
           <div className="container px-4 md:px-6 mx-auto">
-            <div className="grid gap-6 lg:grid-cols-[1fr_500px] lg:gap-12 xl:grid-cols-[1fr_550px] items-center">
+            <div className="grid gap-6 lg:grid-cols-[1fr_600px] lg:gap-12 xl:grid-cols-[1fr_700px] items-center">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none max-w-[600px]">
@@ -53,14 +53,15 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="flex items-center justify-center lg:justify-end">
-                <div className="relative w-full max-w-[500px] aspect-video">
+                  <div className="relative w-full max-w-[700px] aspect-[16/9] group">
                   <Image
-                    src="/mockly.png"
+                    src="/showcase.png"
                     alt="ScreenCraft Editor Preview"
                     layout="fill"
                     objectFit="cover"
-                    className="rounded-xl shadow-2xl"
+                    className="rounded-xl shadow-2xl transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-3xl"
                   />
+                  <div className="absolute inset-0 rounded-xl border-2 border-transparent transition-all duration-300 group-hover:border-primary/50"></div>
                 </div>
               </div>
             </div>
