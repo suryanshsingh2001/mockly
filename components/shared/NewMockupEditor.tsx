@@ -672,7 +672,7 @@ export default function MockupEditor() {
             className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-auto"
           >
             <div
-              className="relative overflow-hidden"  
+              className="relative overflow-hidden rounded-lg"  
               style={{
                 width: `${screenSize.width * scale}px`,
                 height: `${screenSize.height * scale}px`,
