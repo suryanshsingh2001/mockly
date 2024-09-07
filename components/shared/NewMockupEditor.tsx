@@ -256,6 +256,7 @@ export default function MockupEditor() {
   ]);
 
   useEffect(() => {
+       // eslint-disable-next-line react-hooks/exhaustive-deps
     drawCanvas();
   }, [drawCanvas]);
 
@@ -733,7 +734,7 @@ export default function MockupEditor() {
           <DialogHeader>
             <DialogTitle>Thank you for using Mockly!</DialogTitle>
             <DialogDescription>
-              We'd love to hear your feedback. How was your experience?
+              We&apos;d love to hear your feedback. How was your experience?
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
