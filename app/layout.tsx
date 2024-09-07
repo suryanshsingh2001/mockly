@@ -25,15 +25,15 @@ export const metadata: Metadata = {
     template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  // openGraph: {
-  //   images: siteConfig.ogImage,
-  //   title: `${siteConfig.name}`,
-  //   description: siteConfig.description,
-  //   url: siteConfig.url,
-  //   siteName: `${siteConfig.name}`,
-  //   locale: "en_US",
-  //   type: "website",
-  // },
+  openGraph: {
+    images: siteConfig.ogImage,
+    title: `${siteConfig.name}`,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    siteName: `${siteConfig.name}`,
+    locale: "en_US",
+    type: "website",
+  },
   
   icons: {
     icon: "/favicon.ico",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   twitter: {
     title: `${siteConfig.name}`,
     card: "summary_large_image",
-    //images: siteConfig.ogImage,
+    images: siteConfig.ogImage,
   },
 };
 
