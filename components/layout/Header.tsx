@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ImageIcon, Menu, Moon, Sun } from "lucide-react";
 import { Icons } from "@/components/icons";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/config/config";
 import { buttonVariants } from "@/components/ui/button";
 
 export default function Header() {
@@ -25,7 +25,7 @@ export default function Header() {
             <SheetContent side="left">
               <nav className="flex flex-col space-y-4">
                 <Link
-                  href={siteConfig.links.github}
+                  href={siteConfig.socialLinks.github}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-2"
@@ -34,7 +34,7 @@ export default function Header() {
                   <span>GitHub</span>
                 </Link>
                 <Link
-                  href={siteConfig.links.twitter}
+                  href={siteConfig.socialLinks.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-2"
@@ -55,7 +55,7 @@ export default function Header() {
         <div className="flex flex-1 items-center justify-end space-x-2">
           <nav className="hidden lg:flex items-center space-x-4">
             <Link
-              href={siteConfig.links.github}
+              href={siteConfig.socialLinks.github}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -70,7 +70,7 @@ export default function Header() {
               </div>
             </Link>
             <Link
-              href={siteConfig.links.twitter}
+              href={siteConfig.socialLinks.twitter}
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -25,11 +25,35 @@ export const metadata: Metadata = {
     template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  // openGraph: {
+  //   images: siteConfig.ogImage,
+  //   title: `${siteConfig.name}`,
+  //   description: siteConfig.description,
+  //   url: siteConfig.url,
+  //   siteName: `${siteConfig.name}`,
+  //   locale: "en_US",
+  //   type: "website",
+  // },
   
   icons: {
     icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  twitter: {
+    title: `${siteConfig.name}`,
+    card: "summary_large_image",
+    //images: siteConfig.ogImage,
   },
 };
 
