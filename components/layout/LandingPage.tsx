@@ -264,7 +264,7 @@ export default function LandingPage() {
               </Link>
             </div>
             <div className="text-sm text-muted-foreground">
-              © 2024 ScreenCraft. All rights reserved.
+              © 2024 Mockly. All rights reserved.
             </div>
           </div>
         </div>
