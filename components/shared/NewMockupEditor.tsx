@@ -437,7 +437,7 @@ export default function MockupEditor() {
       <Header />
       <main className="flex-grow container mx-auto p-2">
         <div className="flex flex-col lg:flex-row gap-8 ">
-          <div className="w-full lg:w-1/4 space-y-8 h-screen overflow-y-auto">
+          <div className="w-full lg:w-1/4 space-y-6 h-screen overflow-y-auto">
             <div>
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
