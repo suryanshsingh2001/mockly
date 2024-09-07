@@ -255,7 +255,7 @@ export default function LandingPage() {
             <div className="flex items-center text-lg text-muted-foreground ">
               Made with <Heart className="h-4 w-4 mx-1 text-red-500" /> by{" "}
               <Link
-                href="https://github.com/suryansh"
+                href="https://www.linkedin.com/in/suryanshsingh2001/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="ml-1 hover:text-primary transition-colors"
