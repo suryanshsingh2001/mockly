@@ -8,10 +8,10 @@ const ShowcaseImage = () => {
   return (
     <Image
       src={theme === "light" ? "/showcase-dark.png" : "/showcase-light.png"}
-      alt="ScreenCraft Editor Preview"
+      alt="ScreenCraft Editor Preview "
       layout="fill"
       objectFit="cover"
-      className="rounded-xl shadow-2xl transition-all duration-300 group-hover:scale-[1.05] group-hover:shadow-3xl"
+      className="rounded-sm shadow-2xl transition-all duration-300 group-hover:scale-[1.05] group-hover:shadow-3xl"
     />
   );
 };
