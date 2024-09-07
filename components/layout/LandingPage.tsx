@@ -48,7 +48,7 @@ export default function LandingPage() {
                   <p className="max-w-[600px] text-muted-foreground text-base sm:text-lg md:text-xl animate-fade-in-up">
                     Mockly lets you whip up beautiful mockups and presentations
                     in no time. No stress, just pick, place, zoom, done. Perfect
-                    for developers who'd rather code than design.
+                    for developers who&apos;d rather code than design.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 animate-fade-in-up">
