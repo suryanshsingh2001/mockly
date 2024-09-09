@@ -13,12 +13,12 @@ export default function TermsOfService() {
           
           <h2 className="text-2xl font-semibold mt-8 mb-4">1. Acceptance of Terms</h2>
           <p>
-            By accessing or using Mockly (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of the terms, you may not use our Service.
+            By accessing or using Mockly, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not use our Service.
           </p>
 
           <h2 className="text-2xl font-semibold mt-8 mb-4">2. Description of Service</h2>
           <p>
-            Mockly provides an online platform for creating and editing screenshots and mockups ("Content"). We reserve the right to modify or discontinue, temporarily or permanently, the Service with or without notice.
+            Mockly provides an online platform for creating and editing screenshots and mockups . We reserve the right to modify or discontinue, temporarily or permanently, the Service with or without notice.
           </p>
 
           <h2 className="text-2xl font-semibold mt-8 mb-4">3. User Accounts</h2>
