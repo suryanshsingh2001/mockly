@@ -10,6 +10,7 @@ export const siteConfig = {
     {
       name: "Starter",
       price: "Free",
+      isRecommended: true, 
       features: [
         "Unlimited screenshot creation",
         "No login required",
@@ -20,6 +21,7 @@ export const siteConfig = {
     },
     {
       name: "Pro",
+      isRecommended: false,
       price: "Coming Soon",
       features: [
         "All Free features",
@@ -42,6 +44,7 @@ export const siteConfig = {
     {
       name: "Enterprise",
       price: "Custom",
+      isRecommended: false, 
       features: [
         "All Pro features",
         "Custom SLA",

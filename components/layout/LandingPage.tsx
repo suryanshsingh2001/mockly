@@ -24,12 +24,14 @@ import {
   ImagePlus,
   Heart,
 } from "lucide-react";
+
 import Link from "next/link";
 import Image from "next/image";
 import LandingHeader from "./LandingHeader";
 import { siteConfig } from "@/config/config";
 import { useTheme } from "next-themes";
 import ShowcaseImage from "../shared/ShowcaseImage";
+import { Badge } from "../ui/badge";
 
 export default function LandingPage() {
   return (
@@ -177,12 +179,24 @@ export default function LandingPage() {
               {siteConfig.pricing.map((plan) => (
                 <Card
                   key={plan.name}
-                  className="flex flex-col bg-card text-card-foreground rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  className={`flex flex-col bg-card text-card-foreground rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                    plan.isRecommended ? "border-primary shadow-lg" : ""
+                  }`}
                 >
                   <CardHeader>
-                    <CardTitle className="text-xl sm:text-2xl">
-                      {plan.name}
-                    </CardTitle>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-xl sm:text-2xl">
+                        {plan.name}
+                      </CardTitle>
+                      {plan.isRecommended && (
+                        <Badge
+                          variant="secondary"
+                          className="text-xs font-semibold"
+                        >
+                          Recommended
+                        </Badge>
+                      )}
+                    </div>
                     <CardDescription className="text-2xl sm:text-3xl font-bold">
                       {plan.price}
                     </CardDescription>
@@ -198,7 +212,12 @@ export default function LandingPage() {
                     </ul>
                   </CardContent>
                   <CardFooter>
-                    <Button className="w-full">Choose Plan</Button>
+                    <Button
+                      className="w-full"
+                      variant={plan.isRecommended ? "default" : "outline"}
+                    >
+                      Choose Plan
+                    </Button>
                   </CardFooter>
                 </Card>
               ))}
@@ -249,26 +268,35 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-border bg-muted">
-        <div className="container mx-auto px-4 md:px-6 py-8">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="flex items-center text-lg text-muted-foreground ">
-              Made with <Heart className="h-4 w-4 mx-1 text-red-500" /> by{" "}
-              <Link
-                href="https://www.linkedin.com/in/suryanshsingh2001/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-1 hover:text-primary transition-colors"
-              >
-                Suryansh
-              </Link>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              © 2024 Mockly. All rights reserved.
-            </div>
+      <footer className="border-t border-border bg-background">
+      <div className="container mx-auto px-4 md:px-6 py-8">
+        <div className="flex flex-col items-center justify-center space-y-4 text-center">
+          <div className="flex items-center text-sm font-medium text-muted-foreground">
+            Made with <Heart className="inline-block h-4 w-4 mx-1 text-primary" /> by{" "}
+            <Link
+              href="https://www.linkedin.com/in/suryanshsingh2001/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-1 text-foreground hover:text-primary transition-colors"
+            >
+              Suryansh
+            </Link>
+          </div>
+          <nav className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+            <Link href="/terms" className="hover:text-foreground transition-colors">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy Policy
+            </Link>
+          
+          </nav>
+          <div className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} Mockly. All rights reserved.
           </div>
         </div>
-      </footer>
+      </div>
+    </footer>
     </div>
   );
 }
