@@ -48,7 +48,7 @@ export default function LandingPage() {
                     Create Stunning Screenshots in Seconds
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground text-base sm:text-lg md:text-xl animate-fade-in-up">
-                  With Mockly, just pick, place, zoom—done. Fast, stress-free mockups for developers who'd rather code than design.
+                  With Mockly, just pick, place, zoom—done. Fast, stress-free mockups for developers who&apos;d rather code than design.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 animate-fade-in-up">

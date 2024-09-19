@@ -1,5 +1,5 @@
-import MockupEditor from "@/components/shared/NewMockupEditor"
 import EditorNotAvailable from "@/components/shared/NotAvailable"
+import MockupEditor from "@/components/shared/Editor"
 import { siteConfig } from "@/config/config"
 
 export default function EditorPage() {

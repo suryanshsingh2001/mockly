@@ -13,10 +13,19 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Upload, X, Download, RotateCcw, Type } from "lucide-react";
+import { Upload, X, Download, RotateCcw, Type, Star } from "lucide-react";
 import Header from "@/components/layout/Header";
+import { Textarea } from "../ui/textarea";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -92,6 +101,14 @@ export default function MockupEditor() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
+  const [canvasKey, setCanvasKey] = useState(0);
+
+
+  //Complete and rating
+  const [complete, setComplete] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -116,12 +133,29 @@ export default function MockupEditor() {
 
       const filename = `screenshot${Date.now()}.png`;
       saveAs(image.src, filename);
+
+
+      setComplete(true);
     }
   };
 
   const handleClearImage = () => {
     setImage(null);
   };
+  const handleCloseDialog = () => {
+    setComplete(false);
+    setRating(0);
+    setComment("");
+  };
+
+  const handleSubmitFeedback = () => {
+    // Here you would typically send the rating and comment to your backend
+    console.log("Rating:", rating);
+    console.log("Comment:", comment);
+    handleCloseDialog();
+    handleReset();
+  };
+
 
   const handleReset = () => {
     setImage(defaultSettings.image);
@@ -167,10 +201,8 @@ export default function MockupEditor() {
   }, [updateCanvasScale]);
 
 
-
-  
-
-  useEffect(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (canvas && ctx) {
@@ -182,8 +214,8 @@ export default function MockupEditor() {
         const img = new Image();
         img.onload = () => {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          drawImage();
-          drawText();
+          drawImage(ctx);
+          drawText(ctx);
         };
         img.setAttribute("crossOrigin", "anonymous");
         img.src = background;
@@ -198,13 +230,13 @@ export default function MockupEditor() {
         gradient.addColorStop(1, customColor2);
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage();
-        drawText();
+        drawImage(ctx);
+        drawText(ctx);
       } else {
         ctx.fillStyle = background;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage();
-        drawText();
+        drawImage(ctx);
+        drawText(ctx);
       }
     }
   }, [
@@ -226,10 +258,13 @@ export default function MockupEditor() {
     textColor,
   ]);
 
-  const drawImage = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (canvas && ctx && image) {
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
+
+ 
+  const drawImage = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (image) {
       const img = new Image();
       img.onload = () => {
         const scale = zoom / 100;
@@ -257,56 +292,7 @@ export default function MockupEditor() {
       };
       img.src = image;
     }
-  };
-
-  const drawText = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (canvas && ctx && text) {
-      ctx.font = `${fontWeight} ${fontSize}px Arial`;
-      ctx.fillStyle = textColor;
-      ctx.fillText(text, textPosition.x, textPosition.y);
-    }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / scale;
-      const y = (e.clientY - rect.top) / scale;
-
-      if (image && isPointInImage(x, y)) {
-        setIsDragging(true);
-        setDragTarget("image");
-      } else if (text && isPointInText(x, y)) {
-        setIsDragging(true);
-        setDragTarget("text");
-      }
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (isDragging) {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / scale;
-        const y = (e.clientY - rect.top) / scale;
-
-        if (dragTarget === "image") {
-          setImagePosition({ x, y });
-        } else if (dragTarget === "text") {
-          setTextPosition({ x, y });
-        }
-      }
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    setDragTarget(null);
-  };
+  }, [image, zoom, imagePosition, borderRadius, transparency, shadow]);
 
   const isPointInImage = (x: number, y: number) => {
     if (image) {
@@ -342,12 +328,69 @@ export default function MockupEditor() {
     return false;
   };
 
+
+  const drawText = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (text) {
+      ctx.font = `${fontWeight} ${fontSize}px Arial`;
+      ctx.fillStyle = textColor;
+      ctx.fillText(text, textPosition.x, textPosition.y);
+    }
+  }, [text, fontWeight, fontSize, textColor, textPosition]);
+
+  
+
+  // Removed duplicate handleMouseDown function
+
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / scale;
+      const y = (e.clientY - rect.top) / scale;
+
+      if (image && isPointInImage(x, y)) {
+        setIsDragging(true);
+        setDragTarget("image");
+      } else if (text && isPointInText(x, y)) {
+        setIsDragging(true);
+        setDragTarget("text");
+      }
+    }
+  }, [image, text, scale, isPointInImage, isPointInText]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (isDragging) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / scale;
+        const y = (e.clientY - rect.top) / scale;
+
+        if (dragTarget === "image") {
+          setImagePosition({ x, y });
+        } else if (dragTarget === "text") {
+          setTextPosition({ x, y });
+        }
+      }
+    }
+  }, [isDragging, dragTarget, scale]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+    setDragTarget(null);
+  }, []);
+
+
+  
+
+  
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow container mx-auto p-2">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/4 space-y-8">
+        <div className="flex flex-col lg:flex-row gap-8 ">
+          <div className="w-full lg:w-1/4 space-y-6 h-screen overflow-y-auto">
             <div>
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
@@ -483,111 +526,116 @@ export default function MockupEditor() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="zoom" className="block mb-4">
-                Zoom: {zoom}%
-              </Label>
-              <Slider
-                id="zoom"
-                min={10}
-                max={200}
-                step={1}
-                value={[zoom]}
-                onValueChange={(value) => setZoom(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="transparency" className="block mb-4">
-                Transparency: {transparency}%
-              </Label>
-              <Slider
-                id="transparency"
-                min={0}
-                max={100}
-                step={1}
-                value={[transparency]}
-                onValueChange={(value) => setTransparency(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="border-radius" className="block mb-4">
-                Border Radius: {borderRadius}px
-              </Label>
-              <Slider
-                id="border-radius"
-                min={0}
-                max={50}
-                step={1}
-                value={[borderRadius]}
-                onValueChange={(value) => setBorderRadius(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="shadow" className="block mb-4">
-                Shadow: {shadow}px
-              </Label>
-              <Slider
-                id="shadow"
-                min={0}
-                max={50}
-                step={1}
-                value={[shadow]}
-                onValueChange={(value) => setShadow(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="text" className="block mb-4">
-                Text
-              </Label>
-              <Input
-                id="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Enter text"
-              />
-            </div>
-            <div>
-              <Label htmlFor="font-size" className="block mb-4">
-                Font Size: {fontSize}px
-              </Label>
-              <Slider
-                id="font-size"
-                min={12}
-                max={72}
-                step={1}
-                value={[fontSize]}
-                onValueChange={(value) => setFontSize(value[0])}
-              />
-            </div>
-            <div>
-              <Label htmlFor="font-weight" className="block mb-4">
-                Font Weight
-              </Label>
-              <Select
-                onValueChange={(value) => setFontWeight(value)}
-                value={fontWeight}
-              >
-                <SelectTrigger id="font-weight">
-                  <SelectValue placeholder="Select font weight" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="bold">Bold</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="text-color" className="block mb-4">
-                Text Color
-              </Label>
-              <Input
-                id="text-color"
-                type="color"
-                value={textColor}
-                onChange={(e) => setTextColor(e.target.value)}
-                className="w-full h-10"
-              />
-            </div>
+
+          
+
+            <Tabs defaultValue="design" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="design">Design</TabsTrigger>
+                <TabsTrigger value="text">Text</TabsTrigger>
+              </TabsList>
+              <TabsContent value="design" className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="zoom">Zoom: {zoom}%</Label>
+                  <Slider
+                    id="zoom"
+                    min={10}
+                    max={200}
+                    step={1}
+                    value={[zoom]}
+                    onValueChange={(value) => setZoom(value[0])}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="transparency">
+                    Transparency: {transparency}%
+                  </Label>
+                  <Slider
+                    id="transparency"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[transparency]}
+                    onValueChange={(value) => setTransparency(value[0])}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="border-radius">
+                    Border Radius: {borderRadius}px
+                  </Label>
+                  <Slider
+                    id="border-radius"
+                    min={0}
+                    max={50}
+                    step={1}
+                    value={[borderRadius]}
+                    onValueChange={(value) => setBorderRadius(value[0])}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="shadow">Shadow: {shadow}px</Label>
+                  <Slider
+                    id="shadow"
+                    min={0}
+                    max={50}
+                    step={1}
+                    value={[shadow]}
+                    onValueChange={(value) => setShadow(value[0])}
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="text" className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="text">Text</Label>
+                  <Input
+                    id="text"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="Enter text"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="font-size">Font Size: {fontSize}px</Label>
+                  <Slider
+                    id="font-size"
+                    min={12}
+                    max={72}
+                    step={1}
+                    value={[fontSize]}
+                    onValueChange={(value) => setFontSize(value[0])}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="font-weight">Font Weight</Label>
+                  <Select
+                    onValueChange={(value) => setFontWeight(value)}
+                    value={fontWeight}
+                  >
+                    <SelectTrigger id="font-weight">
+                      <SelectValue placeholder="Select font weight" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="bold">Bold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="text-color">Text Color</Label>
+                  <Input
+                    id="text-color"
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="w-full h-10"
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+
+
+
+
             <div className="flex space-x-2">
               <Button
                 onClick={handleDownload}
@@ -603,21 +651,25 @@ export default function MockupEditor() {
               >
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
               </Button>
-            </div>
+
+
+              </div>
           </div>
+
           <div
             ref={containerRef}
-            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-gray-100 h-[calc(100vh-12rem)] lg:h-auto"
+            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-auto"
           >
             <div
-              className="relative overflow-hidden"
+              className="relative overflow-hidden"  
               style={{
                 width: `${screenSize.width * scale}px`,
                 height: `${screenSize.height * scale}px`,
               }}
             >
               <canvas
-                className="absolute top-0 left-0"
+              key={canvasKey}
+              className=""
                 ref={canvasRef}
                 style={{
                   transform: `scale(${scale})`,
@@ -632,6 +684,43 @@ export default function MockupEditor() {
           </div>
         </div>
       </main>
+
+      <Dialog open={complete} onOpenChange={setComplete}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Thank you for using Mockly!</DialogTitle>
+            <DialogDescription>
+              We&apos;d love to hear your feedback. How was your experience?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex justify-center space-x-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`w-8 h-8 cursor-pointer transition-colors ${
+                    star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                  }`}
+                  onClick={() => setRating(star)}
+                />
+              ))}
+            </div>
+            <Textarea
+              id="comment"
+              placeholder="Leave a comment (optional)"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitFeedback}>Submit Feedback</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+  
   );
 }

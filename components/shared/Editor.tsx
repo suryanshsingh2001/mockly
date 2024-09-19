@@ -13,10 +13,19 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Upload, X, Download, RotateCcw, Type } from "lucide-react";
+import { Upload, X, Download, RotateCcw, Type, Star } from "lucide-react";
 import Header from "@/components/layout/Header";
+import { Textarea } from "../ui/textarea";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -93,6 +102,13 @@ export default function MockupEditor() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
 
+
+  //Complete and rating
+  const [complete, setComplete] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
@@ -116,12 +132,29 @@ export default function MockupEditor() {
 
       const filename = `screenshot${Date.now()}.png`;
       saveAs(image.src, filename);
+
+
+      setComplete(true);
     }
   };
 
   const handleClearImage = () => {
     setImage(null);
   };
+  const handleCloseDialog = () => {
+    setComplete(false);
+    setRating(0);
+    setComment("");
+  };
+
+  const handleSubmitFeedback = () => {
+    // Here you would typically send the rating and comment to your backend
+    console.log("Rating:", rating);
+    console.log("Comment:", comment);
+    handleCloseDialog();
+    handleReset();
+  };
+
 
   const handleReset = () => {
     setImage(defaultSettings.image);
@@ -166,6 +199,8 @@ export default function MockupEditor() {
     return () => window.removeEventListener("resize", updateCanvasScale);
   }, [updateCanvasScale]);
 
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -223,6 +258,7 @@ export default function MockupEditor() {
   ]);
 
   useEffect(() => {
+       // eslint-disable-next-line react-hooks/exhaustive-deps
     drawCanvas();
   }, [drawCanvas]);
 
@@ -400,8 +436,8 @@ export default function MockupEditor() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow container mx-auto p-2">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/4 space-y-8 h-screen">
+        <div className="flex flex-col lg:flex-row gap-8 ">
+          <div className="w-full lg:w-1/4 space-y-6 h-screen overflow-y-auto">
             <div>
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
@@ -672,7 +708,7 @@ export default function MockupEditor() {
             className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-auto"
           >
             <div
-              className="relative rounded-lg"  
+              className="relative overflow-hidden"  
               style={{
                 width: `${screenSize.width * scale}px`,
                 height: `${screenSize.height * scale}px`,
@@ -694,6 +730,43 @@ export default function MockupEditor() {
           </div>
         </div>
       </main>
+
+      <Dialog open={complete} onOpenChange={setComplete}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Thank you for using Mockly!</DialogTitle>
+            <DialogDescription>
+              We&apos;d love to hear your feedback. How was your experience?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex justify-center space-x-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`w-8 h-8 cursor-pointer transition-colors ${
+                    star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                  }`}
+                  onClick={() => setRating(star)}
+                />
+              ))}
+            </div>
+            <Textarea
+              id="comment"
+              placeholder="Leave a comment (optional)"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitFeedback}>Submit Feedback</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+  
   );
 }
