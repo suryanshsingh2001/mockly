@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
 import { Slider } from "@/components/ui/slider";
 import {
   Select,
@@ -102,12 +103,10 @@ export default function MockupEditor() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
 
-
   //Complete and rating
   const [complete, setComplete] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -124,15 +123,62 @@ export default function MockupEditor() {
     multiple: false,
   });
 
-  const handleDownload = () => {
+  // const handleDownload = () => {
+  //   if (canvasRef.current) {
+  //     const image = new Image();
+  //     image.setAttribute("crossOrigin", "anonymous");
+  //     image.src = canvasRef.current.toDataURL("image/png");
+
+  //     const filename = `screenshot${Date.now()}.png`;
+  //     saveAs(image.src, filename);
+
+  //     setComplete(true);
+  //   }
+  // };
+  const [format, setDownloadFormat] = useState<"png" | "jpg" | "svg" | "pdf">(
+    "png"
+  );
+
+  const handleDownload = (format: "png" | "jpg" | "svg" | "pdf") => {
     if (canvasRef.current) {
-      const image = new Image();
-      image.setAttribute("crossOrigin", "anonymous");
-      image.src = canvasRef.current.toDataURL("image/png");
+      const canvas = canvasRef.current;
 
-      const filename = `screenshot${Date.now()}.png`;
-      saveAs(image.src, filename);
+      if (format === "png" || format === "jpg") {
+        const mimeType = format === "png" ? "image/png" : "image/jpeg";
+        const imageData = canvas.toDataURL(mimeType);
+        const filename = `screenshot${Date.now()}.${format}`;
+        saveAs(imageData, filename);
+      } else if (format === "svg") {
+        // Convert canvas to SVG data
+        const svgWidth = canvas.width;
+        const svgHeight = canvas.height;
 
+        const svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">
+                           <foreignObject width="100%" height="100%">
+                             <img xmlns="http://www.w3.org/1999/xhtml" src="${canvas.toDataURL(
+                               "image/png"
+                             )}" width="${svgWidth}" height="${svgHeight}"/>
+                           </foreignObject>
+                         </svg>`;
+        const svgBlob = new Blob([svgData], {
+          type: "image/svg+xml;charset=utf-8",
+        });
+        const filename = `screenshot${Date.now()}.svg`;
+        saveAs(svgBlob, filename);
+      } else if (format === "pdf") {
+        const imgData = canvas.toDataURL("image/png");
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const pdf = new jsPDF({
+          orientation: imgWidth > imgHeight ? "landscape" : "portrait",
+          unit: "px",
+          format: [imgWidth, imgHeight],
+        });
+
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        const filename = `screenshot${Date.now()}.pdf`;
+        pdf.save(filename);
+      }
 
       setComplete(true);
     }
@@ -154,7 +200,6 @@ export default function MockupEditor() {
     handleCloseDialog();
     handleReset();
   };
-
 
   const handleReset = () => {
     setImage(defaultSettings.image);
@@ -198,7 +243,6 @@ export default function MockupEditor() {
     window.addEventListener("resize", updateCanvasScale);
     return () => window.removeEventListener("resize", updateCanvasScale);
   }, [updateCanvasScale]);
-
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const drawCanvas = useCallback(() => {
@@ -258,7 +302,7 @@ export default function MockupEditor() {
   ]);
 
   useEffect(() => {
-       // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     drawCanvas();
   }, [drawCanvas]);
 
@@ -430,8 +474,6 @@ export default function MockupEditor() {
     return false;
   };
 
-  
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -574,8 +616,6 @@ export default function MockupEditor() {
               </Select>
             </div>
 
-          
-
             <Tabs defaultValue="design" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="design">Design</TabsTrigger>
@@ -680,17 +720,36 @@ export default function MockupEditor() {
               </TabsContent>
             </Tabs>
 
-
-
-
             <div className="flex space-x-2">
-              <Button
+              {/* <Button
                 onClick={handleDownload}
                 className="w-full"
                 disabled={!image && !text}
               >
                 <Download className="mr-2 h-4 w-4" /> Download
+              </Button> */}
+              <select
+                value={format}
+                onChange={(e) =>
+                  setDownloadFormat(
+                    e.target.value as "png" | "jpg" | "svg" | "pdf"
+                  )
+                }
+                className="mb-4 p-2 border border-gray-300 rounded-md"
+              >
+                <option value="png">PNG</option>
+                <option value="jpg">JPG</option>
+                <option value="svg">SVG</option>
+                <option value="pdf">PDF</option>
+              </select>
+              <Button
+                onClick={() => handleDownload(format)}
+                className="w-full"
+                disabled={!image && !text}
+              >
+                <Download className="mr-2 h-4 w-4" /> Download
               </Button>
+
               <Button
                 onClick={handleReset}
                 variant="outline"
@@ -698,9 +757,7 @@ export default function MockupEditor() {
               >
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
               </Button>
-
-
-              </div>
+            </div>
           </div>
 
           <div
@@ -708,14 +765,14 @@ export default function MockupEditor() {
             className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-auto"
           >
             <div
-              className="relative overflow-hidden"  
+              className="relative overflow-hidden"
               style={{
                 width: `${screenSize.width * scale}px`,
                 height: `${screenSize.height * scale}px`,
               }}
             >
               <canvas
-              className=""
+                className=""
                 ref={canvasRef}
                 style={{
                   transform: `scale(${scale})`,
@@ -745,7 +802,9 @@ export default function MockupEditor() {
                 <Star
                   key={star}
                   className={`w-8 h-8 cursor-pointer transition-colors ${
-                    star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                    star <= rating
+                      ? "text-yellow-400 fill-yellow-400"
+                      : "text-gray-300"
                   }`}
                   onClick={() => setRating(star)}
                 />
@@ -767,6 +826,5 @@ export default function MockupEditor() {
         </DialogContent>
       </Dialog>
     </div>
-  
   );
 }
