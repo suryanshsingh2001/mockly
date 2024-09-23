@@ -1,11 +1,4 @@
 # Mockly 🎨
-
-Create Stunning Screenshots in Seconds
-
-![Mockly Screenshot](public/showcase-dark.png)
-
-Mockly is an open-source tool that allows developers to create professional-looking screenshots and mockups with ease. With Mockly, you can pick, place, and zoom—done. It's designed for fast, stress-free mockups for developers who'd rather code than design.
-
 [![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://www.mockly.site)
 [![Next.js](https://img.shields.io/badge/Next.js-13.0-blueviolet.svg)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-18.0-blue.svg)](https://reactjs.org/)
@@ -13,6 +6,15 @@ Mockly is an open-source tool that allows developers to create professional-look
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.3-blue.svg)](https://tailwindcss.com/)
 [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-latest-blue.svg)](https://ui.shadcn.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+
+**Create Stunning Screenshots in Seconds**
+
+![Mockly Screenshot](public/showcase-dark.png)
+
+Mockly is an open-source tool that allows developers to create professional-looking screenshots and mockups with ease. With Mockly, you can pick, place, and zoom—done. It's designed for fast, stress-free mockups for developers who'd rather code than design.
+
+
 
 ## ✨ Features
 
