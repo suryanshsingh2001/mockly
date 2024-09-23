@@ -1,4 +1,4 @@
-# Mockly
+# Mockly 🎨
 
 Create Stunning Screenshots in Seconds
 
@@ -6,7 +6,7 @@ Create Stunning Screenshots in Seconds
 
 Mockly is an open-source tool that allows developers to create professional-looking screenshots and mockups with ease. With Mockly, you can pick, place, and zoom—done. It's designed for fast, stress-free mockups for developers who'd rather code than design.
 
-## Features
+## ✨ Features
 
 - **Instant Mockups**: Upload, tweak, done. It's like magic, but without the wand.
 - **Multi-device Preview**: Instantly see how your designs look on any screen size—because nobody has time for resizing.
@@ -16,7 +16,7 @@ Mockly is an open-source tool that allows developers to create professional-look
 - **No Watermarks**: Your designs, your brand—no unwanted additions.
 - **Free to Use**: Powerful features accessible to everyone at no cost.
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -51,7 +51,7 @@ Mockly is an open-source tool that allows developers to create professional-look
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-## Usage
+## 🖱️ Usage
 
 1. Navigate to the editor page.
 2. Upload your screenshot or choose from available templates.
@@ -60,7 +60,7 @@ Mockly is an open-source tool that allows developers to create professional-look
 5. Preview your design on multiple device sizes.
 6. Download your finished mockup.
 
-## Future Scope
+## 🔮 Future Scope
 
 We have exciting plans for the future of Mockly, and we welcome contributions in these areas:
 
@@ -76,18 +76,18 @@ We have exciting plans for the future of Mockly, and we welcome contributions in
 
 We encourage contributors to think creatively about these future directions and propose innovative solutions to help bring these ideas to life.
 
-## Hacktoberfest 2024
+## 🎉 Hacktoberfest 2024
 
 We're excited to participate in Hacktoberfest 2024! Here's how you can contribute:
 
-### Ground Rules
+### 📜 Ground Rules
 
 1. Contributions must be meaningful and add value to the project.
 2. Follow our code style and best practices.
 3. Be respectful and collaborative in discussions.
 4. Test your changes thoroughly before submitting a PR.
 
-### How to Contribute
+### 🛠️ How to Contribute
 
 1. Fork the repository to your GitHub account.
 2. Create a new branch for your feature or bug fix:
@@ -106,7 +106,7 @@ We're excited to participate in Hacktoberfest 2024! Here's how you can contribut
    ```
 6. Open a Pull Request (PR) to our `main` branch.
 
-### Pull Request Process
+### 🔄 Pull Request Process
 
 1. Ensure your PR description clearly describes the problem and solution. Include the relevant issue number if applicable.
 2. Include screenshots or GIFs in your PR if you've made UI changes.
@@ -114,7 +114,7 @@ We're excited to participate in Hacktoberfest 2024! Here's how you can contribut
 4. Your PR will be reviewed by maintainers. Be open to feedback and make necessary changes.
 5. Once approved, your PR will be merged into the main codebase.
 
-### Issue Templates
+### 📝 Issue Templates
 
 When creating a new issue or PR, please use our provided templates:
 
@@ -122,9 +122,9 @@ When creating a new issue or PR, please use our provided templates:
 - For feature requests: [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.md)
 - For pull requests: [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md)
 
-### Existing Issues and Contributions
+### 🐛 Existing Issues and Contributions
 
-We encourage contributors to explore our [existing issues](https://github.com/your-username/mockly/issues) and contribute to them. Here are some ways you can help:
+We encourage contributors to explore our [existing issues](https://github.com/suryanshsingh2001/mockly/issues) and contribute to them. Here are some ways you can help:
 
 1. **Bug Fixes**: Look for issues labeled `bug` and help us squash them!
 2. **Feature Implementation**: Issues labeled `enhancement` are great opportunities to add new features to Mockly.
@@ -136,24 +136,24 @@ Don't see an issue that matches your interests? Feel free to [create a new issue
 
 We look forward to your contributions and hope you enjoy participating in Hacktoberfest with Mockly!
 
-## Contributing
+## 👥 Contributing
 
 We welcome contributions from the community! Please read our [Contribution Guidelines](CONTRIBUTING.md) for more details on our year-round contribution process.
 
-## Code of Conduct
+## 🤝 Code of Conduct
 
 We are committed to fostering an inclusive and welcoming community. Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
-## License
+## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
 
-## Contact
+## 📞 Contact
 
 - Project Maintainer: [Suryansh](https://www.linkedin.com/in/suryanshsingh2001/)
 - Project Website: [https://mockly.yourdomain.com](https://mockly.yourdomain.com)
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - Thanks to all contributors who have helped shape Mockly.
 - Built with [Next.js](https://nextjs.org/) and [shadcn/ui](https://ui.shadcn.com/).
