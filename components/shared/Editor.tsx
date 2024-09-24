@@ -102,12 +102,10 @@ export default function MockupEditor() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
 
-
   //Complete and rating
   const [complete, setComplete] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -133,7 +131,6 @@ export default function MockupEditor() {
       const filename = `screenshot${Date.now()}.png`;
       saveAs(image.src, filename);
 
-
       setComplete(true);
     }
   };
@@ -154,7 +151,6 @@ export default function MockupEditor() {
     handleCloseDialog();
     handleReset();
   };
-
 
   const handleReset = () => {
     setImage(defaultSettings.image);
@@ -198,7 +194,6 @@ export default function MockupEditor() {
     window.addEventListener("resize", updateCanvasScale);
     return () => window.removeEventListener("resize", updateCanvasScale);
   }, [updateCanvasScale]);
-
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const drawCanvas = useCallback(() => {
@@ -258,7 +253,7 @@ export default function MockupEditor() {
   ]);
 
   useEffect(() => {
-       // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     drawCanvas();
   }, [drawCanvas]);
 
@@ -430,15 +425,13 @@ export default function MockupEditor() {
     return false;
   };
 
-  
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow container mx-auto p-2">
-        <div className="flex flex-col lg:flex-row gap-8 ">
-          <div className="w-full lg:w-1/4 space-y-6 h-screen overflow-y-auto">
-            <div>
+      <main className="container mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
+            <div className="">
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
               </Label>
@@ -477,7 +470,7 @@ export default function MockupEditor() {
                 )}
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="background" className="block mb-4">
                 Background
               </Label>
@@ -573,8 +566,6 @@ export default function MockupEditor() {
                 </SelectContent>
               </Select>
             </div>
-
-          
 
             <Tabs defaultValue="design" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -680,9 +671,6 @@ export default function MockupEditor() {
               </TabsContent>
             </Tabs>
 
-
-
-
             <div className="flex space-x-2">
               <Button
                 onClick={handleDownload}
@@ -698,24 +686,22 @@ export default function MockupEditor() {
               >
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
               </Button>
-
-
-              </div>
+            </div>
           </div>
 
           <div
             ref={containerRef}
-            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-auto"
+            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
           >
             <div
-              className="relative overflow-hidden"  
+              className="relative overflow-hidden"
               style={{
                 width: `${screenSize.width * scale}px`,
                 height: `${screenSize.height * scale}px`,
               }}
             >
               <canvas
-              className=""
+                className=""
                 ref={canvasRef}
                 style={{
                   transform: `scale(${scale})`,
@@ -745,7 +731,9 @@ export default function MockupEditor() {
                 <Star
                   key={star}
                   className={`w-8 h-8 cursor-pointer transition-colors ${
-                    star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                    star <= rating
+                      ? "text-yellow-400 fill-yellow-400"
+                      : "text-gray-300"
                   }`}
                   onClick={() => setRating(star)}
                 />
@@ -767,6 +755,5 @@ export default function MockupEditor() {
         </DialogContent>
       </Dialog>
     </div>
-  
   );
 }
