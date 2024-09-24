@@ -57,6 +57,6 @@ export const siteConfig = {
   isEditorActive: true,
   socialLinks: {
     twitter: "https://x.com/SuryanshSi2001",
-    github: "https://github.com/suryanshsingh2001",
+    github: "https://github.com/suryanshsingh2001/mockly",
   },
 };
