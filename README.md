@@ -161,7 +161,7 @@ This project is licensed under the [MIT License](LICENSE).
 ## 📞 Contact
 
 - Project Maintainer: [Suryansh](https://www.linkedin.com/in/suryanshsingh2001/)
-- Project Website: [https://mockly.yourdomain.com](https://mockly.yourdomain.com)
+- Project Website: [https://www.mockly.site](https://www.mockly.site)
 
 ## 🙏 Acknowledgments
 
