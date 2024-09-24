@@ -62,6 +62,7 @@ const defaultSettings = {
   fontSize: 24,
   fontWeight: "normal",
   textColor: "#000000",
+  format: "png" as "png" | "jpg" | "svg" | "pdf",
 };
 
 export default function MockupEditor() {
@@ -136,7 +137,7 @@ export default function MockupEditor() {
   //   }
   // };
   const [format, setDownloadFormat] = useState<"png" | "jpg" | "svg" | "pdf">(
-    "png"
+    defaultSettings.format
   );
 
   const handleDownload = (format: "png" | "jpg" | "svg" | "pdf") => {
@@ -218,6 +219,7 @@ export default function MockupEditor() {
     setFontSize(defaultSettings.fontSize);
     setFontWeight(defaultSettings.fontWeight);
     setTextColor(defaultSettings.textColor);
+    setDownloadFormat(defaultSettings.format);
   };
 
   const updateCanvasScale = useCallback(() => {
@@ -728,7 +730,7 @@ export default function MockupEditor() {
               >
                 <Download className="mr-2 h-4 w-4" /> Download
               </Button> */}
-              <select
+              {/* <select
                 value={format}
                 onChange={(e) =>
                   setDownloadFormat(
@@ -742,6 +744,30 @@ export default function MockupEditor() {
                 <option value="svg">SVG</option>
                 <option value="pdf">PDF</option>
               </select>
+              <Button
+                onClick={() => handleDownload(format)}
+                className="w-full"
+                disabled={!image && !text}
+              >
+                <Download className="mr-2 h-4 w-4" /> Download
+              </Button> */}
+              <Select
+                value={format}
+                onValueChange={(value) =>
+                  setDownloadFormat(value as "png" | "jpg" | "svg" | "pdf")
+                }
+              >
+                <SelectTrigger className="mb-4 p-2 border  rounded-md">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="png">PNG</SelectItem>
+                  <SelectItem value="jpg">JPG</SelectItem>
+                  <SelectItem value="svg">SVG</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Button
                 onClick={() => handleDownload(format)}
                 className="w-full"
