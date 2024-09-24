@@ -479,10 +479,10 @@ export default function MockupEditor() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow container mx-auto p-2">
-        <div className="flex flex-col lg:flex-row gap-8 ">
-          <div className="w-full lg:w-1/4 space-y-6 h-screen overflow-y-auto">
-            <div>
+      <main className="container mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
+            <div className="">
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
               </Label>
@@ -521,7 +521,7 @@ export default function MockupEditor() {
                 )}
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="background" className="block mb-4">
                 Background
               </Label>
@@ -788,7 +788,7 @@ export default function MockupEditor() {
 
           <div
             ref={containerRef}
-            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-auto"
+            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
           >
             <div
               className="relative overflow-hidden"
