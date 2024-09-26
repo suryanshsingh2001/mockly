@@ -307,11 +307,9 @@ export default function MockupEditor() {
     const ctx = canvas?.getContext("2d");
 
     if (canvas && ctx) {
-      // Update canvas dimensions
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
 
-      // Only draw if the background image is loaded or it's not an image
       drawBackgroundImage(ctx);
     }
 
@@ -354,7 +352,7 @@ export default function MockupEditor() {
       ctx.drawImage(loadedImage, imagePosition.x, imagePosition.y, w, h);
       ctx.restore();
 
-      // Draw shadow if applicable
+      // Draw shadow
       if (shadow > 0) {
         ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
         ctx.shadowBlur = shadow;
