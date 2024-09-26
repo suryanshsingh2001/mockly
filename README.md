@@ -14,7 +14,7 @@
 
 Mockly is an open-source tool that allows developers to create professional-looking screenshots and mockups with ease. With Mockly, you can pick, place, and zoom—done. It's designed for fast, stress-free mockups for developers who'd rather code than design.
 
-
+![Sample image edit](public/mockly-demo.png)
 
 ## ✨ Features
 
