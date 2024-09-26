@@ -253,6 +253,51 @@ export default function MockupEditor() {
     return () => window.removeEventListener("resize", updateCanvasScale);
   }, [updateCanvasScale]);
 
+  const backgroundImageRef = useRef(new Image());
+  const [newChangesToDraw, setNewChangesToDraw] = useState(false);
+
+  const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
+    if (background.startsWith("http")) {
+      backgroundImageRef.current.src = background;
+      backgroundImageRef.current.onload = () => {
+        ctx.drawImage(backgroundImageRef.current, 0, 0);
+        drawImage(ctx);
+        drawText(ctx);
+      };
+      backgroundImageRef.current.src = background;
+    } else if (background === "gradient") {
+      const gradient = ctx.createLinearGradient(
+        0,
+        0,
+        Math.cos((gradientAngle * Math.PI) / 180) *
+          backgroundImageRef.current.width,
+        Math.sin((gradientAngle * Math.PI) / 180) *
+          backgroundImageRef.current.height
+      );
+      gradient.addColorStop(0, customColor1);
+      gradient.addColorStop(1, customColor2);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(
+        0,
+        0,
+        backgroundImageRef.current.width,
+        backgroundImageRef.current.height
+      );
+      drawImage(ctx);
+      drawText(ctx);
+    } else {
+      ctx.fillStyle = background;
+      ctx.fillRect(
+        0,
+        0,
+        backgroundImageRef.current.width,
+        backgroundImageRef.current.height
+      );
+      drawImage(ctx);
+      drawText(ctx);
+    }
+  };
+
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -260,42 +305,15 @@ export default function MockupEditor() {
     if (canvas && ctx) {
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-
-      // Draw background
-      if (background.startsWith("http")) {
-        const img = new Image();
-        img.setAttribute("crossOrigin", "anonymous");
-        img.onload = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          drawImage(ctx);
-          drawText(ctx);
-        };
-        img.src = background;
-      } else if (background === "gradient") {
-        const gradient = ctx.createLinearGradient(
-          0,
-          0,
-          Math.cos((gradientAngle * Math.PI) / 180) * canvas.width,
-          Math.sin((gradientAngle * Math.PI) / 180) * canvas.height
-        );
-        gradient.addColorStop(0, customColor1);
-        gradient.addColorStop(1, customColor2);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage(ctx);
-        drawText(ctx);
-      } else {
-        ctx.fillStyle = background;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage(ctx);
-        drawText(ctx);
-      }
+      drawBackgroundImage(ctx);
     }
 
-    requestAnimationFrame(drawCanvas);
+    if (isDragging || newChangesToDraw) {
+      setNewChangesToDraw(false);
+      requestAnimationFrame(drawCanvas);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     screenSize.width,
@@ -318,7 +336,10 @@ export default function MockupEditor() {
     shadow,
   ]);
 
-  // Draw the image
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
+
   const drawImage = (ctx: CanvasRenderingContext2D) => {
     if (loadedImage) {
       const scale = zoom / 100;
@@ -341,7 +362,6 @@ export default function MockupEditor() {
     }
   };
 
-  // Draw the text
   const drawText = (ctx: CanvasRenderingContext2D) => {
     if (text) {
       ctx.font = `${fontWeight} ${fontSize}px Arial`;
@@ -350,7 +370,6 @@ export default function MockupEditor() {
     }
   };
 
-  // Trigger drawing on component mount
   useEffect(() => {
     drawCanvas();
   }, [drawCanvas]);
