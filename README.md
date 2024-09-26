@@ -151,53 +151,85 @@ We look forward to your contributions and hope you enjoy participating in Hackto
 
 ## ❓  Frequently Asked Questions (FAQs)
 
-**Q: What is Mockly?**
-- **A:** Mockly is an open-source tool designed to help developers create professional-looking screenshots and mockups quickly and easily. It’s perfect for developers who want to produce high-quality visuals without needing to dive into complex design tools.
+<details>
+<summary>1. What is Mockly?</summary>
+Mockly is an open-source tool designed to help developers create professional-looking screenshots and mockups quickly and easily. It’s perfect for developers who want to produce high-quality visuals without needing to dive into complex design tools.
+</details>
 
-**Q: Do I need to sign up to use Mockly?**
-- **A:** No, Mockly does not require any login or account creation. You can start using the tool right away without the need for any sign-up process.
+<details>
+<summary>2. Do I need to sign up to use Mockly?</summary>
+No, Mockly does not require any login or account creation. You can start using the tool right away without the need for any sign-up process.
+</details>
 
-**Q: Is Mockly free to use?**
-- **A:** Yes, Mockly is completely free to use, and there are no hidden fees or watermarks. You get access to all its powerful features without any cost.
+<details>
+<summary>3. Is Mockly free to use?</summary>
+Yes, Mockly is completely free to use, and there are no hidden fees or watermarks. You get access to all its powerful features without any cost.
+</details>
 
-**Q: Is my data secure when using Mockly?**
-- **A:** Yes, it is. Mockly does not store any of your images, text, or designs. All processing is done in real-time, and nothing is saved on our servers.
+<details>
+<summary>4. Is my data secure when using Mockly?</summary>
+Yes, it is. Mockly does not store any of your images, text, or designs. All processing is done in real-time, and nothing is saved on our servers.
+</details>
 
-**Q: What formats does Mockly support for screenshots?**
-- **A:** You can upload images in common formats like PNG, JPEG, and SVG. These formats are widely supported and make it easy to incorporate your screenshots into the tool.
+<details>
+<summary>5. What formats does Mockly support for screenshots?</summary>
+You can upload images in common formats like PNG, JPEG, and SVG. These formats are widely supported and make it easy to incorporate your screenshots into the tool.
+</details>
 
-**Q: How can I customize background image?**
-- **A:** Custom backgrounds are currently not available, but are planned for future updates. Stay tuned for updates, or if you'd like, feel free to contribute to the implementation!
+<details>
+<summary>6. How can I customize background image?</summary>
+Custom backgrounds are currently not available, but are planned for future updates. Stay tuned for updates, or if you'd like, feel free to contribute to the implementation!
+</details>
 
-**Q: Can I preview my designs on multiple devices?**
-- **A:** Yes! Mockly allows you to preview your designs on various screen sizes and devices. This feature ensures that your mockups will look great on any platform.
+<details>
+<summary>7. Can I preview my designs on multiple devices?</summary>
+Yes! Mockly allows you to preview your designs on various screen sizes and devices. This feature ensures that your mockups will look great on any platform.
+</details>
 
-**Q: Does Mockly support multi-language text input?**
-- **A:** Yes, Mockly supports multi-language text input. Just enter your preferred language in the text field, and Mockly will render it accordingly.
+<details>
+<summary>8. Does Mockly support multi-language text input?</summary>
+Yes, Mockly supports multi-language text input. Just enter your preferred language in the text field, and Mockly will render it accordingly.
+</details>
 
-**Q: Are there any system requirements for Mockly?**
-- **A:** To run Mockly locally, you'll need Node.js (v14 or later) installed on your machine. Mockly works best in modern web browsers like Chrome, Firefox, and Safari for its web version.
+<details>
+<summary>9. Are there any system requirements for Mockly?</summary>
+To run Mockly locally, you'll need Node.js (v14 or later) installed on your machine. Mockly works best in modern web browsers like Chrome, Firefox, and Safari for its web version.
+</details>
 
-**Q: Can I collaborate with others on Mockly?**
-- **A:** As of now, Mockly doesn't have real-time collaboration features, but they are part of the future roadmap! Stay tuned for updates.
+<details>
+<summary>9. Can I collaborate with others on Mockly?</summary>
+As of now, Mockly doesn't have real-time collaboration features, but they are part of the future roadmap! Stay tuned for updates.
+</details>
 
-**Q: Does Mockly have a plugin system?**
-- **A:** Not yet, but we plan to introduce a plugin system in the future that will allow developers to extend the tool's functionality by creating and integrating custom plugins.
+<details>
+<summary>10. Does Mockly have a plugin system?</summary>
+Not yet, but we plan to introduce a plugin system in the future that will allow developers to extend the tool's functionality by creating and integrating custom plugins.
+</details>
 
-**Q: How do I contribute to the project?**
-- **A:** Mockly is open-source and welcomes contributions! You can check out our contribution guidelines and participate in Hacktoberfest or submit features, bug fixes, and more throughout the year.
+<details>
+<summary>11. How do I contribute to the project?</summary>
+Mockly is open-source and welcomes contributions! You can check out our contribution guidelines and participate in Hacktoberfest or submit features, bug fixes, and more throughout the year.
+</details>
 
-**Q: Where can I report bugs or suggest features?**
-- **A:** You can report bugs or suggest features by creating an issue in the Mockly GitHub repository. Make sure to check if an issue already exists before creating a new one!
+<details>
+<summary>12. Where can I report bugs or suggest features?</summary>
+You can report bugs or suggest features by creating an issue in the Mockly GitHub repository. Make sure to check if an issue already exists before creating a new one!
+</details>
 
-**Q: Can I use Mockly for commercial purposes?**
-- **A:** Yes, Mockly is licensed under the MIT License, which allows you to use it freely for both personal and commercial purposes.
+<details>
+<summary>13. Can I use Mockly for commercial purposes?</summary>
+Yes, Mockly is licensed under the MIT License, which allows you to use it freely for both personal and commercial purposes.
+</details>
 
-**Q: Will Mockly support video editing?**
-- **A:** Yes, we are planning to add video editing capabilities in the future, so you can create stunning video content with the same ease as creating screenshots.
+<details>
+<summary>14. Will Mockly support video editing?</summary>
+Yes, we are planning to add video editing capabilities in the future, so you can create stunning video content with the same ease as creating screenshots.
+</details>
 
-**Q: What if I need help with Mockly?**
-- **A:** For any questions or help, feel free to reach out through our GitHub Discussions or contact us via our project website or GitHub repository.
+<details>
+<summary>15. What if I need help with Mockly?</summary>
+For any questions or help, feel free to reach out through our GitHub Discussions or contact us via our project website or GitHub repository.
+</details>
 
 ## 👥 Contributing
 
