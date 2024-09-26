@@ -463,11 +463,14 @@ export default function MockupEditor() {
                 <input {...getInputProps()} id="image-upload" />
                 {image ? (
                   <div className="flex items-center justify-center">
-                    <img
-                      src={image}
-                      alt="Uploaded"
-                      className="max-h-24 max-w-full"
-                    />
+                    {
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={image}
+                        alt="Uploaded"
+                        className="max-h-24 max-w-full"
+                      />
+                    }
                     <Button
                       variant="ghost"
                       size="icon"
@@ -551,11 +554,14 @@ export default function MockupEditor() {
                       className="relative aspect-video cursor-pointer overflow-hidden rounded-lg"
                       onClick={() => setBackground(url)}
                     >
-                      <img
-                        src={url}
-                        alt={`Background ${index + 1}`}
-                        className="object-cover w-full h-full"
-                      />
+                      {
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={url}
+                          alt={`Background ${index + 1}`}
+                          className="object-cover w-full h-full"
+                        />
+                      }
                     </div>
                   ))}
                 </TabsContent>
