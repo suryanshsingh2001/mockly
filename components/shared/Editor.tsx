@@ -194,6 +194,7 @@ export default function MockupEditor() {
   const handleClearImage = () => {
     setImage(null);
   };
+
   const handleCloseDialog = () => {
     setComplete(false);
     setRating(0);
@@ -257,24 +258,23 @@ export default function MockupEditor() {
     const ctx = canvas?.getContext("2d");
 
     if (canvas && ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
 
       // Draw background
       if (background.startsWith("http")) {
         const img = new Image();
         img.setAttribute("crossOrigin", "anonymous");
         img.onload = () => {
-          ctx.save();
-          ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas before drawing
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          ctx.restore();
+          drawImage(ctx);
+          drawText(ctx);
         };
         img.src = background;
       } else if (background === "gradient") {
-        ctx.save();
         const gradient = ctx.createLinearGradient(
           0,
           0,
@@ -284,39 +284,19 @@ export default function MockupEditor() {
         gradient.addColorStop(0, customColor1);
         gradient.addColorStop(1, customColor2);
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill with gradient
-        ctx.restore();
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        drawImage(ctx);
+        drawText(ctx);
       } else {
         ctx.fillStyle = background;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        drawImage(ctx);
+        drawText(ctx);
       }
-
-      if (loadedImage) {
-        const scale = zoom / 100;
-        const w = loadedImage.width * scale;
-        const h = loadedImage.height * scale;
-
-        ctx.save();
-        ctx.globalAlpha = transparency / 100;
-        ctx.drawImage(loadedImage, imagePosition.x, imagePosition.y, w, h);
-        ctx.restore();
-
-        // Draw shadow if applicable
-        if (shadow > 0) {
-          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-          ctx.shadowBlur = shadow;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-          ctx.strokeRect(imagePosition.x, imagePosition.y, w, h);
-        }
-      }
-
-      // Draw text
-      ctx.font = `${fontWeight} ${fontSize}px Arial`;
-      ctx.fillStyle = textColor;
-      ctx.fillText(text, textPosition.x, textPosition.y);
     }
+
     requestAnimationFrame(drawCanvas);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     screenSize.width,
     screenSize.height,
@@ -338,6 +318,39 @@ export default function MockupEditor() {
     shadow,
   ]);
 
+  // Draw the image
+  const drawImage = (ctx: CanvasRenderingContext2D) => {
+    if (loadedImage) {
+      const scale = zoom / 100;
+      const w = loadedImage.width * scale;
+      const h = loadedImage.height * scale;
+
+      ctx.save();
+      ctx.globalAlpha = transparency / 100;
+      ctx.drawImage(loadedImage, imagePosition.x, imagePosition.y, w, h);
+      ctx.restore();
+
+      // Draw shadow if applicable
+      if (shadow > 0) {
+        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+        ctx.shadowBlur = shadow;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.strokeRect(imagePosition.x, imagePosition.y, w, h);
+      }
+    }
+  };
+
+  // Draw the text
+  const drawText = (ctx: CanvasRenderingContext2D) => {
+    if (text) {
+      ctx.font = `${fontWeight} ${fontSize}px Arial`;
+      ctx.fillStyle = textColor;
+      ctx.fillText(text, textPosition.x, textPosition.y);
+    }
+  };
+
+  // Trigger drawing on component mount
   useEffect(() => {
     drawCanvas();
   }, [drawCanvas]);
