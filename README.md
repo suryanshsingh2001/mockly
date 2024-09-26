@@ -18,20 +18,23 @@ Mockly is an open-source tool that allows developers to create professional-look
 
 ## ✨ Features
 
-- **Instant Mockups**: Upload, tweak, done. It's like magic, but without the wand.
-- **Multi-device Preview**: Instantly see how your designs look on any screen size—because nobody has time for resizing.
-- **Zoom & Place**: Put your screenshots exactly where you want, and zoom in like a pro—minus the struggle.
-- **Text & Style**: Add text, pick your font, and make it pop. Because plain screenshots are so last year.
-- **No Login Required**: Start creating immediately without any sign-up process.
-- **No Watermarks**: Your designs, your brand—no unwanted additions.
-- **Free to Use**: Powerful features accessible to everyone at no cost.
+1. **Instant Mockups**: Upload, tweak, done. It's like magic, but without the wand.
+2. **Multi-device Preview**: Instantly see how your designs look on any screen size—because nobody has time for resizing.
+   - **Example**: Select "Screen Size" dropdown menu to automatically generate views for mobile, tablet, and desktop versions.
+3. **Zoom & Place**: Precisely position your screenshot, and zoom in or out like a pro—minus the struggle.
+   - **Example**: Drag your cursor to specify the position and use the zoom slider in the "Design" tab as needed.
+4. **Text & Style**: Add text, pick your style, and make it pop. Because plain screenshots are so last year.
+   - **Example**: Enter your text under the "Text" tab. Adjust the font size, weight, color, and drag it with around to align it your mockup.
+5. **No Login Required**: Start creating immediately without any sign-up process.
+6. **No Watermarks**: Your designs, your brand—no unwanted additions.
+7. **Free to Use**: Powerful features accessible to everyone at no cost.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or later)
-- npm or yarn
+- **Node.js** (v14 or later): Check your current Node.js version by running `node -v`.
+- **npm or yarn**: If you're using npm or Yarn, you can run `npm -v` or `yarn -v`.
 
 ### Installation
 
@@ -145,6 +148,20 @@ We encourage contributors to explore our [existing issues](https://github.com/su
 Don't see an issue that matches your interests? Feel free to [create a new issue](https://github.com/suryanshsingh2001/mockly/issues/new/choose) and discuss your ideas with the community!
 
 We look forward to your contributions and hope you enjoy participating in Hacktoberfest with Mockly!
+
+## ❓ FAQ
+
+**Q: Is my data secure when using Mockly?**
+- **A:** Yes, it is. Mockly does not store any of your images, text, or designs. All processing is done in real-time, and nothing is saved on our servers.
+
+**Q: How can I customize background image?**
+- **A:** Custom backgrounds are currently not available, but are planned for future updates. Stay tuned for updates, or if you'd like, feel free to contribute to the implementation!
+
+**Q: Where can I report a bug or request a feature?**
+- **A:** After downloading your mockup, a pop-up form will appear allowing you to rate your experience and leave detailed feedback. Our team will address it as soon as possible.
+
+**Q: Does Mockly support multi-language text input?**
+- **A:** Yes, Mockly supports multi-language text input. Just enter your preferred language in the text field, and Mockly will render it accordingly.
 
 ## 👥 Contributing
 
