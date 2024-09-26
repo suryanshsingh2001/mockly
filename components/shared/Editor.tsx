@@ -90,7 +90,6 @@ export default function MockupEditor() {
   const [imagePosition, setImagePosition] = useState(
     defaultSettings.imagePosition
   );
-  console.log(imagePosition);
   const [text, setText] = useState(defaultSettings.text);
   const [textPosition, setTextPosition] = useState(
     defaultSettings.textPosition
@@ -109,14 +108,33 @@ export default function MockupEditor() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
+  const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => setImage(e.target?.result as string);
+      reader.onload = (e) => {
+        const newImage = new Image();
+        newImage.src = e.target?.result as string;
+        newImage.onload = () => setLoadedImage(newImage);
+        setImage(e.target?.result as string);
+      };
       reader.readAsDataURL(file);
     }
   }, []);
+
+  useEffect(() => {
+    if (image) {
+      const img = new Image();
+      img.onload = () => {
+        setLoadedImage(img);
+      };
+      img.src = image;
+    } else {
+      setLoadedImage(null);
+    }
+  }, [image]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -124,18 +142,6 @@ export default function MockupEditor() {
     multiple: false,
   });
 
-  // const handleDownload = () => {
-  //   if (canvasRef.current) {
-  //     const image = new Image();
-  //     image.setAttribute("crossOrigin", "anonymous");
-  //     image.src = canvasRef.current.toDataURL("image/png");
-
-  //     const filename = `screenshot${Date.now()}.png`;
-  //     saveAs(image.src, filename);
-
-  //     setComplete(true);
-  //   }
-  // };
   const [format, setDownloadFormat] = useState<"png" | "jpg" | "svg" | "pdf">(
     defaultSettings.format
   );
@@ -246,25 +252,29 @@ export default function MockupEditor() {
     return () => window.removeEventListener("resize", updateCanvasScale);
   }, [updateCanvasScale]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
+
     if (canvas && ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
 
       // Draw background
       if (background.startsWith("http")) {
         const img = new Image();
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          drawImage(ctx);
-          drawText(ctx);
-        };
         img.setAttribute("crossOrigin", "anonymous");
+        img.onload = () => {
+          ctx.save();
+          ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas before drawing
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          ctx.restore();
+        };
         img.src = background;
       } else if (background === "gradient") {
+        ctx.save();
         const gradient = ctx.createLinearGradient(
           0,
           0,
@@ -274,134 +284,63 @@ export default function MockupEditor() {
         gradient.addColorStop(0, customColor1);
         gradient.addColorStop(1, customColor2);
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage(ctx);
-        drawText(ctx);
+        ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill with gradient
+        ctx.restore();
       } else {
         ctx.fillStyle = background;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage(ctx);
-        drawText(ctx);
       }
-    }
-  }, [
-    image,
-    background,
-    customColor1,
-    customColor2,
-    gradientAngle,
-    screenSize,
-    zoom,
-    transparency,
-    borderRadius,
-    shadow,
-    imagePosition,
-    text,
-    textPosition,
-    fontSize,
-    fontWeight,
-    textColor,
-  ]);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    drawCanvas();
-  }, [drawCanvas]);
-
-  // useEffect(() => {
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas?.getContext("2d");
-  //   if (canvas && ctx) {
-  //     canvas.width = screenSize.width;
-  //     canvas.height = screenSize.height;
-
-  //     // Draw background
-  //     if (background.startsWith("http")) {
-  //       const img = new Image();
-  //       img.onload = () => {
-  //         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  //         drawImage();
-  //         drawText();
-  //       };
-  //       img.setAttribute("crossOrigin", "anonymous");
-  //       img.src = background;
-  //     } else if (background === "gradient") {
-  //       const gradient = ctx.createLinearGradient(
-  //         0,
-  //         0,
-  //         Math.cos((gradientAngle * Math.PI) / 180) * canvas.width,
-  //         Math.sin((gradientAngle * Math.PI) / 180) * canvas.height
-  //       );
-  //       gradient.addColorStop(0, customColor1);
-  //       gradient.addColorStop(1, customColor2);
-  //       ctx.fillStyle = gradient;
-  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
-  //       drawImage();
-  //       drawText();
-  //     } else {
-  //       ctx.fillStyle = background;
-  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
-  //       drawImage();
-  //       drawText();
-  //     }
-  //   }
-  // }, [
-  //   image,
-  //   background,
-  //   customColor1,
-  //   customColor2,
-  //   gradientAngle,
-  //   screenSize,
-  //   zoom,
-  //   transparency,
-  //   borderRadius,
-  //   shadow,
-  //   imagePosition,
-  //   text,
-  //   textPosition,
-  //   fontSize,
-  //   fontWeight,
-  //   textColor,
-  // ]);
-
-  const drawImage = (ctx: CanvasRenderingContext2D) => {
-    if (image) {
-      const img = new Image();
-      img.onload = () => {
+      if (loadedImage) {
         const scale = zoom / 100;
-        const w = img.width * scale;
-        const h = img.height * scale;
-        const x = imagePosition.x;
-        const y = imagePosition.y;
+        const w = loadedImage.width * scale;
+        const h = loadedImage.height * scale;
 
         ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(x, y, w, h, borderRadius);
-        ctx.clip();
         ctx.globalAlpha = transparency / 100;
-        ctx.drawImage(img, x, y, w, h);
+        ctx.drawImage(loadedImage, imagePosition.x, imagePosition.y, w, h);
         ctx.restore();
 
-        // Draw shadow
+        // Draw shadow if applicable
         if (shadow > 0) {
           ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
           ctx.shadowBlur = shadow;
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
-          ctx.strokeRect(x, y, w, h);
+          ctx.strokeRect(imagePosition.x, imagePosition.y, w, h);
         }
-      };
-      img.src = image;
-    }
-  };
+      }
 
-  const drawText = (ctx: CanvasRenderingContext2D) => {
-    if (text) {
+      // Draw text
       ctx.font = `${fontWeight} ${fontSize}px Arial`;
       ctx.fillStyle = textColor;
       ctx.fillText(text, textPosition.x, textPosition.y);
     }
-  };
+    requestAnimationFrame(drawCanvas);
+  }, [
+    screenSize.width,
+    screenSize.height,
+    background,
+    loadedImage,
+    fontWeight,
+    fontSize,
+    textColor,
+    text,
+    textPosition.x,
+    textPosition.y,
+    gradientAngle,
+    customColor1,
+    customColor2,
+    zoom,
+    transparency,
+    imagePosition.x,
+    imagePosition.y,
+    shadow,
+  ]);
+
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
