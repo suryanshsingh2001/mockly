@@ -316,6 +316,7 @@ export default function MockupEditor() {
     }
 
     requestAnimationFrame(drawCanvas);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     screenSize.width,
     screenSize.height,
