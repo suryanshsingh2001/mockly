@@ -365,10 +365,6 @@ export default function MockupEditor() {
     }
   };
 
-  useEffect(() => {
-    drawCanvas();
-  }, [drawCanvas]);
-
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (canvas) {
