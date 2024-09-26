@@ -254,7 +254,6 @@ export default function MockupEditor() {
   }, [updateCanvasScale]);
 
   const backgroundImageRef = useRef(new Image());
-  const [newChangesToDraw, setNewChangesToDraw] = useState(false);
 
   const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
     if (background.startsWith("http")) {
@@ -310,10 +309,6 @@ export default function MockupEditor() {
       drawBackgroundImage(ctx);
     }
 
-    if (isDragging || newChangesToDraw) {
-      setNewChangesToDraw(false);
-      requestAnimationFrame(drawCanvas);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     screenSize.width,
