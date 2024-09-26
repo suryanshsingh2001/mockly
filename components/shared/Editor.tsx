@@ -109,6 +109,9 @@ export default function MockupEditor() {
   const [comment, setComment] = useState("");
 
   const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
+  const [backgroundImage, setBackgroundImage] =
+    useState<HTMLImageElement | null>(null);
+  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -253,48 +256,50 @@ export default function MockupEditor() {
     return () => window.removeEventListener("resize", updateCanvasScale);
   }, [updateCanvasScale]);
 
-  const backgroundImageRef = useRef(new Image());
+  useEffect(() => {
+    if (background.startsWith("http")) {
+      const img = new Image();
+      img.src = background;
+
+      img.onload = () => {
+        setBackgroundImage(img);
+        setIsBackgroundLoaded(true);
+      };
+
+      img.onerror = () => {
+        console.error("Failed to load background image");
+        setBackgroundImage(null);
+        setIsBackgroundLoaded(false);
+      };
+    } else {
+      setBackgroundImage(null);
+      setIsBackgroundLoaded(false);
+    }
+  }, [background]);
 
   const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
-    if (background.startsWith("http")) {
-      backgroundImageRef.current.src = background;
-      backgroundImageRef.current.onload = () => {
-        ctx.drawImage(backgroundImageRef.current, 0, 0);
-        drawImage(ctx);
-        drawText(ctx);
-      };
-      backgroundImageRef.current.src = background;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    if (isBackgroundLoaded && backgroundImage) {
+      ctx.drawImage(backgroundImage, 0, 0, ctx.canvas.width, ctx.canvas.height);
     } else if (background === "gradient") {
       const gradient = ctx.createLinearGradient(
         0,
         0,
-        Math.cos((gradientAngle * Math.PI) / 180) *
-          backgroundImageRef.current.width,
-        Math.sin((gradientAngle * Math.PI) / 180) *
-          backgroundImageRef.current.height
+        Math.cos((gradientAngle * Math.PI) / 180) * screenSize.width,
+        Math.sin((gradientAngle * Math.PI) / 180) * screenSize.height
       );
       gradient.addColorStop(0, customColor1);
       gradient.addColorStop(1, customColor2);
       ctx.fillStyle = gradient;
-      ctx.fillRect(
-        0,
-        0,
-        backgroundImageRef.current.width,
-        backgroundImageRef.current.height
-      );
-      drawImage(ctx);
-      drawText(ctx);
+      ctx.fillRect(0, 0, screenSize.width, screenSize.height);
     } else {
       ctx.fillStyle = background;
-      ctx.fillRect(
-        0,
-        0,
-        backgroundImageRef.current.width,
-        backgroundImageRef.current.height
-      );
-      drawImage(ctx);
-      drawText(ctx);
+      ctx.fillRect(0, 0, screenSize.width, screenSize.height);
     }
+
+    drawImage(ctx);
+    drawText(ctx);
   };
 
   const drawCanvas = useCallback(() => {
@@ -302,17 +307,19 @@ export default function MockupEditor() {
     const ctx = canvas?.getContext("2d");
 
     if (canvas && ctx) {
+      // Update canvas dimensions
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Only draw if the background image is loaded or it's not an image
       drawBackgroundImage(ctx);
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    requestAnimationFrame(drawCanvas);
   }, [
     screenSize.width,
     screenSize.height,
+    isBackgroundLoaded,
     background,
     loadedImage,
     fontWeight,
@@ -390,7 +397,7 @@ export default function MockupEditor() {
         const x = (e.clientX - rect.left) / scale;
         const y = (e.clientY - rect.top) / scale;
 
-        if (dragTarget === "image") {
+        if (dragTarget === "image" && loadedImage) {
           setImagePosition({ x, y });
         } else if (dragTarget === "text") {
           setTextPosition({ x, y });
