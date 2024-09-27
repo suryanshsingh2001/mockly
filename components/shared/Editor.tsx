@@ -68,6 +68,10 @@ const defaultSettings = {
 export default function MockupEditor() {
   const [image, setImage] = useState<string | null>(defaultSettings.image);
   const [background, setBackground] = useState(defaultSettings.background);
+  const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
+  const [backgroundImage, setBackgroundImage] =
+    useState<HTMLImageElement | null>(null);
+  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
   const [customColor1, setCustomColor1] = useState(
     defaultSettings.customColor1
   );
@@ -107,11 +111,6 @@ export default function MockupEditor() {
   const [complete, setComplete] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-
-  const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
-  const [backgroundImage, setBackgroundImage] =
-    useState<HTMLImageElement | null>(null);
-  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
