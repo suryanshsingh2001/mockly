@@ -8,9 +8,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-**Create Stunning Screenshots in Seconds**
+![screenshot1727467497308](https://github.com/user-attachments/assets/67a2c9fe-44e6-41c5-8fdf-443b8b324e17)
 
-![Mockly Screenshot](public/showcase-dark.png)
 
 Mockly is an open-source tool that allows developers to create professional-looking screenshots and mockups with ease. With Mockly, you can pick, place, and zoom—done. It's designed for fast, stress-free mockups for developers who'd rather code than design.
 
