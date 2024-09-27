@@ -263,7 +263,8 @@ export default function MockupEditor() {
 
       img.onload = () => {
         setBackgroundImage(img);
-        setIsBackgroundLoaded(true);
+        setIsBackgroundLoaded(true); // Mark as loaded
+        console.log("Background image loaded");
       };
 
       img.onerror = () => {
@@ -319,6 +320,7 @@ export default function MockupEditor() {
     screenSize.width,
     screenSize.height,
     isBackgroundLoaded,
+    backgroundImage,
     background,
     loadedImage,
     fontWeight,
@@ -338,7 +340,7 @@ export default function MockupEditor() {
   ]);
 
   useEffect(() => {
-    drawCanvas();
+    drawCanvas(); // Trigger canvas redraw on updates
   }, [drawCanvas]);
 
   const drawImage = (ctx: CanvasRenderingContext2D) => {
@@ -554,7 +556,9 @@ export default function MockupEditor() {
                     <div
                       key={index}
                       className="relative aspect-video cursor-pointer overflow-hidden rounded-lg"
-                      onClick={() => setBackground(url)}
+                      onClick={() => {
+                        setBackground(url);
+                      }}
                     >
                       {
                         // eslint-disable-next-line @next/next/no-img-element
