@@ -321,6 +321,7 @@ export default function MockupEditor() {
     isBackgroundLoaded,
     backgroundImage,
     background,
+    borderRadius,
     loadedImage,
     fontWeight,
     fontSize,
