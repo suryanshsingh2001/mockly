@@ -426,7 +426,7 @@ export default function MockupEditor() {
 
   return (
     <>
-      <main className="container mx-auto">
+      <main className="mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
             <div className="">
