@@ -24,7 +24,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Upload, X, Download, RotateCcw, Type, Star } from "lucide-react";
-import Header from "@/components/layout/Header";
 import { Textarea } from "../ui/textarea";
 
 const backgroundUrls = [
@@ -426,8 +425,7 @@ export default function MockupEditor() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <>
       <main className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
@@ -691,7 +689,7 @@ export default function MockupEditor() {
 
           <div
             ref={containerRef}
-            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
+            className="mt-2 w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
           >
             <div
               className="relative overflow-hidden"
@@ -754,6 +752,6 @@ export default function MockupEditor() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
