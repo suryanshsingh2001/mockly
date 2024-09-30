@@ -262,8 +262,8 @@ export default function MockupEditor() {
 
       img.onload = () => {
         setBackgroundImage(img);
-        setIsBackgroundLoaded(true); // Mark as loaded
-        console.log("Background image loaded");
+        setIsBackgroundLoaded(true);
+        img.setAttribute("crossOrigin", "anonymous");
       };
 
       img.onerror = () => {
