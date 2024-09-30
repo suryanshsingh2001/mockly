@@ -12,9 +12,9 @@ export default function Header() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="bg-background sticky top-0 z-40 w-full">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center space-x-4 sm:justify-between sm:space-x-0">
-        <div className="flex items-center space-x-4">
+    <header className="bg-background sticky top-0 z-40 w-full max-w-screen-lg">
+      <div className="container mx-auto py-4 flex justify-between items-center space-x-4 sm:justify-between sm:space-x-0">
+        <div className="flex items-center">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden">
@@ -46,7 +46,7 @@ export default function Header() {
             </SheetContent>
           </Sheet>
           <Link href="/">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-0">
               <ImageIcon className="h-8 w-8 mr-2 text-primary" />
               <span className="text-2xl font-bold">Mockly</span>
             </div>
