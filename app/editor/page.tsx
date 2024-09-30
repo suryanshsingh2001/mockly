@@ -12,7 +12,10 @@ export default function EditorPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <Tabs defaultValue="screenshot" className="w-full max-w-screen-lg">
+      <Tabs
+        defaultValue="screenshot"
+        className="w-full max-w-screen-lg mx-auto"
+      >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="screenshot">Screenshot</TabsTrigger>
           <TabsTrigger value="video">Video</TabsTrigger>
