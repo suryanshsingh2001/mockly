@@ -689,8 +689,8 @@ export default function MockupEditor() {
                   <div className="flex items-center justify-between">
                     <Label htmlFor="shadow">Shadow: {shadow.blur}px</Label>
                     <ShadowManager
-                      value={shadow} // Pass the actual shadow state
-                      onChange={(value) => setShadow(value)} // Update entire shadow state when changed
+                      value={shadow}
+                      onChange={(value) => setShadow(value)}
                     />
                   </div>
                   <Slider
