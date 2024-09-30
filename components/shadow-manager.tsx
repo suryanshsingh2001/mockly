@@ -9,9 +9,9 @@ import { Input } from "./ui/input";
 import { Settings2Icon } from "lucide-react";
 
 export type Shadow = {
+  color: string;
   x: number;
   y: number;
-  spread: number;
   blur: number;
 };
 
@@ -25,18 +25,15 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
   onChange,
 }) => {
   const [popoverVisible, setPopoverVisible] = useState(false);
-  const [xValue, setXValue] = useState(defaultValue.x);
-  const [yValue, setYValue] = useState(defaultValue.y);
-  const [spreadValue, setSpreadValue] = useState(defaultValue.spread);
-  const [blurValue, setBlurValue] = useState(defaultValue.blur);
+  const [shadowValue, setShadowValue] = useState<Shadow>(defaultValue);
 
   // Function to handle state change and propagate values
   const handleInputChange = (newValues: Partial<Shadow>) => {
     const updatedShadow = {
-      x: xValue,
-      y: yValue,
-      spread: spreadValue,
-      blur: blurValue,
+      x: shadowValue.x,
+      y: shadowValue.y,
+      color: shadowValue.color,
+      blur: shadowValue.blur,
       ...newValues,
     };
     onChange(updatedShadow);
@@ -51,6 +48,24 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
       <PopoverContent className="w-60" align="start">
         <div className="grid grid-cols-5 gap-4">
           <Label
+            htmlFor="color"
+            className="col-span-2 flex items-center text-nowrap"
+          >
+            Color
+          </Label>
+          <Input
+            id="color"
+            type="color"
+            className="col-span-3"
+            value={shadowValue.color}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setShadowValue({ ...shadowValue, color: newValue });
+              handleInputChange({ color: newValue });
+            }}
+          />
+
+          <Label
             htmlFor="xoffset"
             className="col-span-2 flex items-center text-nowrap"
           >
@@ -60,10 +75,10 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
             id="xoffset"
             type="number"
             className="col-span-3"
-            value={xValue}
+            value={shadowValue.x}
             onChange={(e) => {
               const newValue = parseInt(e.target.value);
-              setXValue(newValue);
+              setShadowValue({ ...shadowValue, x: newValue });
               handleInputChange({ x: newValue });
             }}
           />
@@ -78,29 +93,11 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
             id="yoffset"
             type="number"
             className="col-span-3"
-            value={yValue}
+            value={shadowValue.y}
             onChange={(e) => {
               const newValue = parseInt(e.target.value);
-              setYValue(newValue);
+              setShadowValue({ ...shadowValue, y: newValue });
               handleInputChange({ y: newValue });
-            }}
-          />
-
-          <Label
-            htmlFor="spread"
-            className="col-span-2 flex items-center text-nowrap"
-          >
-            Spread
-          </Label>
-          <Input
-            id="spread"
-            type="number"
-            className="col-span-3"
-            value={spreadValue}
-            onChange={(e) => {
-              const newValue = parseInt(e.target.value);
-              setSpreadValue(newValue);
-              handleInputChange({ spread: newValue });
             }}
           />
 
@@ -114,10 +111,10 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
             id="blur"
             type="number"
             className="col-span-3"
-            value={blurValue}
+            value={shadowValue.blur}
             onChange={(e) => {
               const newValue = parseInt(e.target.value);
-              setBlurValue(newValue);
+              setShadowValue({ ...shadowValue, blur: newValue });
               handleInputChange({ blur: newValue });
             }}
           />

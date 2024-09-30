@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Upload, X, Download, RotateCcw, Type, Star } from "lucide-react";
 import Header from "@/components/layout/Header";
 import { Textarea } from "../ui/textarea";
+import { ShadowManager, type Shadow } from "@/components/shadow-manager";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -55,7 +56,12 @@ const defaultSettings = {
   zoom: 50,
   transparency: 100,
   borderRadius: 0,
-  shadow: 0,
+  shadow: {
+    color: "#000000",
+    x: 0,
+    y: 0,
+    blur: 0,
+  },
   imagePosition: { x: 0.5, y: 0.5 },
   text: "",
   textPosition: { x: 50, y: 50 },
@@ -85,7 +91,7 @@ export default function MockupEditor() {
   const [borderRadius, setBorderRadius] = useState(
     defaultSettings.borderRadius
   );
-  const [shadow, setShadow] = useState(defaultSettings.shadow);
+  const [shadow, setShadow] = useState<Shadow>(defaultSettings.shadow);
   const [scale, setScale] = useState(1);
   const [imagePosition, setImagePosition] = useState(
     defaultSettings.imagePosition
@@ -374,6 +380,15 @@ export default function MockupEditor() {
         const x = imagePosition.x;
         const y = imagePosition.y;
 
+        // Draw shadow
+        if (shadow.blur > 0) {
+          ctx.shadowColor = shadow.color;
+          ctx.shadowBlur = shadow.blur;
+          ctx.shadowOffsetX = shadow.x;
+          ctx.shadowOffsetY = shadow.y;
+          ctx.fillRect(x, y, w, h);
+        }
+
         ctx.save();
         ctx.beginPath();
         ctx.roundRect(x, y, w, h, borderRadius);
@@ -381,15 +396,6 @@ export default function MockupEditor() {
         ctx.globalAlpha = transparency / 100;
         ctx.drawImage(img, x, y, w, h);
         ctx.restore();
-
-        // Draw shadow
-        if (shadow > 0) {
-          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-          ctx.shadowBlur = shadow;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-          ctx.strokeRect(x, y, w, h);
-        }
       };
       img.src = image;
     }
@@ -662,14 +668,22 @@ export default function MockupEditor() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="shadow">Shadow: {shadow}px</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="shadow">Shadow: {shadow.blur}px</Label>
+                    <ShadowManager
+                      defaultValue={shadow}
+                      onChange={(value) => setShadow({ ...shadow, ...value })}
+                    />
+                  </div>
                   <Slider
                     id="shadow"
                     min={0}
                     max={50}
                     step={1}
-                    value={[shadow]}
-                    onValueChange={(value) => setShadow(value[0])}
+                    value={[shadow.blur]}
+                    onValueChange={(value) =>
+                      setShadow({ ...shadow, blur: value[0] })
+                    }
                   />
                 </div>
               </TabsContent>
