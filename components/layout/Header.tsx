@@ -12,7 +12,7 @@ export default function Header() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="bg-background sticky top-0 z-40 w-full max-w-screen-lg">
+    <header className="bg-background/60 mx-auto backdrop-blur-sm sticky top-0 z-40 w-full max-w-screen-lg">
       <div className="container mx-auto py-4 flex justify-between items-center space-x-4 sm:justify-between sm:space-x-0">
         <div className="flex items-center">
           <Sheet>
