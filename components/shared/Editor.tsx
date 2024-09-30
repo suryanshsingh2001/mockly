@@ -348,8 +348,13 @@ export default function MockupEditor() {
       const scale = zoom / 100;
       const w = loadedImage.width * scale;
       const h = loadedImage.height * scale;
+      const x = imagePosition.x;
+      const y = imagePosition.y;
 
       ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, borderRadius);
+      ctx.clip();
       ctx.globalAlpha = transparency / 100;
       ctx.drawImage(loadedImage, imagePosition.x, imagePosition.y, w, h);
       ctx.restore();
