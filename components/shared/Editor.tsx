@@ -29,6 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/layout/Header";
 import { ShadowManager, type Shadow } from "@/components/shadow-manager";
+import { ScreenSize } from "./types";
+
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -88,7 +90,9 @@ export default function MockupEditor() {
   const [gradientAngle, setGradientAngle] = useState(
     defaultSettings.gradientAngle
   );
-  const [screenSize, setScreenSize] = useState(defaultSettings.screenSize);
+  const [screenSize, setScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
+  const [customScreenSize, setCustomScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
+  const [presetScreenSize, setPresetScreenSize] = useState(defaultSettings.screenSize);
   const [zoom, setZoom] = useState(defaultSettings.zoom);
   const [transparency, setTransparency] = useState(
     defaultSettings.transparency
@@ -228,6 +232,8 @@ export default function MockupEditor() {
     setCustomColor2(defaultSettings.customColor2);
     setGradientAngle(defaultSettings.gradientAngle);
     setScreenSize(defaultSettings.screenSize);
+    setPresetScreenSize(defaultSettings.screenSize);
+    setCustomScreenSize(defaultSettings.screenSize);
     setZoom(defaultSettings.zoom);
     setTransparency(defaultSettings.transparency);
     setBorderRadius(defaultSettings.borderRadius);
@@ -472,6 +478,23 @@ export default function MockupEditor() {
     return false;
   };
 
+  const handleCustomSizeChange = (key: keyof ScreenSize, value:string) => {
+    const isNumericOrEmpty = /^[0-9]*$/.test(value)
+    if(!isNumericOrEmpty) return;
+
+    const MIN_VALUE = '0'
+    const parsedValue = parseInt(value.length ? value : MIN_VALUE)
+    const size = {...customScreenSize,[key]:parsedValue}
+    setCustomScreenSize(size)
+    setScreenSize(size)
+  }
+
+  const handlePresetSizeChange = (value:string) => {
+    const size = screenSizes[parseInt(value)]
+    setPresetScreenSize(size)
+    setScreenSize(size);
+  }
+
   return (
     <div className="min-h-screen flex flex-col px-6">
       <Header />
@@ -599,15 +622,19 @@ export default function MockupEditor() {
                 </TabsContent>
               </Tabs>
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="screen-size" className="block mb-4">
                 Screen Size
               </Label>
-              <Select
-                onValueChange={(value) =>
-                  setScreenSize(screenSizes[parseInt(value)])
-                }
-                value={screenSizes.indexOf(screenSize).toString()}
+              <Tabs defaultValue="preset" className="w-full">  
+               <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="preset" onClick={() => setScreenSize(presetScreenSize)}>Preset</TabsTrigger>
+                  <TabsTrigger value="custom" onClick={() => setScreenSize(customScreenSize)}>Custom</TabsTrigger>
+                </TabsList>
+                <TabsContent value="preset">
+                <Select
+                onValueChange={(value) => handlePresetSizeChange(value)}
+                value={screenSizes.indexOf(presetScreenSize).toString()}
               >
                 <SelectTrigger id="screen-size">
                   <SelectValue placeholder="Select screen size" />
@@ -620,6 +647,26 @@ export default function MockupEditor() {
                   ))}
                 </SelectContent>
               </Select>
+                </TabsContent>
+                <TabsContent value="custom">
+                  <div className="space-y-2">
+                    <div className="flex space-x-2">
+                      <Input
+                        value={customScreenSize.width}
+                        placeholder="Width"
+                        onChange={(e) => handleCustomSizeChange('width', e.target.value)}
+                        className="w-1/2 h-10"
+                      />
+                      <Input
+                        value={customScreenSize.height}
+                        placeholder="Height"
+                        onChange={(e) => handleCustomSizeChange('height', e.target.value)}
+                        className="w-1/2 h-10"
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+                </Tabs>
             </div>
 
             <Tabs defaultValue="design" className="w-full">
