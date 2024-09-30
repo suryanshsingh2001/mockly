@@ -395,11 +395,12 @@ export default function MockupEditor() {
             // Shadow the image with border radius
             ctx.beginPath();
             ctx.roundRect(x, y, w, h, borderRadius);
+            ctx.fillStyle = shadow.color;
             ctx.fill();
           } else {
             // Shadow the image without border radius
             // Allows for a more accurate shadow on transparent images
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = transparency / 100;
             ctx.drawImage(img, x, y, w, h);
           }
 
