@@ -26,6 +26,7 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
 }) => {
   const [popoverVisible, setPopoverVisible] = useState(false);
   const [shadowValue, setShadowValue] = useState<Shadow>(value);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setShadowValue(value);
@@ -42,13 +43,35 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
     onChange(updatedShadow);
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <Popover open={popoverVisible} onOpenChange={setPopoverVisible}>
       <PopoverTrigger className="p-1.5 hover:bg-input rounded">
         <Settings2Icon size="1.25rem" />
       </PopoverTrigger>
 
-      <PopoverContent className="w-60" align="start">
+      <PopoverContent
+        className="w-60 flex flex-col gap-2"
+        align={isMobile ? "end" : "start"}
+      >
+        <div className="space-y-2">
+          <h4 className="font-medium leading-none">Shadow Settings</h4>
+          <p className="text-sm text-muted-foreground leading-tight">
+            Tweak how the shadow is applied.
+          </p>
+        </div>
+
         <div className="grid grid-cols-5 gap-4">
           <Label
             htmlFor="color"
