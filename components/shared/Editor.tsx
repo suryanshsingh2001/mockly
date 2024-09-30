@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Upload, X, Download, RotateCcw, Star } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
+
 import { Slider } from "@/components/ui/slider";
 import {
   Select,
@@ -24,10 +26,10 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Upload, X, Download, RotateCcw, Type, Star } from "lucide-react";
 import Header from "@/components/layout/Header";
-import { Textarea } from "../ui/textarea";
 import { ShadowManager, type Shadow } from "@/components/shadow-manager";
+
+import { Textarea } from "../ui/textarea";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
