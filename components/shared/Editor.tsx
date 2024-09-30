@@ -76,6 +76,10 @@ const defaultSettings = {
 export default function MockupEditor() {
   const [image, setImage] = useState<string | null>(defaultSettings.image);
   const [background, setBackground] = useState(defaultSettings.background);
+  const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
+  const [backgroundImage, setBackgroundImage] =
+    useState<HTMLImageElement | null>(null);
+  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
   const [customColor1, setCustomColor1] = useState(
     defaultSettings.customColor1
   );
@@ -98,7 +102,6 @@ export default function MockupEditor() {
   const [imagePosition, setImagePosition] = useState(
     defaultSettings.imagePosition
   );
-  console.log(imagePosition);
   const [text, setText] = useState(defaultSettings.text);
   const [textPosition, setTextPosition] = useState(
     defaultSettings.textPosition
@@ -121,10 +124,27 @@ export default function MockupEditor() {
     const file = acceptedFiles[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => setImage(e.target?.result as string);
+      reader.onload = (e) => {
+        const newImage = new Image();
+        newImage.src = e.target?.result as string;
+        newImage.onload = () => setLoadedImage(newImage);
+        setImage(e.target?.result as string);
+      };
       reader.readAsDataURL(file);
     }
   }, []);
+
+  useEffect(() => {
+    if (image) {
+      const img = new Image();
+      img.onload = () => {
+        setLoadedImage(img);
+      };
+      img.src = image;
+    } else {
+      setLoadedImage(null);
+    }
+  }, [image]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -132,18 +152,6 @@ export default function MockupEditor() {
     multiple: false,
   });
 
-  // const handleDownload = () => {
-  //   if (canvasRef.current) {
-  //     const image = new Image();
-  //     image.setAttribute("crossOrigin", "anonymous");
-  //     image.src = canvasRef.current.toDataURL("image/png");
-
-  //     const filename = `screenshot${Date.now()}.png`;
-  //     saveAs(image.src, filename);
-
-  //     setComplete(true);
-  //   }
-  // };
   const [format, setDownloadFormat] = useState<"png" | "jpg" | "svg" | "pdf">(
     defaultSettings.format
   );
@@ -196,6 +204,7 @@ export default function MockupEditor() {
   const handleClearImage = () => {
     setImage(null);
   };
+
   const handleCloseDialog = () => {
     setComplete(false);
     setRating(0);
@@ -254,168 +263,129 @@ export default function MockupEditor() {
     return () => window.removeEventListener("resize", updateCanvasScale);
   }, [updateCanvasScale]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (background.startsWith("http")) {
+      const img = new Image();
+      img.src = background;
+      img.onload = () => {
+        setBackgroundImage(img);
+        setIsBackgroundLoaded(true);
+        img.setAttribute("crossOrigin", "anonymous");
+      };
+      img.onerror = () => {
+        console.error("Failed to load background image");
+        setBackgroundImage(null);
+        setIsBackgroundLoaded(false);
+      };
+    } else {
+      setBackgroundImage(null);
+      setIsBackgroundLoaded(false);
+    }
+  }, [background]);
+  const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (isBackgroundLoaded && backgroundImage) {
+      ctx.drawImage(backgroundImage, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    } else if (background === "gradient") {
+      const gradient = ctx.createLinearGradient(
+        0,
+        0,
+        Math.cos((gradientAngle * Math.PI) / 180) * screenSize.width,
+        Math.sin((gradientAngle * Math.PI) / 180) * screenSize.height
+      );
+      gradient.addColorStop(0, customColor1);
+      gradient.addColorStop(1, customColor2);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, screenSize.width, screenSize.height);
+    } else {
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, screenSize.width, screenSize.height);
+    }
+    drawImage(ctx);
+    drawText(ctx);
+  };
+
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
+
     if (canvas && ctx) {
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
 
-      // Draw background
-      if (background.startsWith("http")) {
-        const img = new Image();
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          drawImage(ctx);
-          drawText(ctx);
-        };
-        img.setAttribute("crossOrigin", "anonymous");
-        img.src = background;
-      } else if (background === "gradient") {
-        const gradient = ctx.createLinearGradient(
-          0,
-          0,
-          Math.cos((gradientAngle * Math.PI) / 180) * canvas.width,
-          Math.sin((gradientAngle * Math.PI) / 180) * canvas.height
-        );
-        gradient.addColorStop(0, customColor1);
-        gradient.addColorStop(1, customColor2);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage(ctx);
-        drawText(ctx);
-      } else {
-        ctx.fillStyle = background;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage(ctx);
-        drawText(ctx);
-      }
+      drawBackgroundImage(ctx);
     }
+
+    requestAnimationFrame(drawCanvas);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    image,
+    screenSize.width,
+    screenSize.height,
+    isBackgroundLoaded,
+    backgroundImage,
     background,
+    borderRadius,
+    loadedImage,
+    fontWeight,
+    fontSize,
+    textColor,
+    text,
+    textPosition.x,
+    textPosition.y,
+    gradientAngle,
     customColor1,
     customColor2,
-    gradientAngle,
-    screenSize,
     zoom,
     transparency,
-    borderRadius,
+    imagePosition.x,
+    imagePosition.y,
     shadow,
-    imagePosition,
-    text,
-    textPosition,
-    fontSize,
-    fontWeight,
-    textColor,
   ]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    drawCanvas();
+    drawCanvas(); // Trigger canvas redraw on updates
   }, [drawCanvas]);
 
-  // useEffect(() => {
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas?.getContext("2d");
-  //   if (canvas && ctx) {
-  //     canvas.width = screenSize.width;
-  //     canvas.height = screenSize.height;
-
-  //     // Draw background
-  //     if (background.startsWith("http")) {
-  //       const img = new Image();
-  //       img.onload = () => {
-  //         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  //         drawImage();
-  //         drawText();
-  //       };
-  //       img.setAttribute("crossOrigin", "anonymous");
-  //       img.src = background;
-  //     } else if (background === "gradient") {
-  //       const gradient = ctx.createLinearGradient(
-  //         0,
-  //         0,
-  //         Math.cos((gradientAngle * Math.PI) / 180) * canvas.width,
-  //         Math.sin((gradientAngle * Math.PI) / 180) * canvas.height
-  //       );
-  //       gradient.addColorStop(0, customColor1);
-  //       gradient.addColorStop(1, customColor2);
-  //       ctx.fillStyle = gradient;
-  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
-  //       drawImage();
-  //       drawText();
-  //     } else {
-  //       ctx.fillStyle = background;
-  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
-  //       drawImage();
-  //       drawText();
-  //     }
-  //   }
-  // }, [
-  //   image,
-  //   background,
-  //   customColor1,
-  //   customColor2,
-  //   gradientAngle,
-  //   screenSize,
-  //   zoom,
-  //   transparency,
-  //   borderRadius,
-  //   shadow,
-  //   imagePosition,
-  //   text,
-  //   textPosition,
-  //   fontSize,
-  //   fontWeight,
-  //   textColor,
-  // ]);
-
   const drawImage = (ctx: CanvasRenderingContext2D) => {
-    if (image) {
-      const img = new Image();
-      img.onload = () => {
-        const scale = zoom / 100;
-        const w = img.width * scale;
-        const h = img.height * scale;
-        const x = imagePosition.x;
-        const y = imagePosition.y;
+    if (loadedImage) {
+      const scale = zoom / 100;
+      const w = loadedImage.width * scale;
+      const h = loadedImage.height * scale;
+      const x = imagePosition.x;
+      const y = imagePosition.y;
 
-        // Draw shadow
-        if (shadow.blur > 0) {
-          ctx.save();
+      // Draw shadow
+      if (shadow.blur > 0) {
+        ctx.save();
 
-          ctx.shadowColor = shadow.color;
-          ctx.shadowBlur = shadow.blur;
-          ctx.shadowOffsetX = shadow.x;
-          ctx.shadowOffsetY = shadow.y;
+        ctx.shadowColor = shadow.color;
+        ctx.shadowBlur = shadow.blur;
+        ctx.shadowOffsetX = shadow.x;
+        ctx.shadowOffsetY = shadow.y;
 
-          if (borderRadius > 0) {
-            // Shadow the image with border radius
-            ctx.beginPath();
-            ctx.roundRect(x, y, w, h, borderRadius);
-            ctx.fillStyle = shadow.color;
-            ctx.fill();
-          } else {
-            // Shadow the image without border radius
-            // Allows for a more accurate shadow on transparent images
-            ctx.globalAlpha = transparency / 100;
-            ctx.drawImage(img, x, y, w, h);
-          }
-
-          ctx.restore();
+        if (borderRadius > 0) {
+          // Shadow the image with border radius
+          ctx.beginPath();
+          ctx.roundRect(x, y, w, h, borderRadius);
+          ctx.fillStyle = shadow.color;
+          ctx.fill();
+        } else {
+          // Shadow the image without border radius
+          // Allows for a more accurate shadow on transparent images
+          ctx.globalAlpha = transparency / 100;
+          ctx.drawImage(loadedImage, x, y, w, h);
         }
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(x, y, w, h, borderRadius);
-        ctx.clip();
-        ctx.globalAlpha = transparency / 100;
-        ctx.drawImage(img, x, y, w, h);
         ctx.restore();
-      };
-      img.src = image;
+      }
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, borderRadius);
+      ctx.clip();
+      ctx.globalAlpha = transparency / 100;
+      ctx.drawImage(loadedImage, x, y, w, h);
+      ctx.restore();
     }
   };
 
@@ -452,7 +422,7 @@ export default function MockupEditor() {
         const x = (e.clientX - rect.left) / scale;
         const y = (e.clientY - rect.top) / scale;
 
-        if (dragTarget === "image") {
+        if (dragTarget === "image" && loadedImage) {
           setImagePosition({ x, y });
         } else if (dragTarget === "text") {
           setTextPosition({ x, y });
@@ -521,11 +491,14 @@ export default function MockupEditor() {
                 <input {...getInputProps()} id="image-upload" />
                 {image ? (
                   <div className="flex items-center justify-center">
-                    <img
-                      src={image}
-                      alt="Uploaded"
-                      className="max-h-24 max-w-full"
-                    />
+                    {
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={image}
+                        alt="Uploaded"
+                        className="max-h-24 max-w-full"
+                      />
+                    }
                     <Button
                       variant="ghost"
                       size="icon"
@@ -607,13 +580,18 @@ export default function MockupEditor() {
                     <div
                       key={index}
                       className="relative aspect-video cursor-pointer overflow-hidden rounded-lg"
-                      onClick={() => setBackground(url)}
+                      onClick={() => {
+                        setBackground(url);
+                      }}
                     >
-                      <img
-                        src={url}
-                        alt={`Background ${index + 1}`}
-                        className="object-cover w-full h-full"
-                      />
+                      {
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={url}
+                          alt={`Background ${index + 1}`}
+                          className="object-cover w-full h-full"
+                        />
+                      }
                     </div>
                   ))}
                 </TabsContent>
