@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -16,18 +16,21 @@ export type Shadow = {
 };
 
 interface ShadowManagerProps {
-  defaultValue: Shadow;
+  value: Shadow;
   onChange: (value: Shadow) => void;
 }
 
 export const ShadowManager: React.FC<ShadowManagerProps> = ({
-  defaultValue,
+  value,
   onChange,
 }) => {
   const [popoverVisible, setPopoverVisible] = useState(false);
-  const [shadowValue, setShadowValue] = useState<Shadow>(defaultValue);
+  const [shadowValue, setShadowValue] = useState<Shadow>(value);
 
-  // Function to handle state change and propagate values
+  useEffect(() => {
+    setShadowValue(value);
+  }, [value]);
+
   const handleInputChange = (newValues: Partial<Shadow>) => {
     const updatedShadow = {
       x: shadowValue.x,
