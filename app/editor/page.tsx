@@ -5,6 +5,7 @@ import MockupEditor from "@/components/shared/Editor";
 import { siteConfig } from "@/config/config";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/Header";
+import VideoEditor from "@/components/shared/VideoEditor";
 
 export default function EditorPage() {
   // return siteConfig.isEditorActive ? <MockupEditor /> : <EditorNotAvailable />;
@@ -27,7 +28,7 @@ export default function EditorPage() {
         </TabsContent>
 
         <TabsContent value="video" className="space-y-4">
-          <EditorNotAvailable />
+          <VideoEditor />
         </TabsContent>
       </Tabs>
     </div>
