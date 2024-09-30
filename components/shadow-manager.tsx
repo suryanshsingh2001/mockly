@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -8,20 +8,39 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Settings2Icon } from "lucide-react";
 
+export type Shadow = {
+  x: number;
+  y: number;
+  spread: number;
+  blur: number;
+};
+
 interface ShadowManagerProps {
-  defaultValue: number;
-  onChange: (value: number) => void;
+  defaultValue: Shadow;
+  onChange: (value: Shadow) => void;
 }
 
-const ShadowManager: React.FC<ShadowManagerProps> = ({
+export const ShadowManager: React.FC<ShadowManagerProps> = ({
   defaultValue,
   onChange,
 }) => {
   const [popoverVisible, setPopoverVisible] = useState(false);
-  const xValue = useRef(0);
-  const yValue = useRef(0);
-  const spreadValue = useRef(0);
-  const blurValue = useRef(defaultValue);
+  const [xValue, setXValue] = useState(defaultValue.x);
+  const [yValue, setYValue] = useState(defaultValue.y);
+  const [spreadValue, setSpreadValue] = useState(defaultValue.spread);
+  const [blurValue, setBlurValue] = useState(defaultValue.blur);
+
+  // Function to handle state change and propagate values
+  const handleInputChange = (newValues: Partial<Shadow>) => {
+    const updatedShadow = {
+      x: xValue,
+      y: yValue,
+      spread: spreadValue,
+      blur: blurValue,
+      ...newValues,
+    };
+    onChange(updatedShadow);
+  };
 
   return (
     <Popover open={popoverVisible} onOpenChange={setPopoverVisible}>
@@ -32,7 +51,7 @@ const ShadowManager: React.FC<ShadowManagerProps> = ({
       <PopoverContent className="w-60" align="start">
         <div className="grid grid-cols-5 gap-4">
           <Label
-            htmlFor="spread"
+            htmlFor="xoffset"
             className="col-span-2 flex items-center text-nowrap"
           >
             X-Offset
@@ -41,12 +60,16 @@ const ShadowManager: React.FC<ShadowManagerProps> = ({
             id="xoffset"
             type="number"
             className="col-span-3"
-            value={xValue.current}
-            onChange={(e) => (xValue.current = parseInt(e.target.value))}
+            value={xValue}
+            onChange={(e) => {
+              const newValue = parseInt(e.target.value);
+              setXValue(newValue);
+              handleInputChange({ x: newValue });
+            }}
           />
 
           <Label
-            htmlFor="spread"
+            htmlFor="yoffset"
             className="col-span-2 flex items-center text-nowrap"
           >
             Y-Offset
@@ -55,8 +78,12 @@ const ShadowManager: React.FC<ShadowManagerProps> = ({
             id="yoffset"
             type="number"
             className="col-span-3"
-            value={yValue.current}
-            onChange={(e) => (yValue.current = parseInt(e.target.value))}
+            value={yValue}
+            onChange={(e) => {
+              const newValue = parseInt(e.target.value);
+              setYValue(newValue);
+              handleInputChange({ y: newValue });
+            }}
           />
 
           <Label
@@ -69,8 +96,12 @@ const ShadowManager: React.FC<ShadowManagerProps> = ({
             id="spread"
             type="number"
             className="col-span-3"
-            value={spreadValue.current}
-            onChange={(e) => (spreadValue.current = parseInt(e.target.value))}
+            value={spreadValue}
+            onChange={(e) => {
+              const newValue = parseInt(e.target.value);
+              setSpreadValue(newValue);
+              handleInputChange({ spread: newValue });
+            }}
           />
 
           <Label
@@ -83,13 +114,15 @@ const ShadowManager: React.FC<ShadowManagerProps> = ({
             id="blur"
             type="number"
             className="col-span-3"
-            value={blurValue.current}
-            onChange={(e) => (blurValue.current = parseInt(e.target.value))}
+            value={blurValue}
+            onChange={(e) => {
+              const newValue = parseInt(e.target.value);
+              setBlurValue(newValue);
+              handleInputChange({ blur: newValue });
+            }}
           />
         </div>
       </PopoverContent>
     </Popover>
   );
 };
-
-export default ShadowManager;
