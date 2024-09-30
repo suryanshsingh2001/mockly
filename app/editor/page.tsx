@@ -9,13 +9,10 @@ import Header from "@/components/layout/Header";
 export default function EditorPage() {
   // return siteConfig.isEditorActive ? <MockupEditor /> : <EditorNotAvailable />;
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full max-w-screen-sm lg:max-w-screen-lg mx-auto">
       <Header />
 
-      <Tabs
-        defaultValue="screenshot"
-        className="w-full max-w-screen-lg mx-auto"
-      >
+      <Tabs defaultValue="screenshot">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="screenshot">Screenshot</TabsTrigger>
           <TabsTrigger value="video">Video</TabsTrigger>
