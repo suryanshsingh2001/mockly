@@ -386,14 +386,22 @@ export default function MockupEditor() {
         if (shadow.blur > 0) {
           ctx.save();
 
-          // Begin the shadow path (including border radius)
-          ctx.beginPath();
-          ctx.roundRect(x, y, w, h, borderRadius);
           ctx.shadowColor = shadow.color;
           ctx.shadowBlur = shadow.blur;
           ctx.shadowOffsetX = shadow.x;
           ctx.shadowOffsetY = shadow.y;
-          ctx.fill();
+
+          if (borderRadius > 0) {
+            // Shadow the image with border radius
+            ctx.beginPath();
+            ctx.roundRect(x, y, w, h, borderRadius);
+            ctx.fill();
+          } else {
+            // Shadow the image without border radius
+            // Allows for a more accurate shadow on transparent images
+            ctx.globalAlpha = 1;
+            ctx.drawImage(img, x, y, w, h);
+          }
 
           ctx.restore();
         }
