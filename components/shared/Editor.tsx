@@ -384,11 +384,18 @@ export default function MockupEditor() {
 
         // Draw shadow
         if (shadow.blur > 0) {
+          ctx.save();
+
+          // Begin the shadow path (including border radius)
+          ctx.beginPath();
+          ctx.roundRect(x, y, w, h, borderRadius);
           ctx.shadowColor = shadow.color;
           ctx.shadowBlur = shadow.blur;
           ctx.shadowOffsetX = shadow.x;
           ctx.shadowOffsetY = shadow.y;
-          ctx.fillRect(x, y, w, h);
+          ctx.fill();
+
+          ctx.restore();
         }
 
         ctx.save();
