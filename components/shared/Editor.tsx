@@ -26,10 +26,9 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/layout/Header";
 import { ShadowManager, type Shadow } from "@/components/shadow-manager";
-
-import { Textarea } from "../ui/textarea";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -125,25 +124,26 @@ export default function MockupEditor() {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
+        const newImageSrc = e.target?.result as string;
+
         const newImage = new Image();
-        newImage.src = e.target?.result as string;
-        newImage.onload = () => setLoadedImage(newImage);
-        setImage(e.target?.result as string);
+        newImage.src = newImageSrc;
+        newImage.onload = () => setLoadedImage(newImage); // Set image when it's loaded
+        setImage(newImageSrc);
       };
       reader.readAsDataURL(file);
     }
   }, []);
 
   useEffect(() => {
-    if (image) {
-      const img = new Image();
-      img.onload = () => {
-        setLoadedImage(img);
-      };
-      img.src = image;
-    } else {
+    if (!image) {
       setLoadedImage(null);
+      return;
     }
+
+    const img = new Image();
+    img.src = image;
+    img.onload = () => setLoadedImage(img);
   }, [image]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -160,21 +160,21 @@ export default function MockupEditor() {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
 
+      let imageData: string | undefined;
       if (format === "png" || format === "jpg") {
         const mimeType = format === "png" ? "image/png" : "image/jpeg";
-        const imageData = canvas.toDataURL(mimeType);
+        imageData = canvas.toDataURL(mimeType);
         const filename = `screenshot${Date.now()}.${format}`;
         saveAs(imageData, filename);
       } else if (format === "svg") {
         // Convert canvas to SVG data
+        if (!imageData) imageData = canvas.toDataURL("image/png");
+
         const svgWidth = canvas.width;
         const svgHeight = canvas.height;
-
         const svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">
                            <foreignObject width="100%" height="100%">
-                             <img xmlns="http://www.w3.org/1999/xhtml" src="${canvas.toDataURL(
-                               "image/png"
-                             )}" width="${svgWidth}" height="${svgHeight}"/>
+                             <img xmlns="http://www.w3.org/1999/xhtml" src="${imageData}" width="${svgWidth}" height="${svgHeight}"/>
                            </foreignObject>
                          </svg>`;
         const svgBlob = new Blob([svgData], {
@@ -183,7 +183,8 @@ export default function MockupEditor() {
         const filename = `screenshot${Date.now()}.svg`;
         saveAs(svgBlob, filename);
       } else if (format === "pdf") {
-        const imgData = canvas.toDataURL("image/png");
+        if (!imageData) imageData = canvas.toDataURL("image/png");
+
         const imgWidth = canvas.width;
         const imgHeight = canvas.height;
         const pdf = new jsPDF({
@@ -192,7 +193,7 @@ export default function MockupEditor() {
           format: [imgWidth, imgHeight],
         });
 
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.addImage(imageData, "PNG", 0, 0, imgWidth, imgHeight);
         const filename = `screenshot${Date.now()}.pdf`;
         pdf.save(filename);
       }
@@ -203,6 +204,7 @@ export default function MockupEditor() {
 
   const handleClearImage = () => {
     setImage(null);
+    setLoadedImage(null);
   };
 
   const handleCloseDialog = () => {
@@ -237,6 +239,7 @@ export default function MockupEditor() {
     setFontWeight(defaultSettings.fontWeight);
     setTextColor(defaultSettings.textColor);
     setDownloadFormat(defaultSettings.format);
+    setLoadedImage(null);
   };
 
   const updateCanvasScale = useCallback(() => {
@@ -266,11 +269,11 @@ export default function MockupEditor() {
   useEffect(() => {
     if (background.startsWith("http")) {
       const img = new Image();
+      img.setAttribute("crossOrigin", "anonymous"); // Ensure CORS before src set
       img.src = background;
       img.onload = () => {
         setBackgroundImage(img);
         setIsBackgroundLoaded(true);
-        img.setAttribute("crossOrigin", "anonymous");
       };
       img.onerror = () => {
         console.error("Failed to load background image");
@@ -282,6 +285,7 @@ export default function MockupEditor() {
       setIsBackgroundLoaded(false);
     }
   }, [background]);
+
   const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     if (isBackgroundLoaded && backgroundImage) {
@@ -315,8 +319,6 @@ export default function MockupEditor() {
 
       drawBackgroundImage(ctx);
     }
-
-    requestAnimationFrame(drawCanvas);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     screenSize.width,
@@ -736,34 +738,6 @@ export default function MockupEditor() {
             </Tabs>
 
             <div className="flex space-x-2">
-              {/* <Button
-                onClick={handleDownload}
-                className="w-full"
-                disabled={!image && !text}
-              >
-                <Download className="mr-2 h-4 w-4" /> Download
-              </Button> */}
-              {/* <select
-                value={format}
-                onChange={(e) =>
-                  setDownloadFormat(
-                    e.target.value as "png" | "jpg" | "svg" | "pdf"
-                  )
-                }
-                className="mb-4 p-2 border border-gray-300 rounded-md"
-              >
-                <option value="png">PNG</option>
-                <option value="jpg">JPG</option>
-                <option value="svg">SVG</option>
-                <option value="pdf">PDF</option>
-              </select>
-              <Button
-                onClick={() => handleDownload(format)}
-                className="w-full"
-                disabled={!image && !text}
-              >
-                <Download className="mr-2 h-4 w-4" /> Download
-              </Button> */}
               <Select
                 value={format}
                 onValueChange={(value) =>
