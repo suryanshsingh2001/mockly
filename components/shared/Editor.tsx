@@ -473,7 +473,7 @@ export default function MockupEditor() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col px-6">
       <Header />
       <main className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">

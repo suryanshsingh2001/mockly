@@ -4,7 +4,7 @@ import Link from "next/link"
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-background px-6">
       <div className="max-w-md w-full px-4 py-8 text-center">
         <div className="mb-8">
           <Search className="mx-auto h-12 w-12 text-primary" />
