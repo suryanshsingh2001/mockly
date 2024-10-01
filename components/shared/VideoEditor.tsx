@@ -65,41 +65,38 @@ export default function VideoEditor() {
               </>
             )}
           </div>
+
           {video && (
-            <div className="mt-4">
-              <Button
-                onClick={() => setVideo(null)}
-                variant="secondary"
-                className="w-full"
-              >
-                Change/Remove Video
-              </Button>
-            </div>
-          )}
-          {video && (
-            <div className="space-y-8 mt-4">
-              <Label>Trim Video</Label>
-              <Slider
-                min={0}
-                max={100}
-                step={1}
-                value={[trimStart, trimEnd]}
-                onValueChange={handleTrimChange}
-              />
+            <div className="space-y-8 mt-8">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Trim Video</Label>
+                  <Slider
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[trimStart, trimEnd]}
+                    onValueChange={handleTrimChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Brightness</Label>
+                  <Slider
+                    min={0}
+                    max={200}
+                    step={1}
+                    value={[brightness]}
+                    onValueChange={handleBrightnessChange}
+                  />
+                </div>
+              </div>
+
               <div className="flex items-center space-x-2">
                 <Switch id="mute" checked={muted} onCheckedChange={setMuted} />
                 <Label htmlFor="mute">Mute Audio</Label>
               </div>
-              <div className="space-y-2">
-                <Label>Brightness</Label>
-                <Slider
-                  min={0}
-                  max={200}
-                  step={1}
-                  value={[brightness]}
-                  onValueChange={handleBrightnessChange}
-                />
-              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="text-overlay">Text Overlay</Label>
                 <Input
