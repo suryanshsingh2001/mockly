@@ -1,62 +1,57 @@
 import { Input } from '@/components/ui/input';
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
+import { validateInput } from './utils';
 
 type Props = {
-    onSuccess: (value:number) => void;
-    value:number;
+    value: string;
+    setValue: React.Dispatch<React.SetStateAction<string>>
     className?:string;
     placeholder:string;
-    setError: (errorMsg:string) => void;
+    onSuccess: () => void;
+    setError: (errorMsg: string) => void;
 }
 
-const MIN_VALUE = 200;
-const MAX_VALUE = 2000;
-
-export const ValidatedInput = ({
+export default function ValidatedInput ({
     onSuccess, 
-    value : initialValue, 
+    value,
+    setValue, 
     placeholder, 
     setError, 
     className = ''
-}:Props) => {
+}:Props) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState(`${initialValue}`);
+
+  const handleSubmit = () => {
+    setError('');
+    onSuccess()
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
     setError('');
   };
 
-  const validateInput = () => {
-    const numericValue = Number(value);
-    if (numericValue < MIN_VALUE) {
-        setError(`Value must be greater than ${MIN_VALUE}.`);
-        return false;
-    }
-    if (numericValue > MAX_VALUE) {
-        setError(`Value must be less than ${MAX_VALUE}.`);
-        return false;
-    }
-    return true;
-  }
-
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (!validateInput()) {
+     const {success, errorMsg} = validateInput(value)
+     if (!success) {
+      setError(errorMsg)
       e.preventDefault();
       if (inputRef.current) {
         inputRef.current.focus();
       }
+    } else {
+        handleSubmit()
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      
-      if (!validateInput()) {
+      const {success, errorMsg} = validateInput(value)
+      if (!success) {
+        setError(errorMsg)
         e.preventDefault();
       } else {
-        setError('');
-        onSuccess(Number(value))
+        handleSubmit()
       }
     }
   };
@@ -76,4 +71,3 @@ export const ValidatedInput = ({
   );
 };
 
-export default ValidatedInput;

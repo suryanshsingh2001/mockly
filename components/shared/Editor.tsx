@@ -31,6 +31,7 @@ import Header from "@/components/layout/Header";
 import { ShadowManager, type Shadow } from "@/components/shadow-manager";
 import { ScreenSize, ValidationError } from "./types";
 import ValidatedInput from "./ValidatedInput";
+import { validateInput } from "./utils";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -97,7 +98,8 @@ export default function MockupEditor() {
     defaultSettings.gradientAngle
   );
   const [screenSize, setScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
-  const [customScreenSize, setCustomScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
+  const [customWidth,setCustomWidth] = useState(defaultSettings.screenSize.width.toString());
+  const [customHeight,setCustomHeight] = useState(defaultSettings.screenSize.height.toString());
   const [presetScreenSize, setPresetScreenSize] = useState(defaultSettings.screenSize);
   const [validationError, setValidationError] = useState<ValidationError>(defaultSettings.validationError);
   const [zoom, setZoom] = useState(defaultSettings.zoom);
@@ -129,6 +131,11 @@ export default function MockupEditor() {
   const [complete, setComplete] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+
+  const customScreenSize = {
+    height: Number(customHeight), 
+    width: Number(customWidth)
+  } satisfies ScreenSize;
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -240,7 +247,8 @@ export default function MockupEditor() {
     setGradientAngle(defaultSettings.gradientAngle);
     setScreenSize(defaultSettings.screenSize);
     setPresetScreenSize(defaultSettings.screenSize);
-    setCustomScreenSize(defaultSettings.screenSize);
+    setCustomHeight(defaultSettings.screenSize.height.toString());
+    setCustomWidth(defaultSettings.screenSize.width.toString());
     setValidationError(defaultSettings.validationError);
     setZoom(defaultSettings.zoom);
     setTransparency(defaultSettings.transparency);
@@ -486,23 +494,28 @@ export default function MockupEditor() {
     return false;
   };
 
-  const handleCustomSizeChange = (key: keyof ScreenSize, value:number) => {
-    const size = {...customScreenSize,[key]:value}
-    setCustomScreenSize(size)
-    setScreenSize(size)
-  }
-
-  const handlePresetSizeChange = (value:string) => {
+  const handlePresetSizeChange = (value: string) => {
     const size = screenSizes[parseInt(value)]
     setPresetScreenSize(size)
     setScreenSize(size);
   }
 
-  const handleScreenSizeTabChange = (size: ScreenSize) => {
+  const handleScreenSizeTabChange = (tab: 'preset' | 'custom') => {
+    const {success: isHeightCorrect} = validateInput(customHeight);
+    const {success: isWidthCorrect} = validateInput(customWidth);
+    const success = isHeightCorrect && isWidthCorrect;
+
+    const size = tab === 'preset' || !success  ? presetScreenSize : customScreenSize
+
+    if(!success && !isHeightCorrect){
+      setCustomHeight(size.height.toString())
+    }
+    if(!success && !isWidthCorrect){
+      setCustomWidth(size.width.toString())
+    }
     setScreenSize(size);
     setValidationError(defaultSettings.validationError)
   }
-
 
   return (
     <div className="min-h-screen flex flex-col px-6">
@@ -637,8 +650,8 @@ export default function MockupEditor() {
               </Label>
               <Tabs defaultValue="preset" className="w-full">  
                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="preset" onClick={() => handleScreenSizeTabChange(presetScreenSize)}>Preset</TabsTrigger>
-                  <TabsTrigger value="custom" onClick={() => handleScreenSizeTabChange(customScreenSize)}>Custom</TabsTrigger>
+                  <TabsTrigger value="preset" onClick={() => handleScreenSizeTabChange('preset')}>Preset</TabsTrigger>
+                  <TabsTrigger value="custom" onClick={() => handleScreenSizeTabChange('custom')}>Custom</TabsTrigger>
                 </TabsList>
                 <TabsContent value="preset">
                 <Select
@@ -661,26 +674,28 @@ export default function MockupEditor() {
                   <div className="space-y-2">
                     <div className="flex space-x-2">
                       <ValidatedInput 
-                        value={customScreenSize.width} 
                         placeholder="Width" 
                         className="w-1/2 h-10" 
+                        value={customWidth} 
+                        setValue={setCustomWidth}
                         setError={(msg) => setValidationError({...validationError, customWidth: msg})}
-                        onSuccess={(value) => handleCustomSizeChange('width', value)}
+                        onSuccess={() => setScreenSize(customScreenSize)}
                       />
                       <ValidatedInput 
-                        value={customScreenSize.height} 
                         placeholder="Height" 
-                        className="w-1/2 h-10" 
+                        className="w-1/2 h-10"
+                        value={customHeight} 
+                        setValue={setCustomHeight}
                         setError={(msg) => setValidationError({...validationError, customHeight: msg})}
-                        onSuccess={(value) => handleCustomSizeChange('height', value)}
+                        onSuccess={() => setScreenSize(customScreenSize)}
                       />
                     </div>
                   </div>
                 </TabsContent>
                 </Tabs>
                 <div className="mt-2">
-                  {validationError.customHeight && <p className="text-red-500 text-sm font-medium leading-none">{validationError.customHeight}</p>}
                   {validationError.customWidth && <p className="text-red-500 text-sm font-medium leading-none">{validationError.customWidth}</p>}
+                  {validationError.customHeight && <p className="text-red-500 text-sm font-medium leading-none text-right">{validationError.customHeight}</p>}
                 </div>
             </div>
 
@@ -903,3 +918,4 @@ export default function MockupEditor() {
     </div>
   );
 }
+
