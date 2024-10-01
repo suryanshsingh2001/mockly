@@ -3,7 +3,7 @@ import Link from "next/link"
 
 export default function TermsOfService() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background px-6">
       <div className="container mx-auto px-4 md:px-6 py-12">
         <h1 className="text-3xl font-bold mb-6 text-center">Terms of Service</h1>
         <div className="prose prose-sm max-w-none dark:prose-invert">
