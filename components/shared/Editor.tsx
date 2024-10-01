@@ -29,8 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/layout/Header";
 import { ShadowManager, type Shadow } from "@/components/shadow-manager";
-import { ScreenSize } from "./types";
-
+import { ScreenSize, ValidationError } from "./types";
+import ValidatedInput from "./ValidatedInput";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -48,6 +48,11 @@ const screenSizes = [
   { name: "Tablet", width: 768, height: 1024 },
   { name: "Desktop", width: 1440, height: 900 },
 ];
+
+const validationError = {
+  customHeight:'',
+  customWidth: ''
+} satisfies ValidationError
 
 const defaultSettings = {
   image: null,
@@ -72,6 +77,7 @@ const defaultSettings = {
   fontWeight: "normal",
   textColor: "#000000",
   format: "png" as "png" | "jpg" | "svg" | "pdf",
+  validationError,
 };
 
 export default function MockupEditor() {
@@ -93,6 +99,7 @@ export default function MockupEditor() {
   const [screenSize, setScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
   const [customScreenSize, setCustomScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
   const [presetScreenSize, setPresetScreenSize] = useState(defaultSettings.screenSize);
+  const [validationError, setValidationError] = useState<ValidationError>(defaultSettings.validationError);
   const [zoom, setZoom] = useState(defaultSettings.zoom);
   const [transparency, setTransparency] = useState(
     defaultSettings.transparency
@@ -234,6 +241,7 @@ export default function MockupEditor() {
     setScreenSize(defaultSettings.screenSize);
     setPresetScreenSize(defaultSettings.screenSize);
     setCustomScreenSize(defaultSettings.screenSize);
+    setValidationError(defaultSettings.validationError);
     setZoom(defaultSettings.zoom);
     setTransparency(defaultSettings.transparency);
     setBorderRadius(defaultSettings.borderRadius);
@@ -478,13 +486,8 @@ export default function MockupEditor() {
     return false;
   };
 
-  const handleCustomSizeChange = (key: keyof ScreenSize, value:string) => {
-    const isNumericOrEmpty = /^[0-9]*$/.test(value)
-    if(!isNumericOrEmpty) return;
-
-    const MIN_VALUE = '0'
-    const parsedValue = parseInt(value.length ? value : MIN_VALUE)
-    const size = {...customScreenSize,[key]:parsedValue}
+  const handleCustomSizeChange = (key: keyof ScreenSize, value:number) => {
+    const size = {...customScreenSize,[key]:value}
     setCustomScreenSize(size)
     setScreenSize(size)
   }
@@ -494,6 +497,12 @@ export default function MockupEditor() {
     setPresetScreenSize(size)
     setScreenSize(size);
   }
+
+  const handleScreenSizeTabChange = (size: ScreenSize) => {
+    setScreenSize(size);
+    setValidationError(defaultSettings.validationError)
+  }
+
 
   return (
     <div className="min-h-screen flex flex-col px-6">
@@ -628,8 +637,8 @@ export default function MockupEditor() {
               </Label>
               <Tabs defaultValue="preset" className="w-full">  
                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="preset" onClick={() => setScreenSize(presetScreenSize)}>Preset</TabsTrigger>
-                  <TabsTrigger value="custom" onClick={() => setScreenSize(customScreenSize)}>Custom</TabsTrigger>
+                  <TabsTrigger value="preset" onClick={() => handleScreenSizeTabChange(presetScreenSize)}>Preset</TabsTrigger>
+                  <TabsTrigger value="custom" onClick={() => handleScreenSizeTabChange(customScreenSize)}>Custom</TabsTrigger>
                 </TabsList>
                 <TabsContent value="preset">
                 <Select
@@ -651,22 +660,28 @@ export default function MockupEditor() {
                 <TabsContent value="custom">
                   <div className="space-y-2">
                     <div className="flex space-x-2">
-                      <Input
-                        value={customScreenSize.width}
-                        placeholder="Width"
-                        onChange={(e) => handleCustomSizeChange('width', e.target.value)}
-                        className="w-1/2 h-10"
+                      <ValidatedInput 
+                        value={customScreenSize.width} 
+                        placeholder="Width" 
+                        className="w-1/2 h-10" 
+                        setError={(msg) => setValidationError({...validationError, customWidth: msg})}
+                        onSuccess={(value) => handleCustomSizeChange('width', value)}
                       />
-                      <Input
-                        value={customScreenSize.height}
-                        placeholder="Height"
-                        onChange={(e) => handleCustomSizeChange('height', e.target.value)}
-                        className="w-1/2 h-10"
+                      <ValidatedInput 
+                        value={customScreenSize.height} 
+                        placeholder="Height" 
+                        className="w-1/2 h-10" 
+                        setError={(msg) => setValidationError({...validationError, customHeight: msg})}
+                        onSuccess={(value) => handleCustomSizeChange('height', value)}
                       />
                     </div>
                   </div>
                 </TabsContent>
                 </Tabs>
+                <div className="mt-2">
+                  {validationError.customHeight && <p className="text-red-500 text-sm font-medium leading-none">{validationError.customHeight}</p>}
+                  {validationError.customWidth && <p className="text-red-500 text-sm font-medium leading-none">{validationError.customWidth}</p>}
+                </div>
             </div>
 
             <Tabs defaultValue="design" className="w-full">
