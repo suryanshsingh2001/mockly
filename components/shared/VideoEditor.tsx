@@ -43,7 +43,7 @@ export default function VideoEditor() {
 
   return (
     // <div className="container mx-auto max-w-screen-lg pt-3">
-    <main className="mx-auto">
+    <main className="mx-auto mt-5">
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full lg:w-1/4 p-2 overflow-y-auto h-full">
           <Label htmlFor="video-upload" className="block mb-4">
