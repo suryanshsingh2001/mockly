@@ -1,5 +1,5 @@
 const MIN_SCREEN_SIZE  = 200;
-const MAX_SCREEN_SIZE = 2000;
+const MAX_SCREEN_SIZE = 2160;
 
 export const validateInput = (value: string) => {
     const numericValue = Number(value);
