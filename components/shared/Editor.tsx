@@ -104,6 +104,7 @@ export default function MockupEditor() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
 
@@ -388,9 +389,11 @@ export default function MockupEditor() {
       if (image && isPointInImage(x, y)) {
         setIsDragging(true);
         setDragTarget("image");
+        offsetRef.current = { x: x - imagePosition.x, y: y - imagePosition.y };
       } else if (text && isPointInText(x, y)) {
         setIsDragging(true);
         setDragTarget("text");
+        offsetRef.current = { x: x - textPosition.x, y: y - textPosition.y };
       }
     }
   };
@@ -404,9 +407,15 @@ export default function MockupEditor() {
         const y = (e.clientY - rect.top) / scale;
 
         if (dragTarget === "image" && loadedImage) {
-          setImagePosition({ x, y });
+          setImagePosition({
+            x: x - offsetRef.current.x,
+            y: y - offsetRef.current.y,
+          });
         } else if (dragTarget === "text") {
-          setTextPosition({ x, y });
+          setTextPosition({
+            x: x - offsetRef.current.x,
+            y: y - offsetRef.current.y,
+          });
         }
       }
     }
