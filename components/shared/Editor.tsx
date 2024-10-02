@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Upload, X, Download, RotateCcw, Star } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
+
 import { Slider } from "@/components/ui/slider";
 import {
   Select,
@@ -24,9 +26,12 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Upload, X, Download, RotateCcw, Type, Star } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/layout/Header";
-import { Textarea } from "../ui/textarea";
+import { ShadowManager, type Shadow } from "@/components/shadow-manager";
+import { ScreenSize, ValidationError } from "./types";
+import ValidatedInput from "./ValidatedInput";
+import { validateInput } from "./utils";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -45,6 +50,11 @@ const screenSizes = [
   { name: "Desktop", width: 1440, height: 900 },
 ];
 
+const validationError = {
+  customHeight:'',
+  customWidth: ''
+} satisfies ValidationError
+
 const defaultSettings = {
   image: null,
   background: backgroundUrls[0],
@@ -55,7 +65,12 @@ const defaultSettings = {
   zoom: 50,
   transparency: 100,
   borderRadius: 0,
-  shadow: 0,
+  shadow: {
+    color: "#000000",
+    x: 0,
+    y: 0,
+    blur: 0,
+  },
   imagePosition: { x: 0.5, y: 0.5 },
   text: "",
   textPosition: { x: 50, y: 50 },
@@ -63,6 +78,7 @@ const defaultSettings = {
   fontWeight: "normal",
   textColor: "#000000",
   format: "png" as "png" | "jpg" | "svg" | "pdf",
+  validationError,
 };
 
 export default function MockupEditor() {
@@ -81,7 +97,11 @@ export default function MockupEditor() {
   const [gradientAngle, setGradientAngle] = useState(
     defaultSettings.gradientAngle
   );
-  const [screenSize, setScreenSize] = useState(defaultSettings.screenSize);
+  const [screenSize, setScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
+  const [customWidth,setCustomWidth] = useState(defaultSettings.screenSize.width.toString());
+  const [customHeight,setCustomHeight] = useState(defaultSettings.screenSize.height.toString());
+  const [presetScreenSize, setPresetScreenSize] = useState(defaultSettings.screenSize);
+  const [validationError, setValidationError] = useState<ValidationError>(defaultSettings.validationError);
   const [zoom, setZoom] = useState(defaultSettings.zoom);
   const [transparency, setTransparency] = useState(
     defaultSettings.transparency
@@ -89,7 +109,7 @@ export default function MockupEditor() {
   const [borderRadius, setBorderRadius] = useState(
     defaultSettings.borderRadius
   );
-  const [shadow, setShadow] = useState(defaultSettings.shadow);
+  const [shadow, setShadow] = useState<Shadow>(defaultSettings.shadow);
   const [scale, setScale] = useState(1);
   const [imagePosition, setImagePosition] = useState(
     defaultSettings.imagePosition
@@ -113,30 +133,36 @@ export default function MockupEditor() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
+  const customScreenSize = {
+    height: Number(customHeight), 
+    width: Number(customWidth)
+  } satisfies ScreenSize;
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
+        const newImageSrc = e.target?.result as string;
+
         const newImage = new Image();
-        newImage.src = e.target?.result as string;
-        newImage.onload = () => setLoadedImage(newImage);
-        setImage(e.target?.result as string);
+        newImage.src = newImageSrc;
+        newImage.onload = () => setLoadedImage(newImage); // Set image when it's loaded
+        setImage(newImageSrc);
       };
       reader.readAsDataURL(file);
     }
   }, []);
 
   useEffect(() => {
-    if (image) {
-      const img = new Image();
-      img.onload = () => {
-        setLoadedImage(img);
-      };
-      img.src = image;
-    } else {
+    if (!image) {
       setLoadedImage(null);
+      return;
     }
+
+    const img = new Image();
+    img.src = image;
+    img.onload = () => setLoadedImage(img);
   }, [image]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -153,21 +179,21 @@ export default function MockupEditor() {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
 
+      let imageData: string | undefined;
       if (format === "png" || format === "jpg") {
         const mimeType = format === "png" ? "image/png" : "image/jpeg";
-        const imageData = canvas.toDataURL(mimeType);
+        imageData = canvas.toDataURL(mimeType);
         const filename = `screenshot${Date.now()}.${format}`;
         saveAs(imageData, filename);
       } else if (format === "svg") {
         // Convert canvas to SVG data
+        if (!imageData) imageData = canvas.toDataURL("image/png");
+
         const svgWidth = canvas.width;
         const svgHeight = canvas.height;
-
         const svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">
                            <foreignObject width="100%" height="100%">
-                             <img xmlns="http://www.w3.org/1999/xhtml" src="${canvas.toDataURL(
-                               "image/png"
-                             )}" width="${svgWidth}" height="${svgHeight}"/>
+                             <img xmlns="http://www.w3.org/1999/xhtml" src="${imageData}" width="${svgWidth}" height="${svgHeight}"/>
                            </foreignObject>
                          </svg>`;
         const svgBlob = new Blob([svgData], {
@@ -176,7 +202,8 @@ export default function MockupEditor() {
         const filename = `screenshot${Date.now()}.svg`;
         saveAs(svgBlob, filename);
       } else if (format === "pdf") {
-        const imgData = canvas.toDataURL("image/png");
+        if (!imageData) imageData = canvas.toDataURL("image/png");
+
         const imgWidth = canvas.width;
         const imgHeight = canvas.height;
         const pdf = new jsPDF({
@@ -185,7 +212,7 @@ export default function MockupEditor() {
           format: [imgWidth, imgHeight],
         });
 
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.addImage(imageData, "PNG", 0, 0, imgWidth, imgHeight);
         const filename = `screenshot${Date.now()}.pdf`;
         pdf.save(filename);
       }
@@ -196,6 +223,7 @@ export default function MockupEditor() {
 
   const handleClearImage = () => {
     setImage(null);
+    setLoadedImage(null);
   };
 
   const handleCloseDialog = () => {
@@ -219,6 +247,10 @@ export default function MockupEditor() {
     setCustomColor2(defaultSettings.customColor2);
     setGradientAngle(defaultSettings.gradientAngle);
     setScreenSize(defaultSettings.screenSize);
+    setPresetScreenSize(defaultSettings.screenSize);
+    setCustomHeight(defaultSettings.screenSize.height.toString());
+    setCustomWidth(defaultSettings.screenSize.width.toString());
+    setValidationError(defaultSettings.validationError);
     setZoom(defaultSettings.zoom);
     setTransparency(defaultSettings.transparency);
     setBorderRadius(defaultSettings.borderRadius);
@@ -230,6 +262,7 @@ export default function MockupEditor() {
     setFontWeight(defaultSettings.fontWeight);
     setTextColor(defaultSettings.textColor);
     setDownloadFormat(defaultSettings.format);
+    setLoadedImage(null);
   };
 
   const updateCanvasScale = useCallback(() => {
@@ -259,14 +292,12 @@ export default function MockupEditor() {
   useEffect(() => {
     if (background.startsWith("http")) {
       const img = new Image();
+      img.setAttribute("crossOrigin", "anonymous"); // Ensure CORS before src set
       img.src = background;
-
       img.onload = () => {
         setBackgroundImage(img);
         setIsBackgroundLoaded(true);
-        img.setAttribute("crossOrigin", "anonymous");
       };
-
       img.onerror = () => {
         console.error("Failed to load background image");
         setBackgroundImage(null);
@@ -280,7 +311,6 @@ export default function MockupEditor() {
 
   const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
     if (isBackgroundLoaded && backgroundImage) {
       ctx.drawImage(backgroundImage, 0, 0, ctx.canvas.width, ctx.canvas.height);
     } else if (background === "gradient") {
@@ -298,7 +328,6 @@ export default function MockupEditor() {
       ctx.fillStyle = background;
       ctx.fillRect(0, 0, screenSize.width, screenSize.height);
     }
-
     drawImage(ctx);
     drawText(ctx);
   };
@@ -313,8 +342,6 @@ export default function MockupEditor() {
 
       drawBackgroundImage(ctx);
     }
-
-    requestAnimationFrame(drawCanvas);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     screenSize.width,
@@ -352,22 +379,38 @@ export default function MockupEditor() {
       const x = imagePosition.x;
       const y = imagePosition.y;
 
+      // Draw shadow
+      if (shadow.blur > 0) {
+        ctx.save();
+
+        ctx.shadowColor = shadow.color;
+        ctx.shadowBlur = shadow.blur;
+        ctx.shadowOffsetX = shadow.x;
+        ctx.shadowOffsetY = shadow.y;
+
+        if (borderRadius > 0) {
+          // Shadow the image with border radius
+          ctx.beginPath();
+          ctx.roundRect(x, y, w, h, borderRadius);
+          ctx.fillStyle = shadow.color;
+          ctx.fill();
+        } else {
+          // Shadow the image without border radius
+          // Allows for a more accurate shadow on transparent images
+          ctx.globalAlpha = transparency / 100;
+          ctx.drawImage(loadedImage, x, y, w, h);
+        }
+
+        ctx.restore();
+      }
+
       ctx.save();
       ctx.beginPath();
       ctx.roundRect(x, y, w, h, borderRadius);
       ctx.clip();
       ctx.globalAlpha = transparency / 100;
-      ctx.drawImage(loadedImage, imagePosition.x, imagePosition.y, w, h);
+      ctx.drawImage(loadedImage, x, y, w, h);
       ctx.restore();
-
-      // Draw shadow
-      if (shadow > 0) {
-        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-        ctx.shadowBlur = shadow;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.strokeRect(imagePosition.x, imagePosition.y, w, h);
-      }
     }
   };
 
@@ -460,8 +503,31 @@ export default function MockupEditor() {
     return false;
   };
 
+  const handlePresetSizeChange = (value: string) => {
+    const size = screenSizes[parseInt(value)]
+    setPresetScreenSize(size)
+    setScreenSize(size);
+  }
+
+  const handleScreenSizeTabChange = (tab: 'preset' | 'custom') => {
+    const {success: isHeightCorrect} = validateInput(customHeight);
+    const {success: isWidthCorrect} = validateInput(customWidth);
+    const success = isHeightCorrect && isWidthCorrect;
+
+    const size = tab === 'preset' || !success  ? presetScreenSize : customScreenSize
+
+    if(!success && !isHeightCorrect){
+      setCustomHeight(size.height.toString())
+    }
+    if(!success && !isWidthCorrect){
+      setCustomWidth(size.width.toString())
+    }
+    setScreenSize(size);
+    setValidationError(defaultSettings.validationError)
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col px-6">
       <Header />
       <main className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -587,15 +653,19 @@ export default function MockupEditor() {
                 </TabsContent>
               </Tabs>
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="screen-size" className="block mb-4">
                 Screen Size
               </Label>
-              <Select
-                onValueChange={(value) =>
-                  setScreenSize(screenSizes[parseInt(value)])
-                }
-                value={screenSizes.indexOf(screenSize).toString()}
+              <Tabs defaultValue="preset" className="w-full">  
+               <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="preset" onClick={() => handleScreenSizeTabChange('preset')}>Preset</TabsTrigger>
+                  <TabsTrigger value="custom" onClick={() => handleScreenSizeTabChange('custom')}>Custom</TabsTrigger>
+                </TabsList>
+                <TabsContent value="preset">
+                <Select
+                onValueChange={(value) => handlePresetSizeChange(value)}
+                value={screenSizes.indexOf(presetScreenSize).toString()}
               >
                 <SelectTrigger id="screen-size">
                   <SelectValue placeholder="Select screen size" />
@@ -608,6 +678,34 @@ export default function MockupEditor() {
                   ))}
                 </SelectContent>
               </Select>
+                </TabsContent>
+                <TabsContent value="custom">
+                  <div className="space-y-2">
+                    <div className="flex space-x-2">
+                      <ValidatedInput 
+                        placeholder="Width" 
+                        className="w-1/2 h-10" 
+                        value={customWidth} 
+                        setValue={setCustomWidth}
+                        setError={(msg) => setValidationError({...validationError, customWidth: msg})}
+                        onSuccess={() => setScreenSize(customScreenSize)}
+                      />
+                      <ValidatedInput 
+                        placeholder="Height" 
+                        className="w-1/2 h-10"
+                        value={customHeight} 
+                        setValue={setCustomHeight}
+                        setError={(msg) => setValidationError({...validationError, customHeight: msg})}
+                        onSuccess={() => setScreenSize(customScreenSize)}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+                </Tabs>
+                <div className="mt-2">
+                  {validationError.customWidth && <p className="text-red-500 text-sm font-medium leading-none">{validationError.customWidth}</p>}
+                  {validationError.customHeight && <p className="text-red-500 text-sm font-medium leading-none text-right">{validationError.customHeight}</p>}
+                </div>
             </div>
 
             <Tabs defaultValue="design" className="w-full">
@@ -654,14 +752,25 @@ export default function MockupEditor() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="shadow">Shadow: {shadow}px</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="shadow">Shadow: {shadow.blur}px</Label>
+                    <ShadowManager
+                      value={shadow}
+                      onChange={(value) => setShadow(value)}
+                    />
+                  </div>
                   <Slider
                     id="shadow"
                     min={0}
                     max={50}
                     step={1}
-                    value={[shadow]}
-                    onValueChange={(value) => setShadow(value[0])}
+                    value={[shadow.blur]}
+                    onValueChange={(value) =>
+                      setShadow((prevShadow) => ({
+                        ...prevShadow,
+                        blur: value[0],
+                      }))
+                    }
                   />
                 </div>
               </TabsContent>
@@ -715,34 +824,6 @@ export default function MockupEditor() {
             </Tabs>
 
             <div className="flex space-x-2">
-              {/* <Button
-                onClick={handleDownload}
-                className="w-full"
-                disabled={!image && !text}
-              >
-                <Download className="mr-2 h-4 w-4" /> Download
-              </Button> */}
-              {/* <select
-                value={format}
-                onChange={(e) =>
-                  setDownloadFormat(
-                    e.target.value as "png" | "jpg" | "svg" | "pdf"
-                  )
-                }
-                className="mb-4 p-2 border border-gray-300 rounded-md"
-              >
-                <option value="png">PNG</option>
-                <option value="jpg">JPG</option>
-                <option value="svg">SVG</option>
-                <option value="pdf">PDF</option>
-              </select>
-              <Button
-                onClick={() => handleDownload(format)}
-                className="w-full"
-                disabled={!image && !text}
-              >
-                <Download className="mr-2 h-4 w-4" /> Download
-              </Button> */}
               <Select
                 value={format}
                 onValueChange={(value) =>
@@ -846,3 +927,4 @@ export default function MockupEditor() {
     </div>
   );
 }
+
