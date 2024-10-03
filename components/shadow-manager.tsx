@@ -16,21 +16,16 @@ export type Shadow = {
 };
 
 interface ShadowManagerProps {
-  value: Shadow;
-  onChange: (value: Shadow) => void;
+  shadowValue: Shadow;
+  setShadowValue: React.Dispatch<React.SetStateAction<Shadow>>
 }
 
 export const ShadowManager: React.FC<ShadowManagerProps> = ({
-  value,
-  onChange,
+  shadowValue,
+  setShadowValue,
 }) => {
   const [popoverVisible, setPopoverVisible] = useState(false);
-  const [shadowValue, setShadowValue] = useState<Shadow>(value);
   const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    setShadowValue(value);
-  }, [value]);
 
   const handleInputChange = (newValues: Partial<Shadow>) => {
     const updatedShadow = {
@@ -40,7 +35,7 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
       blur: shadowValue.blur,
       ...newValues,
     };
-    onChange(updatedShadow);
+    setShadowValue(updatedShadow);
   };
 
   useEffect(() => {
@@ -54,6 +49,16 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  const handleBlur = () => {
+    const updatedShadow = {
+      ...shadowValue, 
+      x: shadowValue.x ? shadowValue.x : 0,
+      y: shadowValue.y ? shadowValue.y : 0, 
+      blur: shadowValue.blur ? shadowValue.blur : 0 
+    }
+    setShadowValue(updatedShadow);
+  }
 
   return (
     <Popover open={popoverVisible} onOpenChange={setPopoverVisible}>
@@ -107,6 +112,7 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
               setShadowValue({ ...shadowValue, x: newValue });
               handleInputChange({ x: newValue });
             }}
+            onBlur={handleBlur}
           />
 
           <Label
@@ -125,6 +131,7 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
               setShadowValue({ ...shadowValue, y: newValue });
               handleInputChange({ y: newValue });
             }}
+            onBlur={handleBlur}
           />
 
           <Label
@@ -137,12 +144,14 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
             id="blur"
             type="number"
             className="col-span-3"
+            min={0}
             value={shadowValue.blur}
             onChange={(e) => {
               const newValue = parseInt(e.target.value);
               setShadowValue({ ...shadowValue, blur: newValue });
               handleInputChange({ blur: newValue });
             }}
+            onBlur={handleBlur}
           />
         </div>
       </PopoverContent>
