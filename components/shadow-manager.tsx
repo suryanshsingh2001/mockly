@@ -54,7 +54,7 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
     const updatedShadow = {
       ...shadowValue, 
       x: shadowValue.x ? shadowValue.x : 0,
-      y: shadowValue.y > 0 ? shadowValue.y : 0, 
+      y: shadowValue.y ? shadowValue.y : 0, 
       blur: shadowValue.blur ? shadowValue.blur : 0 
     }
     setShadowValue(updatedShadow);
@@ -144,6 +144,7 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
             id="blur"
             type="number"
             className="col-span-3"
+            min={0}
             value={shadowValue.blur}
             onChange={(e) => {
               const newValue = parseInt(e.target.value);
