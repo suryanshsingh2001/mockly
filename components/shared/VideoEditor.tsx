@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Slider } from "@/components/ui/slider";
