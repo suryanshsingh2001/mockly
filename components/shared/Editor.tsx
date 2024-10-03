@@ -32,6 +32,7 @@ import { ShadowManager, type Shadow } from "@/components/shadow-manager";
 import { ScreenSize, ValidationError } from "./types";
 import ValidatedInput from "./ValidatedInput";
 import { validateInput } from "./utils";
+import { TextManager, type TextStyle } from "../text-manager";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -73,10 +74,22 @@ const defaultSettings = {
   },
   imagePosition: { x: 0.5, y: 0.5 },
   text: "",
-  textPosition: { x: 50, y: 50 },
-  fontSize: 24,
-  fontWeight: "normal",
-  textColor: "#000000",
+  textPosition: { 
+    x: 50,
+    y: 50,
+  },
+  textStyle: {
+    textColor: "#000000",
+    fontFamily: "Arial",
+    bold: false,
+    italic: false,
+    underline: false,
+    applyStroke: false,
+    strokeColor: "#fff",
+    strokeWidth: 2,
+    fontSize: 24,
+    letterSpacing: 0
+  },
   format: "png" as "png" | "jpg" | "svg" | "pdf",
   validationError,
 };
@@ -85,42 +98,25 @@ export default function MockupEditor() {
   const [image, setImage] = useState<string | null>(defaultSettings.image);
   const [background, setBackground] = useState(defaultSettings.background);
   const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
-  const [backgroundImage, setBackgroundImage] =
-    useState<HTMLImageElement | null>(null);
+  const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
-  const [customColor1, setCustomColor1] = useState(
-    defaultSettings.customColor1
-  );
-  const [customColor2, setCustomColor2] = useState(
-    defaultSettings.customColor2
-  );
-  const [gradientAngle, setGradientAngle] = useState(
-    defaultSettings.gradientAngle
-  );
+  const [customColor1, setCustomColor1] = useState(defaultSettings.customColor1);
+  const [customColor2, setCustomColor2] = useState(defaultSettings.customColor2);
+  const [gradientAngle, setGradientAngle] = useState(defaultSettings.gradientAngle);
   const [screenSize, setScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
   const [customWidth,setCustomWidth] = useState(defaultSettings.screenSize.width.toString());
   const [customHeight,setCustomHeight] = useState(defaultSettings.screenSize.height.toString());
   const [presetScreenSize, setPresetScreenSize] = useState(defaultSettings.screenSize);
   const [validationError, setValidationError] = useState<ValidationError>(defaultSettings.validationError);
   const [zoom, setZoom] = useState(defaultSettings.zoom);
-  const [transparency, setTransparency] = useState(
-    defaultSettings.transparency
-  );
-  const [borderRadius, setBorderRadius] = useState(
-    defaultSettings.borderRadius
-  );
+  const [transparency, setTransparency] = useState(defaultSettings.transparency);
+  const [borderRadius, setBorderRadius] = useState(defaultSettings.borderRadius);
   const [shadow, setShadow] = useState<Shadow>(defaultSettings.shadow);
   const [scale, setScale] = useState(1);
-  const [imagePosition, setImagePosition] = useState(
-    defaultSettings.imagePosition
-  );
+  const [imagePosition, setImagePosition] = useState(defaultSettings.imagePosition);
   const [text, setText] = useState(defaultSettings.text);
-  const [textPosition, setTextPosition] = useState(
-    defaultSettings.textPosition
-  );
-  const [fontSize, setFontSize] = useState(defaultSettings.fontSize);
-  const [fontWeight, setFontWeight] = useState(defaultSettings.fontWeight);
-  const [textColor, setTextColor] = useState(defaultSettings.textColor);
+  const [textStyle, setTextStyle] = useState<TextStyle>(defaultSettings.textStyle);
+  const [textPosition, setTextPosition] = useState(defaultSettings.textPosition);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -146,7 +142,7 @@ export default function MockupEditor() {
 
         const newImage = new Image();
         newImage.src = newImageSrc;
-        newImage.onload = () => setLoadedImage(newImage); // Set image when it's loaded
+        newImage.onload = () => setLoadedImage(newImage);
         setImage(newImageSrc);
       };
       reader.readAsDataURL(file);
@@ -257,9 +253,7 @@ export default function MockupEditor() {
     setImagePosition(defaultSettings.imagePosition);
     setText(defaultSettings.text);
     setTextPosition(defaultSettings.textPosition);
-    setFontSize(defaultSettings.fontSize);
-    setFontWeight(defaultSettings.fontWeight);
-    setTextColor(defaultSettings.textColor);
+    setTextStyle(defaultSettings.textStyle);
     setDownloadFormat(defaultSettings.format);
     setLoadedImage(null);
   };
@@ -350,9 +344,7 @@ export default function MockupEditor() {
     background,
     borderRadius,
     loadedImage,
-    fontWeight,
-    fontSize,
-    textColor,
+    textStyle,
     text,
     textPosition.x,
     textPosition.y,
@@ -367,7 +359,7 @@ export default function MockupEditor() {
   ]);
 
   useEffect(() => {
-    drawCanvas(); // Trigger canvas redraw on updates
+    drawCanvas(); // Redraw the canvas whenever text position changes
   }, [drawCanvas]);
 
   const drawImage = (ctx: CanvasRenderingContext2D) => {
@@ -415,9 +407,46 @@ export default function MockupEditor() {
 
   const drawText = (ctx: CanvasRenderingContext2D) => {
     if (text) {
-      ctx.font = `${fontWeight} ${fontSize}px Arial`;
-      ctx.fillStyle = textColor;
-      ctx.fillText(text, textPosition.x, textPosition.y);
+      const fontWeight = textStyle.bold ? "bold" : "normal";
+      const fontStyle = textStyle.italic ? "italic" : "normal";
+      const fontSize = `${textStyle.fontSize}px`;
+      const fontFamily = textStyle.fontFamily;
+  
+      ctx.font = `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
+      ctx.fillStyle = textStyle.textColor; // Text fill color
+  
+      const letterSpacing = textStyle.letterSpacing;
+      let currentX = textPosition.x; // Store a copy of the x position
+  
+      // Draw each character individually with spacing
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+  
+        // Conditionally apply the border (stroke) if applyStroke is true
+        if (textStyle.applyStroke) {
+          ctx.strokeStyle = textStyle.strokeColor; // Border color
+          ctx.lineWidth = textStyle.strokeWidth; // Border width
+          ctx.strokeText(char, currentX, textPosition.y);
+        }
+  
+        // Draw the filled text
+        ctx.fillText(char, currentX, textPosition.y);
+  
+        currentX += ctx.measureText(char).width + letterSpacing; // Move to the next position
+      }
+  
+      // Draw underline (if applicable)
+      if (textStyle.underline) {
+        const totalTextWidth = currentX - textPosition.x; // Total width of the spaced text
+        const underlineY = textPosition.y + 3; // Position of the underline
+  
+        ctx.beginPath(); // Begin a new path for the underline
+        ctx.moveTo(textPosition.x, underlineY);
+        ctx.lineTo(textPosition.x + totalTextWidth, underlineY);
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
     }
   };
 
@@ -427,7 +456,7 @@ export default function MockupEditor() {
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX - rect.left) / scale;
       const y = (e.clientY - rect.top) / scale;
-
+  
       if (image && isPointInImage(x, y)) {
         setIsDragging(true);
         setDragTarget("image");
@@ -436,7 +465,7 @@ export default function MockupEditor() {
         setDragTarget("text");
       }
     }
-  };
+  };  
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (isDragging) {
@@ -445,7 +474,7 @@ export default function MockupEditor() {
         const rect = canvas.getBoundingClientRect();
         const x = (e.clientX - rect.left) / scale;
         const y = (e.clientY - rect.top) / scale;
-
+  
         if (dragTarget === "image" && loadedImage) {
           setImagePosition({ x, y });
         } else if (dragTarget === "text") {
@@ -480,13 +509,19 @@ export default function MockupEditor() {
     if (text) {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
+      const fontWeight = textStyle.bold ? "bold" : "normal";
+      const fontStyle = textStyle.italic ? "italic" : "normal";
+      const fontSize = `${textStyle.fontSize}px`;
+      const fontFamily = textStyle.fontFamily;
+  
       if (ctx) {
-        ctx.font = `${fontWeight} ${fontSize}px Arial`;
+        ctx.font = `${fontFamily}${fontStyle} ${fontWeight} ${fontSize} `;
         const metrics = ctx.measureText(text);
+  
         return (
           x >= textPosition.x &&
           x <= textPosition.x + metrics.width &&
-          y >= textPosition.y - fontSize &&
+          y >= textPosition.y - textStyle.fontSize &&
           y <= textPosition.y
         );
       }
@@ -768,47 +803,17 @@ export default function MockupEditor() {
               <TabsContent value="text" className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="text">Text</Label>
-                  <Input
-                    id="text"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Enter text"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="font-size">Font Size: {fontSize}px</Label>
-                  <Slider
-                    id="font-size"
-                    min={12}
-                    max={72}
-                    step={1}
-                    value={[fontSize]}
-                    onValueChange={(value) => setFontSize(value[0])}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="font-weight">Font Weight</Label>
-                  <Select
-                    onValueChange={(value) => setFontWeight(value)}
-                    value={fontWeight}
-                  >
-                    <SelectTrigger id="font-weight">
-                      <SelectValue placeholder="Select font weight" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="bold">Bold</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="text-color">Text Color</Label>
-                  <Input
-                    id="text-color"
-                    type="color"
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    className="w-full h-10"
+                  <div className="flex items-center justify-between">
+                    <Input
+                      id="text"
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      placeholder="Enter text"
+                    />
+                  </div>
+                  <TextManager 
+                    value={textStyle}
+                    onChange={(value: TextStyle) => setTextStyle(value)}
                   />
                 </div>
               </TabsContent>
