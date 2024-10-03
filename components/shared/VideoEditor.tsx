@@ -46,13 +46,14 @@ export default function VideoEditor() {
   return (
     <main className="flex flex-col lg:flex-row h-screen">
       {/* Left Section - Upload/Recording Options */}
-      <div
-        className={cn("pt-5", {
-          "w-full": !video,
-          "w-full lg:w-1/2": video,
-        })}
-      >
-        {!video && (
+
+      {video && (
+        <div
+          className={cn("pt-5", {
+            "w-full": video,
+            "w-full lg:w-1/2": !video,
+          })}
+        >
           <div className="flex flex-row justify-evenly gap-4 items-center w-full">
             <div className="w-2/5 flex flex-col gap-4">
               <Label htmlFor="video-upload">Video Upload</Label>
@@ -84,11 +85,13 @@ export default function VideoEditor() {
               <ScreenRecorder onRecordingComplete={(src) => setVideo(src)} />
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Settings */}
-        {video && (
-          <div className="space-y-8 mt-8">
+      {/* Settings */}
+      {!video && (
+        <div className="flex flex-col lg:flex-row gap-8 w-full pt-5">
+          <div className="space-y-8 w-full lg:w-1/4">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Trim Video</Label>
@@ -129,26 +132,24 @@ export default function VideoEditor() {
             </div>
             <Button className="w-full">Export Video</Button>
           </div>
-        )}
-      </div>
 
-      {/* Right Section - Video Playback */}
-      {video && (
-        <div className="w-full lg:w-1/2 p-4 flex items-center justify-center bg-secondary">
-          <video
-            ref={videoRef}
-            src={video}
-            controls
-            className="w-full rounded-lg"
-            style={{ filter: `brightness(${brightness}%)` }}
-            muted={muted}
-          />
+          {/* Right Section - Video Playback */}
+          <div className="w-full lg:w-3/4 h-fit flex items-center justify-center bg-secondary">
+            <video
+              ref={videoRef}
+              // src={video}
+              controls
+              className="w-full rounded-lg"
+              style={{ filter: `brightness(${brightness}%)` }}
+              muted={muted}
+            />
 
-          {textOverlay && (
-            <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white p-2 rounded">
-              {textOverlay}
-            </div>
-          )}
+            {textOverlay && (
+              <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white p-2 rounded">
+                {textOverlay}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </main>
