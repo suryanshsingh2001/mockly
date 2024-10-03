@@ -32,7 +32,6 @@ import { ScreenSize, ValidationError } from "./types";
 import ValidatedInput from "./ValidatedInput";
 import { validateInput } from "./utils";
 import { TextManager, type TextStyle } from "../text-manager";
-import Header from "../layout/Header";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -581,8 +580,7 @@ export default function MockupEditor() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-6">
-      <Header />
+    <>
       <main className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
@@ -978,6 +976,6 @@ export default function MockupEditor() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
