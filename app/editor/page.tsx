@@ -8,7 +8,6 @@ import Header from "@/components/layout/Header";
 import VideoEditor from "@/components/shared/VideoEditor";
 
 export default function EditorPage() {
-  // return siteConfig.isEditorActive ? <MockupEditor /> : <EditorNotAvailable />;
   return (
     <div className="min-h-screen flex flex-col w-full max-w-screen-sm lg:max-w-screen-lg mx-auto">
       <Header />
