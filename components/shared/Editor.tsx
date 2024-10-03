@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Upload, X, Download, RotateCcw, Star } from "lucide-react";
+import {
+  Upload,
+  X,
+  Download,
+  RotateCcw,
+  Star,
+  RotateCcwIcon,
+} from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
@@ -584,6 +591,7 @@ export default function MockupEditor() {
                 }`}
               >
                 <input {...getInputProps()} id="image-upload" />
+
                 {image ? (
                   <div className="flex items-center justify-center">
                     {
@@ -612,6 +620,26 @@ export default function MockupEditor() {
                   </div>
                 )}
               </div>
+
+              {image && (
+                <div className="flex items-center justify-start mt-2 group">
+                  <button
+                    onClick={() => {
+                      setImagePosition({
+                        x: 0,
+                        y: 0,
+                      });
+                    }}
+                    className="text-sm text-muted-foreground hover:underline flex flex-row flex-nowrap gap-1 items-center"
+                  >
+                    <RotateCcwIcon
+                      size="1em"
+                      className="group-hover:-rotate-90 transition-transform duration-300"
+                    />{" "}
+                    Reset image position
+                  </button>
+                </div>
+              )}
             </div>
             <div className="w-full">
               <Label htmlFor="background" className="block mb-4">
