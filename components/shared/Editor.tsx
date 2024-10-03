@@ -511,8 +511,6 @@ export default function MockupEditor() {
   ]);
 
   const handleMouseDown = (e: MouseEvent) => {
-    e.preventDefault();
-
     const canvas = canvasRef.current;
     if (canvas) {
       const rect = canvas.getBoundingClientRect();
@@ -526,10 +524,12 @@ export default function MockupEditor() {
           x: x - imagePosition.x,
           y: y - imagePosition.y,
         };
+        e.preventDefault();
       } else if (text && isPointInText(x, y)) {
         setIsDragging(true);
         setDragTarget("text");
         offsetRef.current = { x: x - textPosition.x, y: y - textPosition.y };
+        e.preventDefault();
       }
     }
   };
