@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Upload } from "lucide-react";
+import ScreenRecorder from "../screen-recorder";
 
 export default function VideoEditor() {
   const [video, setVideo] = useState<string | null>(null);
@@ -44,7 +45,7 @@ export default function VideoEditor() {
   return (
     // <div className="container mx-auto max-w-screen-lg pt-3">
     <main className="mx-auto mt-5">
-      <div className="flex flex-col lg:flex-row gap-8">
+      {/* <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full lg:w-1/4 p-2 overflow-y-auto h-full">
           <Label htmlFor="video-upload" className="block mb-4">
             Video Upload
@@ -127,7 +128,8 @@ export default function VideoEditor() {
             </div>
           )}
         </div>
-      </div>
+      </div> */}
+      <ScreenRecorder />
     </main>
     // </div>
   );
