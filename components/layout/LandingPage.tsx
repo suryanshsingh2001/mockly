@@ -35,7 +35,7 @@ import { Badge } from "../ui/badge";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-background text-foreground px-6">
       <LandingHeader />
 
       <main className="flex-1 pt-16">

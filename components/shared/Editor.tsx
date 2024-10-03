@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Upload, X, Download, RotateCcw, Star } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+
 import { Slider } from "@/components/ui/slider";
 import {
   Select,
@@ -23,8 +26,13 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Upload, X, Download, RotateCcw, Type, Star } from "lucide-react";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "@/components/ui/textarea";
+import { ShadowManager, type Shadow } from "@/components/shadow-manager";
+import { ScreenSize, ValidationError } from "./types";
+import ValidatedInput from "./ValidatedInput";
+import { validateInput } from "./utils";
+import { TextManager, type TextStyle } from "../text-manager";
+import Header from "../layout/Header";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -43,6 +51,11 @@ const screenSizes = [
   { name: "Desktop", width: 1440, height: 900 },
 ];
 
+const validationError = {
+  customHeight: "",
+  customWidth: "",
+} satisfies ValidationError;
+
 const defaultSettings = {
   image: null,
   background: backgroundUrls[0],
@@ -53,18 +66,41 @@ const defaultSettings = {
   zoom: 50,
   transparency: 100,
   borderRadius: 0,
-  shadow: 0,
+  shadow: {
+    color: "#000000",
+    x: 0,
+    y: 0,
+    blur: 0,
+  },
   imagePosition: { x: 0.5, y: 0.5 },
   text: "",
-  textPosition: { x: 50, y: 50 },
-  fontSize: 24,
-  fontWeight: "normal",
-  textColor: "#000000",
+  textPosition: {
+    x: 50,
+    y: 50,
+  },
+  textStyle: {
+    textColor: "#000000",
+    fontFamily: "Arial",
+    bold: false,
+    italic: false,
+    underline: false,
+    applyStroke: false,
+    strokeColor: "#fff",
+    strokeWidth: 2,
+    fontSize: 24,
+    letterSpacing: 0,
+  },
+  format: "png" as "png" | "jpg" | "svg" | "pdf",
+  validationError,
 };
 
 export default function MockupEditor() {
   const [image, setImage] = useState<string | null>(defaultSettings.image);
   const [background, setBackground] = useState(defaultSettings.background);
+  const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
+  const [backgroundImage, setBackgroundImage] =
+    useState<HTMLImageElement | null>(null);
+  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
   const [customColor1, setCustomColor1] = useState(
     defaultSettings.customColor1
   );
@@ -74,7 +110,21 @@ export default function MockupEditor() {
   const [gradientAngle, setGradientAngle] = useState(
     defaultSettings.gradientAngle
   );
-  const [screenSize, setScreenSize] = useState(defaultSettings.screenSize);
+  const [screenSize, setScreenSize] = useState<ScreenSize>(
+    defaultSettings.screenSize
+  );
+  const [customWidth, setCustomWidth] = useState(
+    defaultSettings.screenSize.width.toString()
+  );
+  const [customHeight, setCustomHeight] = useState(
+    defaultSettings.screenSize.height.toString()
+  );
+  const [presetScreenSize, setPresetScreenSize] = useState(
+    defaultSettings.screenSize
+  );
+  const [validationError, setValidationError] = useState<ValidationError>(
+    defaultSettings.validationError
+  );
   const [zoom, setZoom] = useState(defaultSettings.zoom);
   const [transparency, setTransparency] = useState(
     defaultSettings.transparency
@@ -82,19 +132,18 @@ export default function MockupEditor() {
   const [borderRadius, setBorderRadius] = useState(
     defaultSettings.borderRadius
   );
-  const [shadow, setShadow] = useState(defaultSettings.shadow);
+  const [shadow, setShadow] = useState<Shadow>(defaultSettings.shadow);
   const [scale, setScale] = useState(1);
   const [imagePosition, setImagePosition] = useState(
     defaultSettings.imagePosition
   );
-  console.log(imagePosition);
   const [text, setText] = useState(defaultSettings.text);
+  const [textStyle, setTextStyle] = useState<TextStyle>(
+    defaultSettings.textStyle
+  );
   const [textPosition, setTextPosition] = useState(
     defaultSettings.textPosition
   );
-  const [fontSize, setFontSize] = useState(defaultSettings.fontSize);
-  const [fontWeight, setFontWeight] = useState(defaultSettings.fontWeight);
-  const [textColor, setTextColor] = useState(defaultSettings.textColor);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -106,14 +155,37 @@ export default function MockupEditor() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
+  const customScreenSize = {
+    height: Number(customHeight),
+    width: Number(customWidth),
+  } satisfies ScreenSize;
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => setImage(e.target?.result as string);
+      reader.onload = (e) => {
+        const newImageSrc = e.target?.result as string;
+
+        const newImage = new Image();
+        newImage.src = newImageSrc;
+        newImage.onload = () => setLoadedImage(newImage);
+        setImage(newImageSrc);
+      };
       reader.readAsDataURL(file);
     }
   }, []);
+
+  useEffect(() => {
+    if (!image) {
+      setLoadedImage(null);
+      return;
+    }
+
+    const img = new Image();
+    img.src = image;
+    img.onload = () => setLoadedImage(img);
+  }, [image]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -121,14 +193,51 @@ export default function MockupEditor() {
     multiple: false,
   });
 
-  const handleDownload = () => {
-    if (canvasRef.current) {
-      const image = new Image();
-      image.setAttribute("crossOrigin", "anonymous");
-      image.src = canvasRef.current.toDataURL("image/png");
+  const [format, setDownloadFormat] = useState<"png" | "jpg" | "svg" | "pdf">(
+    defaultSettings.format
+  );
 
-      const filename = `screenshot${Date.now()}.png`;
-      saveAs(image.src, filename);
+  const handleDownload = (format: "png" | "jpg" | "svg" | "pdf") => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+
+      let imageData: string | undefined;
+      if (format === "png" || format === "jpg") {
+        const mimeType = format === "png" ? "image/png" : "image/jpeg";
+        imageData = canvas.toDataURL(mimeType);
+        const filename = `screenshot${Date.now()}.${format}`;
+        saveAs(imageData, filename);
+      } else if (format === "svg") {
+        // Convert canvas to SVG data
+        if (!imageData) imageData = canvas.toDataURL("image/png");
+
+        const svgWidth = canvas.width;
+        const svgHeight = canvas.height;
+        const svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">
+                           <foreignObject width="100%" height="100%">
+                             <img xmlns="http://www.w3.org/1999/xhtml" src="${imageData}" width="${svgWidth}" height="${svgHeight}"/>
+                           </foreignObject>
+                         </svg>`;
+        const svgBlob = new Blob([svgData], {
+          type: "image/svg+xml;charset=utf-8",
+        });
+        const filename = `screenshot${Date.now()}.svg`;
+        saveAs(svgBlob, filename);
+      } else if (format === "pdf") {
+        if (!imageData) imageData = canvas.toDataURL("image/png");
+
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const pdf = new jsPDF({
+          orientation: imgWidth > imgHeight ? "landscape" : "portrait",
+          unit: "px",
+          format: [imgWidth, imgHeight],
+        });
+
+        pdf.addImage(imageData, "PNG", 0, 0, imgWidth, imgHeight);
+        const filename = `screenshot${Date.now()}.pdf`;
+        pdf.save(filename);
+      }
 
       setComplete(true);
     }
@@ -136,7 +245,9 @@ export default function MockupEditor() {
 
   const handleClearImage = () => {
     setImage(null);
+    setLoadedImage(null);
   };
+
   const handleCloseDialog = () => {
     setComplete(false);
     setRating(0);
@@ -158,6 +269,10 @@ export default function MockupEditor() {
     setCustomColor2(defaultSettings.customColor2);
     setGradientAngle(defaultSettings.gradientAngle);
     setScreenSize(defaultSettings.screenSize);
+    setPresetScreenSize(defaultSettings.screenSize);
+    setCustomHeight(defaultSettings.screenSize.height.toString());
+    setCustomWidth(defaultSettings.screenSize.width.toString());
+    setValidationError(defaultSettings.validationError);
     setZoom(defaultSettings.zoom);
     setTransparency(defaultSettings.transparency);
     setBorderRadius(defaultSettings.borderRadius);
@@ -165,9 +280,9 @@ export default function MockupEditor() {
     setImagePosition(defaultSettings.imagePosition);
     setText(defaultSettings.text);
     setTextPosition(defaultSettings.textPosition);
-    setFontSize(defaultSettings.fontSize);
-    setFontWeight(defaultSettings.fontWeight);
-    setTextColor(defaultSettings.textColor);
+    setTextStyle(defaultSettings.textStyle);
+    setDownloadFormat(defaultSettings.format);
+    setLoadedImage(null);
   };
 
   const updateCanvasScale = useCallback(() => {
@@ -194,160 +309,171 @@ export default function MockupEditor() {
     return () => window.removeEventListener("resize", updateCanvasScale);
   }, [updateCanvasScale]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (background.startsWith("http")) {
+      const img = new Image();
+      img.setAttribute("crossOrigin", "anonymous"); // Ensure CORS before src set
+      img.src = background;
+      img.onload = () => {
+        setBackgroundImage(img);
+        setIsBackgroundLoaded(true);
+      };
+      img.onerror = () => {
+        console.error("Failed to load background image");
+        setBackgroundImage(null);
+        setIsBackgroundLoaded(false);
+      };
+    } else {
+      setBackgroundImage(null);
+      setIsBackgroundLoaded(false);
+    }
+  }, [background]);
+
+  const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (isBackgroundLoaded && backgroundImage) {
+      ctx.drawImage(backgroundImage, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    } else if (background === "gradient") {
+      const gradient = ctx.createLinearGradient(
+        0,
+        0,
+        Math.cos((gradientAngle * Math.PI) / 180) * screenSize.width,
+        Math.sin((gradientAngle * Math.PI) / 180) * screenSize.height
+      );
+      gradient.addColorStop(0, customColor1);
+      gradient.addColorStop(1, customColor2);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, screenSize.width, screenSize.height);
+    } else {
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, screenSize.width, screenSize.height);
+    }
+    drawImage(ctx);
+    drawText(ctx);
+  };
+
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
+
     if (canvas && ctx) {
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
 
-      // Draw background
-      if (background.startsWith("http")) {
-        const img = new Image();
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          drawImage(ctx);
-          drawText(ctx);
-        };
-        img.setAttribute("crossOrigin", "anonymous");
-        img.src = background;
-      } else if (background === "gradient") {
-        const gradient = ctx.createLinearGradient(
-          0,
-          0,
-          Math.cos((gradientAngle * Math.PI) / 180) * canvas.width,
-          Math.sin((gradientAngle * Math.PI) / 180) * canvas.height
-        );
-        gradient.addColorStop(0, customColor1);
-        gradient.addColorStop(1, customColor2);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage(ctx);
-        drawText(ctx);
-      } else {
-        ctx.fillStyle = background;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawImage(ctx);
-        drawText(ctx);
-      }
+      drawBackgroundImage(ctx);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    image,
+    screenSize.width,
+    screenSize.height,
+    isBackgroundLoaded,
+    backgroundImage,
     background,
+    borderRadius,
+    loadedImage,
+    textStyle,
+    text,
+    textPosition.x,
+    textPosition.y,
+    gradientAngle,
     customColor1,
     customColor2,
-    gradientAngle,
-    screenSize,
     zoom,
     transparency,
-    borderRadius,
+    imagePosition.x,
+    imagePosition.y,
     shadow,
-    imagePosition,
-    text,
-    textPosition,
-    fontSize,
-    fontWeight,
-    textColor,
   ]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    drawCanvas();
+    drawCanvas(); // Redraw the canvas whenever text position changes
   }, [drawCanvas]);
 
-  // useEffect(() => {
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas?.getContext("2d");
-  //   if (canvas && ctx) {
-  //     canvas.width = screenSize.width;
-  //     canvas.height = screenSize.height;
-
-  //     // Draw background
-  //     if (background.startsWith("http")) {
-  //       const img = new Image();
-  //       img.onload = () => {
-  //         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  //         drawImage();
-  //         drawText();
-  //       };
-  //       img.setAttribute("crossOrigin", "anonymous");
-  //       img.src = background;
-  //     } else if (background === "gradient") {
-  //       const gradient = ctx.createLinearGradient(
-  //         0,
-  //         0,
-  //         Math.cos((gradientAngle * Math.PI) / 180) * canvas.width,
-  //         Math.sin((gradientAngle * Math.PI) / 180) * canvas.height
-  //       );
-  //       gradient.addColorStop(0, customColor1);
-  //       gradient.addColorStop(1, customColor2);
-  //       ctx.fillStyle = gradient;
-  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
-  //       drawImage();
-  //       drawText();
-  //     } else {
-  //       ctx.fillStyle = background;
-  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
-  //       drawImage();
-  //       drawText();
-  //     }
-  //   }
-  // }, [
-  //   image,
-  //   background,
-  //   customColor1,
-  //   customColor2,
-  //   gradientAngle,
-  //   screenSize,
-  //   zoom,
-  //   transparency,
-  //   borderRadius,
-  //   shadow,
-  //   imagePosition,
-  //   text,
-  //   textPosition,
-  //   fontSize,
-  //   fontWeight,
-  //   textColor,
-  // ]);
-
   const drawImage = (ctx: CanvasRenderingContext2D) => {
-    if (image) {
-      const img = new Image();
-      img.onload = () => {
-        const scale = zoom / 100;
-        const w = img.width * scale;
-        const h = img.height * scale;
-        const x = imagePosition.x;
-        const y = imagePosition.y;
+    if (loadedImage) {
+      const scale = zoom / 100;
+      const w = loadedImage.width * scale;
+      const h = loadedImage.height * scale;
+      const x = imagePosition.x;
+      const y = imagePosition.y;
 
+      // Draw shadow
+      if (shadow.blur > 0) {
         ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(x, y, w, h, borderRadius);
-        ctx.clip();
-        ctx.globalAlpha = transparency / 100;
-        ctx.drawImage(img, x, y, w, h);
-        ctx.restore();
 
-        // Draw shadow
-        if (shadow > 0) {
-          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-          ctx.shadowBlur = shadow;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-          ctx.strokeRect(x, y, w, h);
+        ctx.shadowColor = shadow.color;
+        ctx.shadowBlur = shadow.blur;
+        ctx.shadowOffsetX = shadow.x;
+        ctx.shadowOffsetY = shadow.y;
+
+        if (borderRadius > 0) {
+          // Shadow the image with border radius
+          ctx.beginPath();
+          ctx.roundRect(x, y, w, h, borderRadius);
+          ctx.fillStyle = shadow.color;
+          ctx.fill();
+        } else {
+          // Shadow the image without border radius
+          // Allows for a more accurate shadow on transparent images
+          ctx.globalAlpha = transparency / 100;
+          ctx.drawImage(loadedImage, x, y, w, h);
         }
-      };
-      img.src = image;
+
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, borderRadius);
+      ctx.clip();
+      ctx.globalAlpha = transparency / 100;
+      ctx.drawImage(loadedImage, x, y, w, h);
+      ctx.restore();
     }
   };
 
   const drawText = (ctx: CanvasRenderingContext2D) => {
     if (text) {
-      ctx.font = `${fontWeight} ${fontSize}px Arial`;
-      ctx.fillStyle = textColor;
-      ctx.fillText(text, textPosition.x, textPosition.y);
+      const fontWeight = textStyle.bold ? "bold" : "normal";
+      const fontStyle = textStyle.italic ? "italic" : "normal";
+      const fontSize = `${textStyle.fontSize}px`;
+      const fontFamily = textStyle.fontFamily;
+
+      ctx.font = `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
+      ctx.fillStyle = textStyle.textColor; // Text fill color
+
+      const letterSpacing = textStyle.letterSpacing;
+      let currentX = textPosition.x; // Store a copy of the x position
+
+      // Draw each character individually with spacing
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+
+        // Conditionally apply the border (stroke) if applyStroke is true
+        if (textStyle.applyStroke) {
+          ctx.strokeStyle = textStyle.strokeColor; // Border color
+          ctx.lineWidth = textStyle.strokeWidth; // Border width
+          ctx.strokeText(char, currentX, textPosition.y);
+        }
+
+        // Draw the filled text
+        ctx.fillText(char, currentX, textPosition.y);
+
+        currentX += ctx.measureText(char).width + letterSpacing; // Move to the next position
+      }
+
+      // Draw underline (if applicable)
+      if (textStyle.underline) {
+        const totalTextWidth = currentX - textPosition.x; // Total width of the spaced text
+        const underlineY = textPosition.y + 3; // Position of the underline
+
+        ctx.beginPath(); // Begin a new path for the underline
+        ctx.moveTo(textPosition.x, underlineY);
+        ctx.lineTo(textPosition.x + totalTextWidth, underlineY);
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
     }
   };
 
@@ -376,7 +502,7 @@ export default function MockupEditor() {
         const x = (e.clientX - rect.left) / scale;
         const y = (e.clientY - rect.top) / scale;
 
-        if (dragTarget === "image") {
+        if (dragTarget === "image" && loadedImage) {
           setImagePosition({ x, y });
         } else if (dragTarget === "text") {
           setTextPosition({ x, y });
@@ -410,13 +536,19 @@ export default function MockupEditor() {
     if (text) {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
+      const fontWeight = textStyle.bold ? "bold" : "normal";
+      const fontStyle = textStyle.italic ? "italic" : "normal";
+      const fontSize = `${textStyle.fontSize}px`;
+      const fontFamily = textStyle.fontFamily;
+
       if (ctx) {
-        ctx.font = `${fontWeight} ${fontSize}px Arial`;
+        ctx.font = `${fontFamily}${fontStyle} ${fontWeight} ${fontSize} `;
         const metrics = ctx.measureText(text);
+
         return (
           x >= textPosition.x &&
           x <= textPosition.x + metrics.width &&
-          y >= textPosition.y - fontSize &&
+          y >= textPosition.y - textStyle.fontSize &&
           y <= textPosition.y
         );
       }
@@ -424,9 +556,34 @@ export default function MockupEditor() {
     return false;
   };
 
+  const handlePresetSizeChange = (value: string) => {
+    const size = screenSizes[parseInt(value)];
+    setPresetScreenSize(size);
+    setScreenSize(size);
+  };
+
+  const handleScreenSizeTabChange = (tab: "preset" | "custom") => {
+    const { success: isHeightCorrect } = validateInput(customHeight);
+    const { success: isWidthCorrect } = validateInput(customWidth);
+    const success = isHeightCorrect && isWidthCorrect;
+
+    const size =
+      tab === "preset" || !success ? presetScreenSize : customScreenSize;
+
+    if (!success && !isHeightCorrect) {
+      setCustomHeight(size.height.toString());
+    }
+    if (!success && !isWidthCorrect) {
+      setCustomWidth(size.width.toString());
+    }
+    setScreenSize(size);
+    setValidationError(defaultSettings.validationError);
+  };
+
   return (
-    <>
-      <main className="mx-auto">
+    <div className="min-h-screen flex flex-col px-6">
+      <Header />
+      <main className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
             <div className="">
@@ -444,11 +601,14 @@ export default function MockupEditor() {
                 <input {...getInputProps()} id="image-upload" />
                 {image ? (
                   <div className="flex items-center justify-center">
-                    <img
-                      src={image}
-                      alt="Uploaded"
-                      className="max-h-24 max-w-full"
-                    />
+                    {
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={image}
+                        alt="Uploaded"
+                        className="max-h-24 max-w-full"
+                      />
+                    }
                     <Button
                       variant="ghost"
                       size="icon"
@@ -530,39 +690,104 @@ export default function MockupEditor() {
                     <div
                       key={index}
                       className="relative aspect-video cursor-pointer overflow-hidden rounded-lg"
-                      onClick={() => setBackground(url)}
+                      onClick={() => {
+                        setBackground(url);
+                      }}
                     >
-                      <img
-                        src={url}
-                        alt={`Background ${index + 1}`}
-                        className="object-cover w-full h-full"
-                      />
+                      {
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={url}
+                          alt={`Background ${index + 1}`}
+                          className="object-cover w-full h-full"
+                        />
+                      }
                     </div>
                   ))}
                 </TabsContent>
               </Tabs>
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="screen-size" className="block mb-4">
                 Screen Size
               </Label>
-              <Select
-                onValueChange={(value) =>
-                  setScreenSize(screenSizes[parseInt(value)])
-                }
-                value={screenSizes.indexOf(screenSize).toString()}
-              >
-                <SelectTrigger id="screen-size">
-                  <SelectValue placeholder="Select screen size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {screenSizes.map((size, index) => (
-                    <SelectItem key={index} value={index.toString()}>
-                      {size.name} ({size.width}x{size.height})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Tabs defaultValue="preset" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger
+                    value="preset"
+                    onClick={() => handleScreenSizeTabChange("preset")}
+                  >
+                    Preset
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="custom"
+                    onClick={() => handleScreenSizeTabChange("custom")}
+                  >
+                    Custom
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="preset">
+                  <Select
+                    onValueChange={(value) => handlePresetSizeChange(value)}
+                    value={screenSizes.indexOf(presetScreenSize).toString()}
+                  >
+                    <SelectTrigger id="screen-size">
+                      <SelectValue placeholder="Select screen size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {screenSizes.map((size, index) => (
+                        <SelectItem key={index} value={index.toString()}>
+                          {size.name} ({size.width}x{size.height})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </TabsContent>
+                <TabsContent value="custom">
+                  <div className="space-y-2">
+                    <div className="flex space-x-2">
+                      <ValidatedInput
+                        placeholder="Width"
+                        className="w-1/2 h-10"
+                        value={customWidth}
+                        setValue={setCustomWidth}
+                        setError={(msg) =>
+                          setValidationError({
+                            ...validationError,
+                            customWidth: msg,
+                          })
+                        }
+                        onSuccess={() => setScreenSize(customScreenSize)}
+                      />
+                      <ValidatedInput
+                        placeholder="Height"
+                        className="w-1/2 h-10"
+                        value={customHeight}
+                        setValue={setCustomHeight}
+                        setError={(msg) =>
+                          setValidationError({
+                            ...validationError,
+                            customHeight: msg,
+                          })
+                        }
+                        onSuccess={() => setScreenSize(customScreenSize)}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+              <div className="mt-2">
+                {validationError.customWidth && (
+                  <p className="text-red-500 text-sm font-medium leading-none">
+                    {validationError.customWidth}
+                  </p>
+                )}
+                {validationError.customHeight && (
+                  <p className="text-red-500 text-sm font-medium leading-none text-right">
+                    {validationError.customHeight}
+                  </p>
+                )}
+              </div>
             </div>
 
             <Tabs defaultValue="design" className="w-full">
@@ -609,74 +834,75 @@ export default function MockupEditor() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="shadow">Shadow: {shadow}px</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="shadow">
+                      Shadow: {shadow.blur ? shadow.blur : 0}px
+                    </Label>
+                    <ShadowManager
+                      shadowValue={shadow}
+                      setShadowValue={setShadow}
+                    />
+                  </div>
                   <Slider
                     id="shadow"
                     min={0}
                     max={50}
                     step={1}
-                    value={[shadow]}
-                    onValueChange={(value) => setShadow(value[0])}
+                    value={[shadow.blur]}
+                    onValueChange={(value) =>
+                      setShadow((prevShadow) => ({
+                        ...prevShadow,
+                        blur: value[0],
+                      }))
+                    }
                   />
                 </div>
               </TabsContent>
               <TabsContent value="text" className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="text">Text</Label>
-                  <Input
-                    id="text"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Enter text"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="font-size">Font Size: {fontSize}px</Label>
-                  <Slider
-                    id="font-size"
-                    min={12}
-                    max={72}
-                    step={1}
-                    value={[fontSize]}
-                    onValueChange={(value) => setFontSize(value[0])}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="font-weight">Font Weight</Label>
-                  <Select
-                    onValueChange={(value) => setFontWeight(value)}
-                    value={fontWeight}
-                  >
-                    <SelectTrigger id="font-weight">
-                      <SelectValue placeholder="Select font weight" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="bold">Bold</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="text-color">Text Color</Label>
-                  <Input
-                    id="text-color"
-                    type="color"
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    className="w-full h-10"
+                  <div className="flex items-center justify-between">
+                    <Input
+                      id="text"
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      placeholder="Enter text"
+                    />
+                  </div>
+                  <TextManager
+                    value={textStyle}
+                    onChange={(value: TextStyle) => setTextStyle(value)}
                   />
                 </div>
               </TabsContent>
             </Tabs>
 
             <div className="flex space-x-2">
+              <Select
+                value={format}
+                onValueChange={(value) =>
+                  setDownloadFormat(value as "png" | "jpg" | "svg" | "pdf")
+                }
+              >
+                <SelectTrigger className="mb-4 p-2 border  rounded-md">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="png">PNG</SelectItem>
+                  <SelectItem value="jpg">JPG</SelectItem>
+                  <SelectItem value="svg">SVG</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Button
-                onClick={handleDownload}
+                onClick={() => handleDownload(format)}
                 className="w-full"
                 disabled={!image && !text}
               >
                 <Download className="mr-2 h-4 w-4" /> Download
               </Button>
+
               <Button
                 onClick={handleReset}
                 variant="outline"
@@ -752,6 +978,6 @@ export default function MockupEditor() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
