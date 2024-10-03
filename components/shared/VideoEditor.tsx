@@ -46,7 +46,7 @@ export default function VideoEditor() {
           {isDragActive ? (
             <p>Drop the video file here ...</p>
           ) : (
-            <p>Drag 'n' drop a video file here, or click to select a file</p>
+            <p>Drag and drop a video file here, or click to select a file</p>
           )}
         </div>
       ) : (
