@@ -51,9 +51,9 @@ const screenSizes = [
 ];
 
 const validationError = {
-  customHeight:'',
-  customWidth: ''
-} satisfies ValidationError
+  customHeight: "",
+  customWidth: "",
+} satisfies ValidationError;
 
 const defaultSettings = {
   image: null,
@@ -97,11 +97,21 @@ export default function MockupEditor() {
   const [gradientAngle, setGradientAngle] = useState(
     defaultSettings.gradientAngle
   );
-  const [screenSize, setScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
-  const [customWidth,setCustomWidth] = useState(defaultSettings.screenSize.width.toString());
-  const [customHeight,setCustomHeight] = useState(defaultSettings.screenSize.height.toString());
-  const [presetScreenSize, setPresetScreenSize] = useState(defaultSettings.screenSize);
-  const [validationError, setValidationError] = useState<ValidationError>(defaultSettings.validationError);
+  const [screenSize, setScreenSize] = useState<ScreenSize>(
+    defaultSettings.screenSize
+  );
+  const [customWidth, setCustomWidth] = useState(
+    defaultSettings.screenSize.width.toString()
+  );
+  const [customHeight, setCustomHeight] = useState(
+    defaultSettings.screenSize.height.toString()
+  );
+  const [presetScreenSize, setPresetScreenSize] = useState(
+    defaultSettings.screenSize
+  );
+  const [validationError, setValidationError] = useState<ValidationError>(
+    defaultSettings.validationError
+  );
   const [zoom, setZoom] = useState(defaultSettings.zoom);
   const [transparency, setTransparency] = useState(
     defaultSettings.transparency
@@ -134,8 +144,8 @@ export default function MockupEditor() {
   const [comment, setComment] = useState("");
 
   const customScreenSize = {
-    height: Number(customHeight), 
-    width: Number(customWidth)
+    height: Number(customHeight),
+    width: Number(customWidth),
   } satisfies ScreenSize;
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -422,7 +432,32 @@ export default function MockupEditor() {
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  useEffect(() => {
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    image,
+    text,
+    scale,
+    loadedImage,
+    imagePosition.x,
+    imagePosition.y,
+    textPosition.x,
+    textPosition.y,
+    isDragging,
+    dragTarget,
+  ]);
+
+  const handleMouseDown = (e: MouseEvent) => {
     const canvas = canvasRef.current;
     if (canvas) {
       const rect = canvas.getBoundingClientRect();
@@ -432,7 +467,10 @@ export default function MockupEditor() {
       if (image && isPointInImage(x, y)) {
         setIsDragging(true);
         setDragTarget("image");
-        offsetRef.current = { x: x - imagePosition.x, y: y - imagePosition.y };
+        offsetRef.current = {
+          x: x - imagePosition.x,
+          y: y - imagePosition.y,
+        };
       } else if (text && isPointInText(x, y)) {
         setIsDragging(true);
         setDragTarget("text");
@@ -441,7 +479,7 @@ export default function MockupEditor() {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (isDragging) {
       const canvas = canvasRef.current;
       if (canvas) {
@@ -464,7 +502,7 @@ export default function MockupEditor() {
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: MouseEvent) => {
     setIsDragging(false);
     setDragTarget(null);
   };
@@ -504,27 +542,28 @@ export default function MockupEditor() {
   };
 
   const handlePresetSizeChange = (value: string) => {
-    const size = screenSizes[parseInt(value)]
-    setPresetScreenSize(size)
+    const size = screenSizes[parseInt(value)];
+    setPresetScreenSize(size);
     setScreenSize(size);
-  }
+  };
 
-  const handleScreenSizeTabChange = (tab: 'preset' | 'custom') => {
-    const {success: isHeightCorrect} = validateInput(customHeight);
-    const {success: isWidthCorrect} = validateInput(customWidth);
+  const handleScreenSizeTabChange = (tab: "preset" | "custom") => {
+    const { success: isHeightCorrect } = validateInput(customHeight);
+    const { success: isWidthCorrect } = validateInput(customWidth);
     const success = isHeightCorrect && isWidthCorrect;
 
-    const size = tab === 'preset' || !success  ? presetScreenSize : customScreenSize
+    const size =
+      tab === "preset" || !success ? presetScreenSize : customScreenSize;
 
-    if(!success && !isHeightCorrect){
-      setCustomHeight(size.height.toString())
+    if (!success && !isHeightCorrect) {
+      setCustomHeight(size.height.toString());
     }
-    if(!success && !isWidthCorrect){
-      setCustomWidth(size.width.toString())
+    if (!success && !isWidthCorrect) {
+      setCustomWidth(size.width.toString());
     }
     setScreenSize(size);
-    setValidationError(defaultSettings.validationError)
-  }
+    setValidationError(defaultSettings.validationError);
+  };
 
   return (
     <div className="min-h-screen flex flex-col px-6">
@@ -657,55 +696,83 @@ export default function MockupEditor() {
               <Label htmlFor="screen-size" className="block mb-4">
                 Screen Size
               </Label>
-              <Tabs defaultValue="preset" className="w-full">  
-               <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="preset" onClick={() => handleScreenSizeTabChange('preset')}>Preset</TabsTrigger>
-                  <TabsTrigger value="custom" onClick={() => handleScreenSizeTabChange('custom')}>Custom</TabsTrigger>
+              <Tabs defaultValue="preset" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger
+                    value="preset"
+                    onClick={() => handleScreenSizeTabChange("preset")}
+                  >
+                    Preset
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="custom"
+                    onClick={() => handleScreenSizeTabChange("custom")}
+                  >
+                    Custom
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="preset">
-                <Select
-                onValueChange={(value) => handlePresetSizeChange(value)}
-                value={screenSizes.indexOf(presetScreenSize).toString()}
-              >
-                <SelectTrigger id="screen-size">
-                  <SelectValue placeholder="Select screen size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {screenSizes.map((size, index) => (
-                    <SelectItem key={index} value={index.toString()}>
-                      {size.name} ({size.width}x{size.height})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <Select
+                    onValueChange={(value) => handlePresetSizeChange(value)}
+                    value={screenSizes.indexOf(presetScreenSize).toString()}
+                  >
+                    <SelectTrigger id="screen-size">
+                      <SelectValue placeholder="Select screen size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {screenSizes.map((size, index) => (
+                        <SelectItem key={index} value={index.toString()}>
+                          {size.name} ({size.width}x{size.height})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </TabsContent>
                 <TabsContent value="custom">
                   <div className="space-y-2">
                     <div className="flex space-x-2">
-                      <ValidatedInput 
-                        placeholder="Width" 
-                        className="w-1/2 h-10" 
-                        value={customWidth} 
+                      <ValidatedInput
+                        placeholder="Width"
+                        className="w-1/2 h-10"
+                        value={customWidth}
                         setValue={setCustomWidth}
-                        setError={(msg) => setValidationError({...validationError, customWidth: msg})}
+                        setError={(msg) =>
+                          setValidationError({
+                            ...validationError,
+                            customWidth: msg,
+                          })
+                        }
                         onSuccess={() => setScreenSize(customScreenSize)}
                       />
-                      <ValidatedInput 
-                        placeholder="Height" 
+                      <ValidatedInput
+                        placeholder="Height"
                         className="w-1/2 h-10"
-                        value={customHeight} 
+                        value={customHeight}
                         setValue={setCustomHeight}
-                        setError={(msg) => setValidationError({...validationError, customHeight: msg})}
+                        setError={(msg) =>
+                          setValidationError({
+                            ...validationError,
+                            customHeight: msg,
+                          })
+                        }
                         onSuccess={() => setScreenSize(customScreenSize)}
                       />
                     </div>
                   </div>
                 </TabsContent>
-                </Tabs>
-                <div className="mt-2">
-                  {validationError.customWidth && <p className="text-red-500 text-sm font-medium leading-none">{validationError.customWidth}</p>}
-                  {validationError.customHeight && <p className="text-red-500 text-sm font-medium leading-none text-right">{validationError.customHeight}</p>}
-                </div>
+              </Tabs>
+              <div className="mt-2">
+                {validationError.customWidth && (
+                  <p className="text-red-500 text-sm font-medium leading-none">
+                    {validationError.customWidth}
+                  </p>
+                )}
+                {validationError.customHeight && (
+                  <p className="text-red-500 text-sm font-medium leading-none text-right">
+                    {validationError.customHeight}
+                  </p>
+                )}
+              </div>
             </div>
 
             <Tabs defaultValue="design" className="w-full">
@@ -877,10 +944,6 @@ export default function MockupEditor() {
                   transform: `scale(${scale})`,
                   transformOrigin: "top left",
                 }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
               />
             </div>
           </div>
@@ -927,4 +990,3 @@ export default function MockupEditor() {
     </div>
   );
 }
-
