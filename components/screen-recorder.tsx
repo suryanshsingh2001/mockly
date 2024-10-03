@@ -1,7 +1,14 @@
 "use client";
 import React, { useRef, useState } from "react";
+import { Button } from "./ui/button";
 
-const ScreenRecorder: React.FC = () => {
+interface ScreenRecorderProps {
+  onRecordingComplete: (src: string) => void;
+}
+
+const ScreenRecorder: React.FC<ScreenRecorderProps> = ({
+  onRecordingComplete,
+}) => {
   const screenRecording = useRef<HTMLVideoElement | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const [displayMedia, setDisplayMedia] = useState<MediaStreamTrack | null>(
@@ -39,6 +46,8 @@ const ScreenRecorder: React.FC = () => {
         if (displayMedia) {
           displayMedia.stop();
         }
+
+        onRecordingComplete(url);
       };
 
       recorder.start();
@@ -51,38 +60,33 @@ const ScreenRecorder: React.FC = () => {
   const stopScreenRecording = () => {
     if (recorderRef.current && isRecording) {
       recorderRef.current.stop();
+      recorderRef.current.stream?.getTracks().forEach((track) => track.stop()); // Stop all tracks
       setIsRecording(false); // Reset the recording state
     }
   };
 
-  const ButtonStyle = {
-    backgroundColor: "green",
-    color: "white",
-    fontSize: "2em",
-    margin: "10px",
-  };
-
   return (
-    <>
-      <button
-        style={ButtonStyle}
-        onClick={startScreenRecording}
-        disabled={isRecording}
-      >
-        Start Recording
-      </button>
-      <button
-        style={ButtonStyle}
-        onClick={stopScreenRecording}
-        disabled={!isRecording}
-      >
-        Stop Recording
-      </button>
-      <br />
-      <br />
-      <br />
-      <video ref={screenRecording} height={300} width={600} controls />
-    </>
+    <div className="flex flex-row gap-2">
+      {!isRecording && (
+        <Button
+          onClick={startScreenRecording}
+          disabled={isRecording}
+          className="bg-green-600"
+        >
+          Start Recording
+        </Button>
+      )}
+
+      {isRecording && (
+        <Button
+          onClick={stopScreenRecording}
+          disabled={!isRecording}
+          className="bg-red-800"
+        >
+          Stop Recording
+        </Button>
+      )}
+    </div>
   );
 };
 
