@@ -465,6 +465,8 @@ export default function MockupEditor() {
   ]);
 
   const handleMouseDown = (e: MouseEvent) => {
+    e.preventDefault();
+
     const canvas = canvasRef.current;
     if (canvas) {
       const rect = canvas.getBoundingClientRect();
