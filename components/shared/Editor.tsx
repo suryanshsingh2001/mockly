@@ -928,18 +928,37 @@ export default function MockupEditor() {
               <TabsContent value="text" className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="text">Text</Label>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-row flex-nowrap gap-2 items-center justify-between">
                     <Input
                       id="text"
                       value={text}
                       onChange={(e) => setText(e.target.value)}
                       placeholder="Enter text"
                     />
+                    <TextManager
+                      value={textStyle}
+                      onChange={(value: TextStyle) => setTextStyle(value)}
+                    />
                   </div>
-                  <TextManager
-                    value={textStyle}
-                    onChange={(value: TextStyle) => setTextStyle(value)}
-                  />
+                  {text && (
+                    <div className="flex items-center justify-start mt-2 group">
+                      <button
+                        onClick={() => {
+                          setTextPosition({
+                            x: 50,
+                            y: 50,
+                          });
+                        }}
+                        className="text-sm text-muted-foreground hover:underline flex flex-row flex-nowrap gap-1 items-center"
+                      >
+                        <RotateCcwIcon
+                          size="1em"
+                          className="group-hover:-rotate-90 transition-transform duration-300"
+                        />{" "}
+                        Reset text position
+                      </button>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
