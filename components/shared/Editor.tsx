@@ -744,10 +744,10 @@ export default function MockupEditor() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="shadow">Shadow: {shadow.blur}px</Label>
+                    <Label htmlFor="shadow">Shadow: {shadow.blur ? shadow.blur : 0}px</Label>
                     <ShadowManager
-                      value={shadow}
-                      onChange={(value) => setShadow(value)}
+                      shadowValue={shadow}
+                      setShadowValue={setShadow}
                     />
                   </div>
                   <Slider
