@@ -13,6 +13,7 @@ import {
 import { Settings2Icon, Bold, Italic, Underline, TypeOutline } from "lucide-react"
 import { Slider } from "./ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { FontFamilyNames } from '@/lib/constants';
 
 export type TextStyle = {
   textColor: string;
@@ -96,7 +97,6 @@ export const TextManager = (props: any) => {
               ...(textStyleValue.applyStroke ? ['stroke'] : [])
             ]}
             onValueChange={(value) => {
-              console.log("value: ", value);
               setTextStyleValue({
                 ...textStyleValue,
                 bold: value.includes('bold'),
@@ -112,16 +112,36 @@ export const TextManager = (props: any) => {
               });
             }}
           >
-            <ToggleGroupItem value="bold" aria-label="Toggle bold">
+            <ToggleGroupItem
+              value="bold"
+              aria-label="Toggle bold"
+              className="flex items-center justify-center p-2 rounded-md hover:bg-gray-200"
+              title="Bold"
+            >
               <Bold className="h-4 w-4" />
             </ToggleGroupItem>
-            <ToggleGroupItem value="italic" aria-label="Toggle italic">
+            <ToggleGroupItem
+              value="italic"
+              aria-label="Toggle italic"
+              className="flex items-center justify-center p-2 rounded-md hover:bg-gray-200"
+              title="Italic"
+            >
               <Italic className="h-4 w-4" />
             </ToggleGroupItem>
-            <ToggleGroupItem value="underline" aria-label="Toggle underline">
+            <ToggleGroupItem
+              value="underline"
+              aria-label="Toggle underline"
+              className="flex items-center justify-center p-2 rounded-md hover:bg-gray-200"
+              title="Underline"
+            >
               <Underline className="h-4 w-4" />
             </ToggleGroupItem>
-            <ToggleGroupItem value="stroke" aria-label="Toggle stroke">
+            <ToggleGroupItem
+              value="stroke"
+              aria-label="Toggle stroke"
+              className="flex items-center justify-center p-2 rounded-md hover:bg-gray-200"
+              title="Text Stroke"
+            >
               <TypeOutline className="h-4 w-4" />
             </ToggleGroupItem>
           </ToggleGroup>
@@ -134,7 +154,6 @@ export const TextManager = (props: any) => {
           </Label>
           <Select
             onValueChange={(value) => {
-              console.log("Text: ", value);
               setTextStyleValue({ ...textStyleValue, fontFamily: value });
               handleInputChange({ fontFamily: value });
             }}
@@ -144,12 +163,11 @@ export const TextManager = (props: any) => {
               <SelectValue placeholder="Select font family" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Arial">Arial</SelectItem>
-              <SelectItem value="Impact">Impact</SelectItem>
-              <SelectItem value="Georgia">Georgia</SelectItem>
-              <SelectItem value="Trebuchet MS">Trebuchet MS</SelectItem>
-              <SelectItem value="Courier New">Courier New</SelectItem>
-              <SelectItem value="Comic Sans MS">Comic Sans MS</SelectItem>
+              {FontFamilyNames.map((fontName) => (
+                <SelectItem key={fontName} value={fontName}>
+                  {fontName}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 

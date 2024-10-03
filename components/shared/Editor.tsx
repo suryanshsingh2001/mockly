@@ -88,7 +88,7 @@ const defaultSettings = {
     strokeColor: "#fff",
     strokeWidth: 2,
     fontSize: 24,
-    letterSpacing: 5
+    letterSpacing: 0
   },
   format: "png" as "png" | "jpg" | "svg" | "pdf",
   validationError,
@@ -810,11 +810,11 @@ export default function MockupEditor() {
                       onChange={(e) => setText(e.target.value)}
                       placeholder="Enter text"
                     />
-                    <TextManager 
-                      value={textStyle}
-                      onChange={(value: TextStyle) => setTextStyle(value)}
-                    />
                   </div>
+                  <TextManager 
+                    value={textStyle}
+                    onChange={(value: TextStyle) => setTextStyle(value)}
+                  />
                 </div>
               </TabsContent>
             </Tabs>
