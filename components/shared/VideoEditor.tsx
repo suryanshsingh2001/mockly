@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useRef, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Slider } from "@/components/ui/slider";
@@ -9,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Upload } from "lucide-react";
 import ScreenRecorder from "../screen-recorder";
-import { cn } from "@/lib/utils";
 
 export default function VideoEditor() {
   const [video, setVideo] = useState<string | null>(null);
@@ -43,17 +40,20 @@ export default function VideoEditor() {
     setBrightness(value[0]);
   };
 
+  const handleDownloadVideo = (videoUrl: string) => {
+    const link = document.createElement("a");
+    link.href = videoUrl;
+    link.download = `video_${Date.now()}.webm`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <main className="flex flex-col lg:flex-row h-screen">
       {/* Left Section - Upload/Recording Options */}
-
       {!video && (
-        <div
-          className={cn("pt-5", {
-            "w-full": !video,
-            "w-full lg:w-1/2": video,
-          })}
-        >
+        <div className="pt-5 w-full">
           <div className="flex flex-row justify-evenly gap-4 items-center w-full">
             <div className="w-2/5 flex flex-col gap-4">
               <Label htmlFor="video-upload">Video Upload</Label>
@@ -74,12 +74,9 @@ export default function VideoEditor() {
                 )}
               </div>
             </div>
-
             <div className="font-bold text-xl w-1/5 flex justify-center">
               Or
             </div>
-
-            {/* Screen Recorder Component */}
             <div className="flex flex-col gap-4 w-2/5 h-[146px]">
               <Label htmlFor="screen-recorder">Record your screen</Label>
               <ScreenRecorder onRecordingComplete={(src) => setVideo(src)} />
@@ -103,7 +100,6 @@ export default function VideoEditor() {
                   onValueChange={handleTrimChange}
                 />
               </div>
-
               <div className="space-y-2">
                 <Label>Brightness</Label>
                 <Slider
@@ -130,11 +126,17 @@ export default function VideoEditor() {
                 placeholder="Enter text overlay"
               />
             </div>
-            <Button className="w-full">Export Video</Button>
+            <Button
+              className="w-full"
+              onClick={() => handleDownloadVideo(video)}
+            >
+              {" "}
+              Export Video
+            </Button>
           </div>
 
           {/* Right Section - Video Playback */}
-          <div className="w-full lg:w-3/4 h-fit flex items-center justify-center bg-secondary">
+          <div className="w-full lg:w-3/4 h-fit flex items-center justify-center bg-secondary relative">
             <video
               ref={videoRef}
               src={video}
