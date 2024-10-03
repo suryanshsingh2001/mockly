@@ -47,11 +47,11 @@ export default function VideoEditor() {
     <main className="flex flex-col lg:flex-row h-screen">
       {/* Left Section - Upload/Recording Options */}
 
-      {video && (
+      {!video && (
         <div
           className={cn("pt-5", {
-            "w-full": video,
-            "w-full lg:w-1/2": !video,
+            "w-full": !video,
+            "w-full lg:w-1/2": video,
           })}
         >
           <div className="flex flex-row justify-evenly gap-4 items-center w-full">
@@ -89,7 +89,7 @@ export default function VideoEditor() {
       )}
 
       {/* Settings */}
-      {!video && (
+      {video && (
         <div className="flex flex-col lg:flex-row gap-8 w-full pt-5">
           <div className="space-y-8 w-full lg:w-1/4">
             <div className="space-y-4">
@@ -137,7 +137,7 @@ export default function VideoEditor() {
           <div className="w-full lg:w-3/4 h-fit flex items-center justify-center bg-secondary">
             <video
               ref={videoRef}
-              // src={video}
+              src={video}
               controls
               className="w-full rounded-lg"
               style={{ filter: `brightness(${brightness}%)` }}
