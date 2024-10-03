@@ -84,9 +84,11 @@ const defaultSettings = {
     bold: false,
     italic: false,
     underline: false,
-    stroke: false,
-    strokeColor: "transparent",
+    applyStroke: false,
+    strokeColor: "#fff",
+    strokeWidth: 2,
     fontSize: 24,
+    letterSpacing: 5
   },
   format: "png" as "png" | "jpg" | "svg" | "pdf",
   validationError,
@@ -409,20 +411,42 @@ export default function MockupEditor() {
       const fontStyle = textStyle.italic ? "italic" : "normal";
       const fontSize = `${textStyle.fontSize}px`;
       const fontFamily = textStyle.fontFamily;
-
+  
       ctx.font = `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
-      ctx.fillStyle = textStyle.textColor;
+      ctx.fillStyle = textStyle.textColor; // Text fill color
+  
+      const letterSpacing = textStyle.letterSpacing;
+      let currentX = textPosition.x; // Store a copy of the x position
+  
+      // Draw each character individually with spacing
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+  
+        // Conditionally apply the border (stroke) if applyStroke is true
+        if (textStyle.applyStroke) {
+          ctx.strokeStyle = textStyle.strokeColor; // Border color
+          ctx.lineWidth = textStyle.strokeWidth; // Border width
+          ctx.strokeText(char, currentX, textPosition.y);
+        }
+  
+        // Draw the filled text
+        ctx.fillText(char, currentX, textPosition.y);
+  
+        currentX += ctx.measureText(char).width + letterSpacing; // Move to the next position
+      }
+  
+      // Draw underline (if applicable)
       if (textStyle.underline) {
-        const textWidth = ctx.measureText(text).width;
-        const underlineY = textPosition.y + 3; 
-
+        const totalTextWidth = currentX - textPosition.x; // Total width of the spaced text
+        const underlineY = textPosition.y + 3; // Position of the underline
+  
+        ctx.beginPath(); // Begin a new path for the underline
         ctx.moveTo(textPosition.x, underlineY);
-        ctx.lineTo(textPosition.x + textWidth, underlineY);
+        ctx.lineTo(textPosition.x + totalTextWidth, underlineY);
         ctx.strokeStyle = ctx.fillStyle;
         ctx.lineWidth = 3;
         ctx.stroke();
       }
-      ctx.fillText(text, textPosition.x, textPosition.y);
     }
   };
 
@@ -491,9 +515,8 @@ export default function MockupEditor() {
       const fontFamily = textStyle.fontFamily;
   
       if (ctx) {
-        ctx.font = `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
+        ctx.font = `${fontFamily}${fontStyle} ${fontWeight} ${fontSize} `;
         const metrics = ctx.measureText(text);
-        const textWidth = metrics.width;
   
         return (
           x >= textPosition.x &&
