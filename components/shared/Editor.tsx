@@ -497,7 +497,7 @@ export default function MockupEditor() {
   
         return (
           x >= textPosition.x &&
-          x <= textPosition.x + textWidth &&
+          x <= textPosition.x + metrics.width &&
           y >= textPosition.y - textStyle.fontSize &&
           y <= textPosition.y
         );
