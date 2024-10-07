@@ -5,19 +5,11 @@ import { cn } from "@/lib/utils";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import { siteConfig } from "@/config/config";
-import { Inter as FontSans } from "next/font/google";
+import { Rethink_Sans } from "next/font/google";
 
-
-
-const fontSans = FontSans({
+const raleway = Rethink_Sans({
   subsets: ["latin"],
-  variable: "--font-sans",
 });
-
-
-
-
-
 
 export const metadata: Metadata = {
   title: {
@@ -34,7 +26,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     type: "website",
   },
-  
+
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
@@ -64,16 +56,16 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <>
-      <html lang="en" suppressHydrationWarning>
+      <html lang="en">
         <head />
-        <body
-          className={cn(
-            "min-h-screen bg-background font-sans antialiased",
-           fontSans.variable
-          )}
-        >
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              {children}
+        <body className={cn("min-h-screen bg-background antialiased", raleway.className)}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
             {/* <TailwindIndicator /> */}
           </ThemeProvider>
         </body>

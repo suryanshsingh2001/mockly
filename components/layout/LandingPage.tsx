@@ -32,6 +32,8 @@ import { siteConfig } from "@/config/config";
 import { useTheme } from "next-themes";
 import ShowcaseImage from "../shared/ShowcaseImage";
 import { Badge } from "../ui/badge";
+import FeatureSection from "../sections/FeatureSection";
+import CTASection from "../sections/CTASection";
 
 export default function LandingPage() {
   return (
@@ -95,67 +97,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section
-          id="features"
-          className="w-full py-12 md:py-24 lg:py-32 bg-secondary/20"
-        >
-          <div className="container px-4 md:px-6 mx-auto">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter">
-                  Feature-Packed, Yet Lazy-Friendly
-                </h2>
-                <p className="max-w-[900px] text-muted-foreground text-base sm:text-lg md:text-xl">
-                  Everything you need to create professional-looking screenshots
-                  and mockups
-                </p>
-              </div>
-            </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mt-12">
-              {[
-                {
-                  icon: <ImagePlus className="h-10 w-10 mb-4 text-primary" />,
-                  title: "Instant Mockups",
-                  description:
-                    "Upload, tweak, done. It's like magic, but without the wand.",
-                },
-                {
-                  icon: <Monitor className="h-10 w-10 mb-4 text-primary" />,
-                  title: "Multi-device Preview",
-                  description:
-                    "Instantly see how your designs look on any screen size—because nobody has time for resizing.",
-                },
-                {
-                  icon: <ZoomIn className="h-10 w-10 mb-4 text-primary" />,
-                  title: "Zoom & Place",
-                  description:
-                    "Put your screenshots exactly where you want, and zoom in like a pro—minus the struggle.",
-                },
-                {
-                  icon: <Type className="h-10 w-10 mb-4 text-primary" />,
-                  title: "Text & Style",
-                  description:
-                    "Add text, pick your font, and make it pop. Because plain screenshots are so last year.",
-                },
-              ].map((feature, index) => (
-                <Card
-                  key={index}
-                  className="bg-card text-card-foreground rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-                >
-                  <CardHeader>
-                    {feature.icon}
-                    <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
+       <FeatureSection />
 
         <section
           id="pricing"
@@ -264,6 +206,8 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+      
       </main>
 
       <footer className="border-t border-border bg-background">
