@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Upload, X, Download, RotateCcw, Star } from "lucide-react";
+import {
+  Upload,
+  X,
+  Download,
+  RotateCcw,
+  Star,
+  RotateCcwIcon,
+} from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
@@ -32,6 +39,7 @@ import { ShadowManager, type Shadow } from "@/components/shadow-manager";
 import { ScreenSize, ValidationError } from "./types";
 import ValidatedInput from "./ValidatedInput";
 import { validateInput } from "./utils";
+import { TextManager, type TextStyle } from "../text-manager";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -51,9 +59,9 @@ const screenSizes = [
 ];
 
 const validationError = {
-  customHeight:'',
-  customWidth: ''
-} satisfies ValidationError
+  customHeight: "",
+  customWidth: "",
+} satisfies ValidationError;
 
 const defaultSettings = {
   image: null,
@@ -73,10 +81,22 @@ const defaultSettings = {
   },
   imagePosition: { x: 0.5, y: 0.5 },
   text: "",
-  textPosition: { x: 50, y: 50 },
-  fontSize: 24,
-  fontWeight: "normal",
-  textColor: "#000000",
+  textPosition: {
+    x: 50,
+    y: 50,
+  },
+  textStyle: {
+    textColor: "#000000",
+    fontFamily: "Arial",
+    bold: false,
+    italic: false,
+    underline: false,
+    applyStroke: false,
+    strokeColor: "#fff",
+    strokeWidth: 2,
+    fontSize: 24,
+    letterSpacing: 0,
+  },
   format: "png" as "png" | "jpg" | "svg" | "pdf",
   validationError,
 };
@@ -97,11 +117,21 @@ export default function MockupEditor() {
   const [gradientAngle, setGradientAngle] = useState(
     defaultSettings.gradientAngle
   );
-  const [screenSize, setScreenSize] = useState<ScreenSize>(defaultSettings.screenSize);
-  const [customWidth,setCustomWidth] = useState(defaultSettings.screenSize.width.toString());
-  const [customHeight,setCustomHeight] = useState(defaultSettings.screenSize.height.toString());
-  const [presetScreenSize, setPresetScreenSize] = useState(defaultSettings.screenSize);
-  const [validationError, setValidationError] = useState<ValidationError>(defaultSettings.validationError);
+  const [screenSize, setScreenSize] = useState<ScreenSize>(
+    defaultSettings.screenSize
+  );
+  const [customWidth, setCustomWidth] = useState(
+    defaultSettings.screenSize.width.toString()
+  );
+  const [customHeight, setCustomHeight] = useState(
+    defaultSettings.screenSize.height.toString()
+  );
+  const [presetScreenSize, setPresetScreenSize] = useState(
+    defaultSettings.screenSize
+  );
+  const [validationError, setValidationError] = useState<ValidationError>(
+    defaultSettings.validationError
+  );
   const [zoom, setZoom] = useState(defaultSettings.zoom);
   const [transparency, setTransparency] = useState(
     defaultSettings.transparency
@@ -115,15 +145,16 @@ export default function MockupEditor() {
     defaultSettings.imagePosition
   );
   const [text, setText] = useState(defaultSettings.text);
+  const [textStyle, setTextStyle] = useState<TextStyle>(
+    defaultSettings.textStyle
+  );
   const [textPosition, setTextPosition] = useState(
     defaultSettings.textPosition
   );
-  const [fontSize, setFontSize] = useState(defaultSettings.fontSize);
-  const [fontWeight, setFontWeight] = useState(defaultSettings.fontWeight);
-  const [textColor, setTextColor] = useState(defaultSettings.textColor);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
 
@@ -133,8 +164,8 @@ export default function MockupEditor() {
   const [comment, setComment] = useState("");
 
   const customScreenSize = {
-    height: Number(customHeight), 
-    width: Number(customWidth)
+    height: Number(customHeight),
+    width: Number(customWidth),
   } satisfies ScreenSize;
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -146,7 +177,7 @@ export default function MockupEditor() {
 
         const newImage = new Image();
         newImage.src = newImageSrc;
-        newImage.onload = () => setLoadedImage(newImage); // Set image when it's loaded
+        newImage.onload = () => setLoadedImage(newImage);
         setImage(newImageSrc);
       };
       reader.readAsDataURL(file);
@@ -257,9 +288,7 @@ export default function MockupEditor() {
     setImagePosition(defaultSettings.imagePosition);
     setText(defaultSettings.text);
     setTextPosition(defaultSettings.textPosition);
-    setFontSize(defaultSettings.fontSize);
-    setFontWeight(defaultSettings.fontWeight);
-    setTextColor(defaultSettings.textColor);
+    setTextStyle(defaultSettings.textStyle);
     setDownloadFormat(defaultSettings.format);
     setLoadedImage(null);
   };
@@ -350,9 +379,7 @@ export default function MockupEditor() {
     background,
     borderRadius,
     loadedImage,
-    fontWeight,
-    fontSize,
-    textColor,
+    textStyle,
     text,
     textPosition.x,
     textPosition.y,
@@ -367,7 +394,7 @@ export default function MockupEditor() {
   ]);
 
   useEffect(() => {
-    drawCanvas(); // Trigger canvas redraw on updates
+    drawCanvas(); // Redraw the canvas whenever text position changes
   }, [drawCanvas]);
 
   const drawImage = (ctx: CanvasRenderingContext2D) => {
@@ -415,13 +442,75 @@ export default function MockupEditor() {
 
   const drawText = (ctx: CanvasRenderingContext2D) => {
     if (text) {
-      ctx.font = `${fontWeight} ${fontSize}px Arial`;
-      ctx.fillStyle = textColor;
-      ctx.fillText(text, textPosition.x, textPosition.y);
+      const fontWeight = textStyle.bold ? "bold" : "normal";
+      const fontStyle = textStyle.italic ? "italic" : "normal";
+      const fontSize = `${textStyle.fontSize}px`;
+      const fontFamily = textStyle.fontFamily;
+
+      ctx.font = `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
+      ctx.fillStyle = textStyle.textColor; // Text fill color
+
+      const letterSpacing = textStyle.letterSpacing;
+      let currentX = textPosition.x; // Store a copy of the x position
+
+      // Draw each character individually with spacing
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+
+        // Conditionally apply the border (stroke) if applyStroke is true
+        if (textStyle.applyStroke) {
+          ctx.strokeStyle = textStyle.strokeColor; // Border color
+          ctx.lineWidth = textStyle.strokeWidth; // Border width
+          ctx.strokeText(char, currentX, textPosition.y);
+        }
+
+        // Draw the filled text
+        ctx.fillText(char, currentX, textPosition.y);
+
+        currentX += ctx.measureText(char).width + letterSpacing; // Move to the next position
+      }
+
+      // Draw underline (if applicable)
+      if (textStyle.underline) {
+        const totalTextWidth = currentX - textPosition.x; // Total width of the spaced text
+        const underlineY = textPosition.y + 3; // Position of the underline
+
+        ctx.beginPath(); // Begin a new path for the underline
+        ctx.moveTo(textPosition.x, underlineY);
+        ctx.lineTo(textPosition.x + totalTextWidth, underlineY);
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  useEffect(() => {
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    image,
+    text,
+    scale,
+    loadedImage,
+    imagePosition.x,
+    imagePosition.y,
+    textPosition.x,
+    textPosition.y,
+    isDragging,
+    dragTarget,
+  ]);
+
+  const handleMouseDown = (e: MouseEvent) => {
     const canvas = canvasRef.current;
     if (canvas) {
       const rect = canvas.getBoundingClientRect();
@@ -431,14 +520,21 @@ export default function MockupEditor() {
       if (image && isPointInImage(x, y)) {
         setIsDragging(true);
         setDragTarget("image");
+        offsetRef.current = {
+          x: x - imagePosition.x,
+          y: y - imagePosition.y,
+        };
+        e.preventDefault();
       } else if (text && isPointInText(x, y)) {
         setIsDragging(true);
         setDragTarget("text");
+        offsetRef.current = { x: x - textPosition.x, y: y - textPosition.y };
+        e.preventDefault();
       }
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (isDragging) {
       const canvas = canvasRef.current;
       if (canvas) {
@@ -447,15 +543,21 @@ export default function MockupEditor() {
         const y = (e.clientY - rect.top) / scale;
 
         if (dragTarget === "image" && loadedImage) {
-          setImagePosition({ x, y });
+          setImagePosition({
+            x: x - offsetRef.current.x,
+            y: y - offsetRef.current.y,
+          });
         } else if (dragTarget === "text") {
-          setTextPosition({ x, y });
+          setTextPosition({
+            x: x - offsetRef.current.x,
+            y: y - offsetRef.current.y,
+          });
         }
       }
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: MouseEvent) => {
     setIsDragging(false);
     setDragTarget(null);
   };
@@ -480,13 +582,19 @@ export default function MockupEditor() {
     if (text) {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
+      const fontWeight = textStyle.bold ? "bold" : "normal";
+      const fontStyle = textStyle.italic ? "italic" : "normal";
+      const fontSize = `${textStyle.fontSize}px`;
+      const fontFamily = textStyle.fontFamily;
+
       if (ctx) {
-        ctx.font = `${fontWeight} ${fontSize}px Arial`;
+        ctx.font = `${fontFamily}${fontStyle} ${fontWeight} ${fontSize} `;
         const metrics = ctx.measureText(text);
+
         return (
           x >= textPosition.x &&
           x <= textPosition.x + metrics.width &&
-          y >= textPosition.y - fontSize &&
+          y >= textPosition.y - textStyle.fontSize &&
           y <= textPosition.y
         );
       }
@@ -495,27 +603,28 @@ export default function MockupEditor() {
   };
 
   const handlePresetSizeChange = (value: string) => {
-    const size = screenSizes[parseInt(value)]
-    setPresetScreenSize(size)
+    const size = screenSizes[parseInt(value)];
+    setPresetScreenSize(size);
     setScreenSize(size);
-  }
+  };
 
-  const handleScreenSizeTabChange = (tab: 'preset' | 'custom') => {
-    const {success: isHeightCorrect} = validateInput(customHeight);
-    const {success: isWidthCorrect} = validateInput(customWidth);
+  const handleScreenSizeTabChange = (tab: "preset" | "custom") => {
+    const { success: isHeightCorrect } = validateInput(customHeight);
+    const { success: isWidthCorrect } = validateInput(customWidth);
     const success = isHeightCorrect && isWidthCorrect;
 
-    const size = tab === 'preset' || !success  ? presetScreenSize : customScreenSize
+    const size =
+      tab === "preset" || !success ? presetScreenSize : customScreenSize;
 
-    if(!success && !isHeightCorrect){
-      setCustomHeight(size.height.toString())
+    if (!success && !isHeightCorrect) {
+      setCustomHeight(size.height.toString());
     }
-    if(!success && !isWidthCorrect){
-      setCustomWidth(size.width.toString())
+    if (!success && !isWidthCorrect) {
+      setCustomWidth(size.width.toString());
     }
     setScreenSize(size);
-    setValidationError(defaultSettings.validationError)
-  }
+    setValidationError(defaultSettings.validationError);
+  };
 
   return (
     <div className="min-h-screen flex flex-col px-6">
@@ -536,6 +645,7 @@ export default function MockupEditor() {
                 }`}
               >
                 <input {...getInputProps()} id="image-upload" />
+
                 {image ? (
                   <div className="flex items-center justify-center">
                     {
@@ -564,6 +674,26 @@ export default function MockupEditor() {
                   </div>
                 )}
               </div>
+
+              {image && (
+                <div className="flex items-center justify-start mt-2 group">
+                  <button
+                    onClick={() => {
+                      setImagePosition({
+                        x: 0,
+                        y: 0,
+                      });
+                    }}
+                    className="text-sm text-muted-foreground hover:underline flex flex-row flex-nowrap gap-1 items-center"
+                  >
+                    <RotateCcwIcon
+                      size="1em"
+                      className="group-hover:-rotate-90 transition-transform duration-300"
+                    />{" "}
+                    Reset image position
+                  </button>
+                </div>
+              )}
             </div>
             <div className="w-full">
               <Label htmlFor="background" className="block mb-4">
@@ -648,55 +778,83 @@ export default function MockupEditor() {
               <Label htmlFor="screen-size" className="block mb-4">
                 Screen Size
               </Label>
-              <Tabs defaultValue="preset" className="w-full">  
-               <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="preset" onClick={() => handleScreenSizeTabChange('preset')}>Preset</TabsTrigger>
-                  <TabsTrigger value="custom" onClick={() => handleScreenSizeTabChange('custom')}>Custom</TabsTrigger>
+              <Tabs defaultValue="preset" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger
+                    value="preset"
+                    onClick={() => handleScreenSizeTabChange("preset")}
+                  >
+                    Preset
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="custom"
+                    onClick={() => handleScreenSizeTabChange("custom")}
+                  >
+                    Custom
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="preset">
-                <Select
-                onValueChange={(value) => handlePresetSizeChange(value)}
-                value={screenSizes.indexOf(presetScreenSize).toString()}
-              >
-                <SelectTrigger id="screen-size">
-                  <SelectValue placeholder="Select screen size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {screenSizes.map((size, index) => (
-                    <SelectItem key={index} value={index.toString()}>
-                      {size.name} ({size.width}x{size.height})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <Select
+                    onValueChange={(value) => handlePresetSizeChange(value)}
+                    value={screenSizes.indexOf(presetScreenSize).toString()}
+                  >
+                    <SelectTrigger id="screen-size">
+                      <SelectValue placeholder="Select screen size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {screenSizes.map((size, index) => (
+                        <SelectItem key={index} value={index.toString()}>
+                          {size.name} ({size.width}x{size.height})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </TabsContent>
                 <TabsContent value="custom">
                   <div className="space-y-2">
                     <div className="flex space-x-2">
-                      <ValidatedInput 
-                        placeholder="Width" 
-                        className="w-1/2 h-10" 
-                        value={customWidth} 
+                      <ValidatedInput
+                        placeholder="Width"
+                        className="w-1/2 h-10"
+                        value={customWidth}
                         setValue={setCustomWidth}
-                        setError={(msg) => setValidationError({...validationError, customWidth: msg})}
+                        setError={(msg) =>
+                          setValidationError({
+                            ...validationError,
+                            customWidth: msg,
+                          })
+                        }
                         onSuccess={() => setScreenSize(customScreenSize)}
                       />
-                      <ValidatedInput 
-                        placeholder="Height" 
+                      <ValidatedInput
+                        placeholder="Height"
                         className="w-1/2 h-10"
-                        value={customHeight} 
+                        value={customHeight}
                         setValue={setCustomHeight}
-                        setError={(msg) => setValidationError({...validationError, customHeight: msg})}
+                        setError={(msg) =>
+                          setValidationError({
+                            ...validationError,
+                            customHeight: msg,
+                          })
+                        }
                         onSuccess={() => setScreenSize(customScreenSize)}
                       />
                     </div>
                   </div>
                 </TabsContent>
-                </Tabs>
-                <div className="mt-2">
-                  {validationError.customWidth && <p className="text-red-500 text-sm font-medium leading-none">{validationError.customWidth}</p>}
-                  {validationError.customHeight && <p className="text-red-500 text-sm font-medium leading-none text-right">{validationError.customHeight}</p>}
-                </div>
+              </Tabs>
+              <div className="mt-2">
+                {validationError.customWidth && (
+                  <p className="text-red-500 text-sm font-medium leading-none">
+                    {validationError.customWidth}
+                  </p>
+                )}
+                {validationError.customHeight && (
+                  <p className="text-red-500 text-sm font-medium leading-none text-right">
+                    {validationError.customHeight}
+                  </p>
+                )}
+              </div>
             </div>
 
             <Tabs defaultValue="design" className="w-full">
@@ -744,10 +902,12 @@ export default function MockupEditor() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="shadow">Shadow: {shadow.blur}px</Label>
+                    <Label htmlFor="shadow">
+                      Shadow: {shadow.blur ? shadow.blur : 0}px
+                    </Label>
                     <ShadowManager
-                      value={shadow}
-                      onChange={(value) => setShadow(value)}
+                      shadowValue={shadow}
+                      setShadowValue={setShadow}
                     />
                   </div>
                   <Slider
@@ -768,48 +928,37 @@ export default function MockupEditor() {
               <TabsContent value="text" className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="text">Text</Label>
-                  <Input
-                    id="text"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Enter text"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="font-size">Font Size: {fontSize}px</Label>
-                  <Slider
-                    id="font-size"
-                    min={12}
-                    max={72}
-                    step={1}
-                    value={[fontSize]}
-                    onValueChange={(value) => setFontSize(value[0])}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="font-weight">Font Weight</Label>
-                  <Select
-                    onValueChange={(value) => setFontWeight(value)}
-                    value={fontWeight}
-                  >
-                    <SelectTrigger id="font-weight">
-                      <SelectValue placeholder="Select font weight" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="bold">Bold</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="text-color">Text Color</Label>
-                  <Input
-                    id="text-color"
-                    type="color"
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    className="w-full h-10"
-                  />
+                  <div className="flex flex-row flex-nowrap gap-2 items-center justify-between">
+                    <Input
+                      id="text"
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      placeholder="Enter text"
+                    />
+                    <TextManager
+                      value={textStyle}
+                      onChange={(value: TextStyle) => setTextStyle(value)}
+                    />
+                  </div>
+                  {text && (
+                    <div className="flex items-center justify-start mt-2 group">
+                      <button
+                        onClick={() => {
+                          setTextPosition({
+                            x: 50,
+                            y: 50,
+                          });
+                        }}
+                        className="text-sm text-muted-foreground hover:underline flex flex-row flex-nowrap gap-1 items-center"
+                      >
+                        <RotateCcwIcon
+                          size="1em"
+                          className="group-hover:-rotate-90 transition-transform duration-300"
+                        />{" "}
+                        Reset text position
+                      </button>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
@@ -868,10 +1017,6 @@ export default function MockupEditor() {
                   transform: `scale(${scale})`,
                   transformOrigin: "top left",
                 }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
               />
             </div>
           </div>
@@ -918,4 +1063,3 @@ export default function MockupEditor() {
     </div>
   );
 }
-
