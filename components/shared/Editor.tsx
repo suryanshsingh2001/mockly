@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Upload, X, Download, RotateCcw, Star } from "lucide-react";
+import {
+  Upload,
+  X,
+  Download,
+  RotateCcw,
+  Star,
+  RotateCcwIcon,
+} from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
@@ -27,6 +34,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Header from "@/components/layout/Header";
 import { ShadowManager, type Shadow } from "@/components/shadow-manager";
 import { ScreenSize, ValidationError } from "./types";
 import ValidatedInput from "./ValidatedInput";
@@ -146,6 +154,7 @@ export default function MockupEditor() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
 
@@ -476,7 +485,32 @@ export default function MockupEditor() {
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  useEffect(() => {
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    image,
+    text,
+    scale,
+    loadedImage,
+    imagePosition.x,
+    imagePosition.y,
+    textPosition.x,
+    textPosition.y,
+    isDragging,
+    dragTarget,
+  ]);
+
+  const handleMouseDown = (e: MouseEvent) => {
     const canvas = canvasRef.current;
     if (canvas) {
       const rect = canvas.getBoundingClientRect();
@@ -486,14 +520,21 @@ export default function MockupEditor() {
       if (image && isPointInImage(x, y)) {
         setIsDragging(true);
         setDragTarget("image");
+        offsetRef.current = {
+          x: x - imagePosition.x,
+          y: y - imagePosition.y,
+        };
+        e.preventDefault();
       } else if (text && isPointInText(x, y)) {
         setIsDragging(true);
         setDragTarget("text");
+        offsetRef.current = { x: x - textPosition.x, y: y - textPosition.y };
+        e.preventDefault();
       }
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (isDragging) {
       const canvas = canvasRef.current;
       if (canvas) {
@@ -502,15 +543,21 @@ export default function MockupEditor() {
         const y = (e.clientY - rect.top) / scale;
 
         if (dragTarget === "image" && loadedImage) {
-          setImagePosition({ x, y });
+          setImagePosition({
+            x: x - offsetRef.current.x,
+            y: y - offsetRef.current.y,
+          });
         } else if (dragTarget === "text") {
-          setTextPosition({ x, y });
+          setTextPosition({
+            x: x - offsetRef.current.x,
+            y: y - offsetRef.current.y,
+          });
         }
       }
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: MouseEvent) => {
     setIsDragging(false);
     setDragTarget(null);
   };
@@ -580,10 +627,11 @@ export default function MockupEditor() {
   };
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col px-6">
+      <Header />
       <main className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2 pl-0">
+          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
             <div className="">
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
@@ -597,6 +645,7 @@ export default function MockupEditor() {
                 }`}
               >
                 <input {...getInputProps()} id="image-upload" />
+
                 {image ? (
                   <div className="flex items-center justify-center">
                     {
@@ -625,6 +674,26 @@ export default function MockupEditor() {
                   </div>
                 )}
               </div>
+
+              {image && (
+                <div className="flex items-center justify-start mt-2 group">
+                  <button
+                    onClick={() => {
+                      setImagePosition({
+                        x: 0,
+                        y: 0,
+                      });
+                    }}
+                    className="text-sm text-muted-foreground hover:underline flex flex-row flex-nowrap gap-1 items-center"
+                  >
+                    <RotateCcwIcon
+                      size="1em"
+                      className="group-hover:-rotate-90 transition-transform duration-300"
+                    />{" "}
+                    Reset image position
+                  </button>
+                </div>
+              )}
             </div>
             <div className="w-full">
               <Label htmlFor="background" className="block mb-4">
@@ -859,18 +928,37 @@ export default function MockupEditor() {
               <TabsContent value="text" className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="text">Text</Label>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-row flex-nowrap gap-2 items-center justify-between">
                     <Input
                       id="text"
                       value={text}
                       onChange={(e) => setText(e.target.value)}
                       placeholder="Enter text"
                     />
+                    <TextManager
+                      value={textStyle}
+                      onChange={(value: TextStyle) => setTextStyle(value)}
+                    />
                   </div>
-                  <TextManager
-                    value={textStyle}
-                    onChange={(value: TextStyle) => setTextStyle(value)}
-                  />
+                  {text && (
+                    <div className="flex items-center justify-start mt-2 group">
+                      <button
+                        onClick={() => {
+                          setTextPosition({
+                            x: 50,
+                            y: 50,
+                          });
+                        }}
+                        className="text-sm text-muted-foreground hover:underline flex flex-row flex-nowrap gap-1 items-center"
+                      >
+                        <RotateCcwIcon
+                          size="1em"
+                          className="group-hover:-rotate-90 transition-transform duration-300"
+                        />{" "}
+                        Reset text position
+                      </button>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
@@ -913,7 +1001,7 @@ export default function MockupEditor() {
 
           <div
             ref={containerRef}
-            className="mt-2 w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
+            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
           >
             <div
               className="relative overflow-hidden"
@@ -929,10 +1017,6 @@ export default function MockupEditor() {
                   transform: `scale(${scale})`,
                   transformOrigin: "top left",
                 }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
               />
             </div>
           </div>
@@ -976,6 +1060,6 @@ export default function MockupEditor() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
