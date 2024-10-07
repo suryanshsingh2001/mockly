@@ -147,7 +147,7 @@ export default function VideoEditor() {
             </div>
 
             {/* Right Section - Video Playback */}
-            <div className="w-full lg:w-3/4 h-fit flex items-center justify-center bg-secondary relative">
+            <div className="w-full lg:w-3/4 h-fit flex items-center justify-center bg-secondary relative border rounded-lg">
               <video
                 ref={videoRef}
                 src={video}
