@@ -21,7 +21,7 @@ export default function FAQSection() {
               Frequently Asked Questions
             </h2>
             <p className="max-w-[900px] text-muted-foreground text-base sm:text-lg md:text-xl">
-              Got questions? We've got answers. If you can't find what you're looking for, feel free to reach out.
+              Got questions? We&apos;ve got answers. If you can&apos;t find what you&apos;re looking for, feel free to reach out.
             </p>
           </div>
         </div>
