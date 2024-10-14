@@ -440,6 +440,8 @@ export default function MockupEditor() {
     }
   };
 
+  let maxTextDimensions:number | null = null;
+
   const drawText = (ctx: CanvasRenderingContext2D) => {
     if (text) {
       const fontWeight = textStyle.bold ? "bold" : "normal";
@@ -452,28 +454,57 @@ export default function MockupEditor() {
 
       const letterSpacing = textStyle.letterSpacing;
       let currentX = textPosition.x; // Store a copy of the x position
+      let currentY = textPosition.y; // Store a copy of the y position
+
+      // Check if the maxTextDimensions is not defined
+      if(!maxTextDimensions){
+        const canvasWidth = ctx.canvas.width;
+        maxTextDimensions = Math.min(1390,canvasWidth - textPosition.x); // Set the max text width
+      }
+
+      const words = text.split(" ").filter(Boolean);
 
       // Draw each character individually with spacing
       for (let i = 0; i < text.length; i++) {
-        const char = text[i];
+        const char = words[i] + " ";
 
-        // Conditionally apply the border (stroke) if applyStroke is true
-        if (textStyle.applyStroke) {
-          ctx.strokeStyle = textStyle.strokeColor; // Border color
-          ctx.lineWidth = textStyle.strokeWidth; // Border width
-          ctx.strokeText(char, currentX, textPosition.y);
+        // check if the char is undefined or Exits
+
+        if (char && char !== "undefined ") {
+          // Check if the text exceeds the screen width
+          if (currentX + ctx.measureText(char).width > maxTextDimensions) {
+            if (textStyle.underline) {
+              const totalTextWidth = currentX - textPosition.x;
+              const underlineY = currentY + 3;
+              ctx.beginPath();
+              ctx.moveTo(textPosition.x, underlineY);
+              ctx.lineTo(textPosition.x + totalTextWidth, underlineY);
+              ctx.strokeStyle = ctx.fillStyle;
+              ctx.lineWidth = 3;
+              ctx.stroke();
+            }
+            currentX = textPosition.x; // Reset the x position
+            currentY += textStyle.fontSize + 5; // Move to the next line
+          }
+
+          // Conditionally apply the border (stroke) if applyStroke is true
+          if (textStyle.applyStroke) {
+            ctx.strokeStyle = textStyle.strokeColor; // Border color
+            ctx.lineWidth = textStyle.strokeWidth; // Border width
+            ctx.strokeText(char, currentX, currentY);
+          }
+
+          // Draw the filled text
+          ctx.fillText(char, currentX, currentY);
+
+          currentX += ctx.measureText(char).width + letterSpacing; // Move to the next position
         }
-
-        // Draw the filled text
-        ctx.fillText(char, currentX, textPosition.y);
-
-        currentX += ctx.measureText(char).width + letterSpacing; // Move to the next position
       }
 
       // Draw underline (if applicable)
       if (textStyle.underline) {
         const totalTextWidth = currentX - textPosition.x; // Total width of the spaced text
-        const underlineY = textPosition.y + 3; // Position of the underline
+        const underlineY = currentY + 3; // Position of the underline
 
         ctx.beginPath(); // Begin a new path for the underline
         ctx.moveTo(textPosition.x, underlineY);
