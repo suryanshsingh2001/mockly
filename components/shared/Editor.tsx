@@ -635,7 +635,7 @@ export default function MockupEditor() {
           
           {/* <div className="w-full overflow-x-auto lg:w-1/4 space-y-8 h-full p-2"> */}
           <div className="w-full lg:w-1/4 h-screen ">
-          <div className="h-full overflow-y-auto  space-y-8">
+          <div className="h-full overflow-y-auto pr-6  space-y-8">
             <div className="">
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
