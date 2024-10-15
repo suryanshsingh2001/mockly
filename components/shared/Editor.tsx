@@ -1,4 +1,52 @@
 "use client";
+"use client"
+
+
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
+
+import { cn } from "@/lib/utils"
+
+const ScrollArea = React.forwardRef<
+  React.ElementRef<typeof ScrollAreaPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
+>(({ className, children, ...props }, ref) => (
+  <ScrollAreaPrimitive.Root
+    ref={ref}
+    className={cn("relative overflow-hidden", className)}
+    {...props}
+  >
+    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+      {children}
+    </ScrollAreaPrimitive.Viewport>
+    <ScrollBar />
+    <ScrollAreaPrimitive.Corner />
+  </ScrollAreaPrimitive.Root>
+))
+ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
+
+const ScrollBar = React.forwardRef<
+  React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
+  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
+>(({ className, orientation = "vertical", ...props }, ref) => (
+  <ScrollAreaPrimitive.ScrollAreaScrollbar
+    ref={ref}
+    orientation={orientation}
+    className={cn(
+      "flex touch-none select-none transition-colors",
+      orientation === "vertical" &&
+        "h-full w-2.5 border-l border-l-transparent p-[1px]",
+      orientation === "horizontal" &&
+        "h-2.5 flex-col border-t border-t-transparent p-[1px]",
+      className
+    )}
+    {...props}
+  >
+    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
+  </ScrollAreaPrimitive.ScrollAreaScrollbar>
+))
+ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
+
+
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
@@ -12,6 +60,7 @@ import {
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
+
 
 import { Slider } from "@/components/ui/slider";
 import {
@@ -630,12 +679,11 @@ export default function MockupEditor() {
     <div className="min-h-screen flex flex-col px-4">
       <Header />
       <main className="container mx-auto">
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-10">
 
-          
-          {/* <div className="w-full overflow-x-auto lg:w-1/4 space-y-8 h-full p-2"> */}
-          <div className="w-full lg:w-1/4 h-screen ">
-          <div className="h-full overflow-y-auto pr-6  space-y-8">
+        <ScrollArea className="w-full lg:w-1/4 h-screen pr-2 pb-10 flex gap-10 ">
+        <div className="space-y-8">
+         
             <div className="">
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
@@ -1001,8 +1049,10 @@ export default function MockupEditor() {
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
               </Button>
             </div>
-          </div>
-          </div>
+            </div>
+            <ScrollBar orientation="horizontal"></ScrollBar>
+            </ScrollArea>
+
           <div
             ref={containerRef}
             className="w-full  lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
