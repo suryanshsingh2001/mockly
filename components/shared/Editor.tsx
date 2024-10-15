@@ -627,11 +627,15 @@ export default function MockupEditor() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-6">
+    <div className="min-h-screen flex flex-col px-4">
       <Header />
       <main className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
+
+          
+          {/* <div className="w-full overflow-x-auto lg:w-1/4 space-y-8 h-full p-2"> */}
+          <div className="w-full lg:w-1/4 h-screen ">
+          <div className="h-full overflow-y-auto overflow-x-hidden  scrollbar">
             <div className="">
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
@@ -998,10 +1002,10 @@ export default function MockupEditor() {
               </Button>
             </div>
           </div>
-
+          </div>
           <div
             ref={containerRef}
-            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
+            className="w-full  lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
           >
             <div
               className="relative overflow-hidden"

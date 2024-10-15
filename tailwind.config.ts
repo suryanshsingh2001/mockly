@@ -59,9 +59,23 @@ const config: Config = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			}
-  		}
+  		},
+		  scrollbar: {
+			DEFAULT: {
+				track: 'bg-gray-200', 
+				thumb: 'bg-gray-400 rounded', 
+				hover: 'bg-gray-600', 
+			},
+			thin: {
+				track: 'bg-gray-200', 
+				thumb: 'bg-gray-400 rounded', 
+				hover: 'bg-gray-600',
+			},
+		},
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  
+  plugins: [require("tailwindcss-animate"),
+	require('tailwind-scrollbar'),],
 };
 export default config;
