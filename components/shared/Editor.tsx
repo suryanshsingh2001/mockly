@@ -1,4 +1,8 @@
 "use client";
+"use client"
+
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
@@ -12,6 +16,7 @@ import {
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
+
 
 import { Slider } from "@/components/ui/slider";
 import {
@@ -627,11 +632,14 @@ export default function MockupEditor() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-6">
+    <div className="min-h-screen flex flex-col px-4">
       <Header />
       <main className="container mx-auto">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
+        <div className="flex flex-col lg:flex-row gap-10">
+
+        <ScrollArea className="w-full lg:w-1/4 h-screen pr-2 pb-10 flex gap-10 ">
+        <div className="space-y-8">
+         
             <div className="">
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
@@ -997,11 +1005,13 @@ export default function MockupEditor() {
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
               </Button>
             </div>
-          </div>
+            </div>
+            <ScrollBar orientation="horizontal"></ScrollBar>
+            </ScrollArea>
 
           <div
             ref={containerRef}
-            className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
+            className="w-full  lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
           >
             <div
               className="relative overflow-hidden"
