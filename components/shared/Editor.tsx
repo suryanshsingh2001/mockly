@@ -315,6 +315,8 @@ export default function MockupEditor() {
     setTextStyle(defaultSettings.textStyle);
     setDownloadFormat(defaultSettings.format);
     setLoadedImage(null);
+    setIsCustomBackground(false);
+    setCustomImg(defaultSettings.background);
   };
 
   const updateCanvasScale = useCallback(() => {
