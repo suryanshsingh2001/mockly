@@ -342,18 +342,10 @@ export default function MockupEditor() {
   }, [updateCanvasScale]);
 
   useEffect(() => {
-    if(background.startsWith("data:image/")){
+    if(background.startsWith("data:image/")||background.startsWith("http")){
       const img = new Image();
+      img.setAttribute("crossOrigin", "anonymous");
       img.src = background; // No need to set crossOrigin for data URLs
-      img.onload = () => {
-        setBackgroundImage(img);
-        setIsBackgroundLoaded(true);
-      };
-    }
-     else if (background.startsWith("http")) {
-      const img = new Image();
-      img.setAttribute("crossOrigin", "anonymous"); // Ensure CORS before src set
-      img.src = background;
       img.onload = () => {
         setBackgroundImage(img);
         setIsBackgroundLoaded(true);
@@ -363,9 +355,20 @@ export default function MockupEditor() {
         setBackgroundImage(null);
         setIsBackgroundLoaded(false);
       };
-    } else {
+    }
+     else if(customImg === "" || customImg?.startsWith("http") || customImg?.startsWith("data:image/")){
+      const img = new Image();
+      img.src = customImg;
+      img.onload = () => {
+        setBackgroundImage(img);
+        setIsBackgroundLoaded(true);
+      }
+      setIsUrlFormat(true);
+     }
+    else {
       setBackgroundImage(null);
       setIsBackgroundLoaded(false);
+      setIsUrlFormat(false)
     }
   }, [background]);
 
@@ -846,14 +849,14 @@ export default function MockupEditor() {
                     <article className="flex flex-col justify-evenly items-center h-52 relative overflow-hidden hover:border-purple-600">
                       <div className="flex flex-col ml-4 items-center justify-between w-fit h-22">
                         
-                        <input type="text" className=" w-80 h-10 mt-7 mr-1 rounded-md text-center " placeholder="Paste Image Link Here" onChange={(e)=>{setCustomImg(e.target.value)}} />
+                        <Input type="text" className=" w-80 h-10 mt-7 mr-1 rounded-md text-center " placeholder="Paste Image Link Here" onChange={(e)=>{setCustomImg(e.target.value)}} />
                         {!isUrlFormat && customImg !== "" && (<p className="text-red-500 text-sm font-medium leading-none mt-1">Invalid URL Format</p>)}
 
                       </div>
                       <div className="mb-2 ">OR</div>
                       <div className="w-fit p-2 flex flex-row items-center justify-center mb-1 " {...getCustomRootProps()}>
                         <Button variant="ghost"> Browse Files <Upload  className="text-gray-400 ml-2"/> </Button> 
-                        <input {...getCustomInputProps()} />
+                        <Input {...getCustomInputProps()} />
                       </div>
                         <ArrowLeft className="absolute top-0 left-0 cursor-pointer" onClick={customBackgroundClick} />
                       
@@ -884,7 +887,7 @@ export default function MockupEditor() {
                       
                       className={`relative aspect-video cursor-pointer overflow-hidden rounded-lg border-2 border-dashed `}
                     >
-                      <input  id="custom-background" />
+                      <Input  id="custom-background" />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <Upload className="h-8 w-8 text-gray-400" onClick={customBackgroundClick} />
                       </div>
