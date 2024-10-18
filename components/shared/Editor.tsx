@@ -358,15 +358,6 @@ export default function MockupEditor() {
         setIsBackgroundLoaded(false);
       };
     }
-     else if(customImg === "" || customImg?.startsWith("http") || customImg?.startsWith("data:image/")){
-      const img = new Image();
-      img.src = customImg;
-      img.onload = () => {
-        setBackgroundImage(img);
-        setIsBackgroundLoaded(true);
-      }
-      setIsUrlFormat(true);
-     }
     else {
       setBackgroundImage(null);
       setIsBackgroundLoaded(false);
