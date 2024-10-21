@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback} from "react";
 import {
   Upload,
   X,
@@ -163,6 +163,8 @@ export default function MockupEditor() {
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
   const [browsedFile, setIsBrowsedFile] = useState(false);
   const [displayFileName, setDisplayFileName] = useState<string>("");
+  const linkRef = useRef<HTMLInputElement>(null)
+  const fileRef = useRef<any>(null)
 
   //Complete and rating
   const [complete, setComplete] = useState(false);
@@ -324,7 +326,8 @@ export default function MockupEditor() {
     setDownloadFormat(defaultSettings.format);
     setLoadedImage(null);
     setIsCustomBackground(false);
-    setCustomImg(defaultSettings.background);
+    setCustomImg("");
+    setDisplayFileName("");
   };
 
   const updateCanvasScale = useCallback(() => {
@@ -704,9 +707,29 @@ export default function MockupEditor() {
     setIsBrowsedFile(false);
   };
 
-  useEffect(()=>{
-    console.log(customImg)
-  },[customImg])
+
+  const handleTextFocus = () => {
+    if (fileRef.current) {
+      fileRef.current.value = "";
+      setIsBrowsedFile(false);
+      setDisplayFileName("");
+    }
+  };
+  
+  const handleFileFocus = () => {
+    setCustomImg("");
+    if (linkRef.current) {
+      linkRef.current.value = "";
+      setDisplayFileName("");
+    }
+  };
+
+
+  useEffect(() => {
+    if(displayFileName === ""){
+      setIsBrowsedFile(false);
+    }
+  },[displayFileName])
 
   const truncateFileName = (name: string, maxLength: number = 20): string => {
     if (name.length <= maxLength) return name;
@@ -874,6 +897,8 @@ export default function MockupEditor() {
                             const pastedValue = e.clipboardData.getData("text");
                             setCustomImg(pastedValue);
                           }}
+                          ref={linkRef}
+                          onFocus={handleTextFocus}
                         />
                         
 
@@ -891,7 +916,7 @@ export default function MockupEditor() {
                       >
                         {browsedFile ? (
                           <>
-                            <div className="flex items-center justify-center relative">
+                            <div className="flex items-center justify-center relative" ref={fileRef}>
                               {" "}
                               {truncateFileName(displayFileName)}{" "}
                               <Button
@@ -905,7 +930,7 @@ export default function MockupEditor() {
                           </>
                         ) : (
                           <>
-                            <Button variant="ghost">
+                            <Button variant="ghost" onFocus={handleFileFocus} ref={fileRef}>
                               {" "}
                               Browse Files{" "}
                               <Upload className="text-gray-400 ml-2" />{" "}
