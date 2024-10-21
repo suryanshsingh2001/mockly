@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback, use } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Upload,
   X,
@@ -8,7 +8,8 @@ import {
   RotateCcw,
   Star,
   RotateCcwIcon,
-  ArrowLeft
+  ArrowLeft,
+  CircleX,
 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
@@ -107,7 +108,7 @@ export default function MockupEditor() {
   const [background, setBackground] = useState(defaultSettings.background);
   const [isCustomBackground, setIsCustomBackground] = useState(false);
   const [isUrlFormat, setIsUrlFormat] = useState<boolean>(true);
-  const [customImg, setCustomImg] = useState<string>('');
+  const [customImg, setCustomImg] = useState<string>("");
   const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
   const [backgroundImage, setBackgroundImage] =
     useState<HTMLImageElement | null>(null);
@@ -161,6 +162,8 @@ export default function MockupEditor() {
   const offsetRef = useRef({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
+  const [browsedFile, setIsBrowsedFile] = useState(false);
+  const [displayFileName, setDisplayFileName] = useState<string>("");
 
   //Complete and rating
   const [complete, setComplete] = useState(false);
@@ -188,19 +191,21 @@ export default function MockupEditor() {
     }
   }, []);
 
-  const onCustomDrop = useCallback((acceptedFiles: File[]) => {              // Function to handle custom Background Image drop
+  const onCustomDrop = useCallback((acceptedFiles: File[]) => {
+    // Function to handle custom Background Image drop
+
     const file = acceptedFiles[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const newImageSrc = e.target?.result as string;
         setBackground(newImageSrc);
-
+        setIsBrowsedFile(true);
+        setDisplayFileName(newImageSrc);
       };
       reader.readAsDataURL(file);
-     }
-
-    },[])
+    }
+  }, []);
 
   useEffect(() => {
     if (!image) {
@@ -219,7 +224,11 @@ export default function MockupEditor() {
     multiple: false,
   });
 
-  const { getRootProps: getCustomRootProps, getInputProps: getCustomInputProps, isDragActive: isCustomDragActive } = useDropzone({
+  const {
+    getRootProps: getCustomRootProps,
+    getInputProps: getCustomInputProps,
+    isDragActive: isCustomDragActive,
+  } = useDropzone({
     onDrop: onCustomDrop,
     accept: { "image/*": [] },
     multiple: false,
@@ -344,44 +353,64 @@ export default function MockupEditor() {
   }, [updateCanvasScale]);
 
   useEffect(() => {
-    if(background.startsWith("data:image/")||background.startsWith("http")){
+    if (background.startsWith("data:image/") || background.startsWith("http")) {
       const img = new Image();
       img.setAttribute("crossOrigin", "anonymous");
       img.src = background; // No need to set crossOrigin for data URLs
       img.onload = () => {
         setBackgroundImage(img);
         setIsBackgroundLoaded(true);
-        setCustomImg("");
       };
       img.onerror = () => {
         console.error("Failed to load background image");
         setBackgroundImage(null);
         setIsBackgroundLoaded(false);
       };
-    }
-    else {
+    } else {
       setBackgroundImage(null);
       setIsBackgroundLoaded(false);
     }
   }, [background]);
 
   useEffect(() => {
-    if(customImg === ""){
-      setIsUrlFormat(true);
-    }
-    else if(customImg?.startsWith("http") || customImg?.startsWith("data:image/")){
+    const loadImage = (src: string) => {
       const img = new Image();
-      img.src = customImg;
+      img.src = src;
       img.onload = () => {
-        setBackgroundImage(img);
+        setBackgroundImage(img); // Set the image for further use
         setIsBackgroundLoaded(true);
       };
-      setIsUrlFormat(true);
-      setBackground(customImg);
-    }else{
-      setIsUrlFormat(false);
+      img.onerror = () => {
+        console.error("Failed to load image");
+        setBackgroundImage(null); // Reset in case of error
+        setIsBackgroundLoaded(false);
+      };
+    };
+    if (customImg !== undefined && customImg !== null) {
+      if (customImg.trim() === "") {
+        setIsUrlFormat(true);
+        setBackground(defaultSettings.background);
+      } else if (
+        customImg?.startsWith("http") ||
+        customImg?.startsWith("data:image/")
+      ) {
+        loadImage(customImg);
+        setIsUrlFormat(true);
+        setBackground(customImg);
+      } else {
+        setIsUrlFormat(false);
+        setBackgroundImage(null);
+        setIsBackgroundLoaded(false);
+      }
     }
-  },[customImg])
+  }, [customImg]);
+
+  useEffect(() => {
+    console.log("Background Image: ", backgroundImage);
+    console.log("custom Image", customImg);
+    console.log("isBackgroundLoaded: ", isBackgroundLoaded);
+    console.log("background: ", background);
+  }, [backgroundImage, customImg, isBackgroundLoaded, background]);
 
   const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -486,8 +515,6 @@ export default function MockupEditor() {
     }
   };
 
-  let maxTextDimensions:number | null = null;
-
   const drawText = (ctx: CanvasRenderingContext2D) => {
     if (text) {
       const fontWeight = textStyle.bold ? "bold" : "normal";
@@ -500,57 +527,28 @@ export default function MockupEditor() {
 
       const letterSpacing = textStyle.letterSpacing;
       let currentX = textPosition.x; // Store a copy of the x position
-      let currentY = textPosition.y; // Store a copy of the y position
-
-      // Check if the maxTextDimensions is not defined
-      if(!maxTextDimensions){
-        const canvasWidth = ctx.canvas.width;
-        maxTextDimensions = Math.min(1390,canvasWidth - textPosition.x); // Set the max text width
-      }
-
-      const words = text.split(" ").filter(Boolean);
 
       // Draw each character individually with spacing
       for (let i = 0; i < text.length; i++) {
-        const char = words[i] + " ";
+        const char = text[i];
 
-        // check if the char is undefined or Exits
-
-        if (char && char !== "undefined ") {
-          // Check if the text exceeds the screen width
-          if (currentX + ctx.measureText(char).width > maxTextDimensions) {
-            if (textStyle.underline) {
-              const totalTextWidth = currentX - textPosition.x;
-              const underlineY = currentY + 3;
-              ctx.beginPath();
-              ctx.moveTo(textPosition.x, underlineY);
-              ctx.lineTo(textPosition.x + totalTextWidth, underlineY);
-              ctx.strokeStyle = ctx.fillStyle;
-              ctx.lineWidth = 3;
-              ctx.stroke();
-            }
-            currentX = textPosition.x; // Reset the x position
-            currentY += textStyle.fontSize + 5; // Move to the next line
-          }
-
-          // Conditionally apply the border (stroke) if applyStroke is true
-          if (textStyle.applyStroke) {
-            ctx.strokeStyle = textStyle.strokeColor; // Border color
-            ctx.lineWidth = textStyle.strokeWidth; // Border width
-            ctx.strokeText(char, currentX, currentY);
-          }
-
-          // Draw the filled text
-          ctx.fillText(char, currentX, currentY);
-
-          currentX += ctx.measureText(char).width + letterSpacing; // Move to the next position
+        // Conditionally apply the border (stroke) if applyStroke is true
+        if (textStyle.applyStroke) {
+          ctx.strokeStyle = textStyle.strokeColor; // Border color
+          ctx.lineWidth = textStyle.strokeWidth; // Border width
+          ctx.strokeText(char, currentX, textPosition.y);
         }
+
+        // Draw the filled text
+        ctx.fillText(char, currentX, textPosition.y);
+
+        currentX += ctx.measureText(char).width + letterSpacing; // Move to the next position
       }
 
       // Draw underline (if applicable)
       if (textStyle.underline) {
         const totalTextWidth = currentX - textPosition.x; // Total width of the spaced text
-        const underlineY = currentY + 3; // Position of the underline
+        const underlineY = textPosition.y + 3; // Position of the underline
 
         ctx.beginPath(); // Begin a new path for the underline
         ctx.moveTo(textPosition.x, underlineY);
@@ -703,10 +701,33 @@ export default function MockupEditor() {
     setValidationError(defaultSettings.validationError);
   };
 
-  const customBackgroundClick = ()=>{
+  const customBackgroundClick = () => {
     setIsCustomBackground(!isCustomBackground);
     setCustomImg("");
-  }
+  };
+
+  const deleteUploadedImage = () => {
+    setBackground(defaultSettings.background);
+    setDisplayFileName("");
+    setIsBrowsedFile(false);
+  };
+
+  const truncateFileName = (name: string, maxLength: number = 20): string => {
+    if (name.length <= maxLength) return name;
+    const lastOfIndex = name.lastIndexOf(".");
+    if (lastOfIndex === -1) return name.substring(0, maxLength - 3) + "...";
+    const extension = name.slice(lastOfIndex + 1);
+    const nameWithoutExtension = name.slice(0, lastOfIndex);
+
+    if (nameWithoutExtension.length > maxLength - 3) {
+      return `${nameWithoutExtension}...${extension}`;
+    }
+    const truncatedName = nameWithoutExtension.substring(
+      0,
+      maxLength - extension.length - 4
+    );
+    return `${truncatedName}...${extension}`;
+  };
 
   return (
     <div className="min-h-screen flex flex-col px-6">
@@ -834,59 +855,103 @@ export default function MockupEditor() {
                     </p>
                   </div>
                 </TabsContent>
-                
-                <TabsContent value="image" className={isCustomBackground ? "" : "grid grid-cols-4 gap-2 "}>
-                  {isCustomBackground ?(
+
+                <TabsContent
+                  value="image"
+                  className={
+                    isCustomBackground ? "" : "grid grid-cols-4 gap-2 "
+                  }
+                >
+                  {isCustomBackground ? (
                     <article className="flex flex-col justify-evenly items-center h-52 relative overflow-hidden hover:border-purple-600">
                       <div className="flex flex-col ml-4 items-center justify-between w-fit h-22">
-                        
-                        <Input type="text" className=" w-80 h-10 mt-7 mr-1 rounded-md text-center " placeholder="Paste Image Link Here" onChange={(e)=>{setCustomImg(e.target.value)}} />
-                        {!isUrlFormat && customImg !== "" && (<p className="text-red-500 text-sm font-medium leading-none mt-1">Invalid URL Format</p>)}
-
+                        <Input
+                          type="text"
+                          className=" w-80 h-10 mt-7 mr-1 rounded-md text-center "
+                          placeholder="Paste Image Link Here"
+                          onChange={(e) => {
+                            setCustomImg(e.target.value);
+                          }}
+                          onPaste={(e) => {
+                            const pastedValue = e.clipboardData.getData("text");
+                            setCustomImg(pastedValue);
+                          }}
+                        />
+                        {!isUrlFormat && customImg !== "" && (
+                          <p className="text-red-500 text-sm font-medium leading-none mt-1">
+                            Invalid URL Format
+                          </p>
+                        )}
                       </div>
                       <div className="mb-2 ">OR</div>
-                      <div className="w-fit p-2 flex flex-row items-center justify-center mb-1 " {...getCustomRootProps()}>
-                        <Button variant="ghost"> Browse Files <Upload  className="text-gray-400 ml-2"/> </Button> 
-                        <Input {...getCustomInputProps()} />
-                      </div>
-                        <ArrowLeft className="absolute top-0 left-0 cursor-pointer" onClick={customBackgroundClick} />
-                      
-                      
-                    </article>
-                  ):(
-                    <>
-                       {backgroundUrls.map((url, index) => (
                       <div
-                        key={index}
-                        className="relative aspect-video cursor-pointer overflow-hidden rounded-lg"
-                        onClick={() => {
-                          setBackground(url);
-                        }}
+                        className="w-fit p-2 flex flex-row items-center justify-center mb-1 "
+                        {...getCustomRootProps()}
                       >
-                        {
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={url}
-                            alt={`Background ${index + 1}`}
-                            className="object-cover w-full h-full"
-                          />
-                        }
+                        {browsedFile ? (
+                          <>
+                            <div className="flex items-center justify-center relative">
+                              {" "}
+                              {truncateFileName(displayFileName)}{" "}
+                              <Button
+                                variant="ghost"
+                                className="absolute right-[-36px] top-[-33.5px] rounded-full "
+                                onClick={deleteUploadedImage}
+                              >
+                                <CircleX />
+                              </Button>{" "}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <Button variant="ghost">
+                              {" "}
+                              Browse Files{" "}
+                              <Upload className="text-gray-400 ml-2" />{" "}
+                            </Button>
+                            <Input {...getCustomInputProps()} />
+                          </>
+                        )}
                       </div>
-                    ))}
-                    <div>
-                    <div
-                      
-                      className={`relative aspect-video cursor-pointer overflow-hidden rounded-lg border-2 border-dashed `}
-                    >
-                      <Input  id="custom-background" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Upload className="h-8 w-8 text-gray-400" onClick={customBackgroundClick} />
+                      <ArrowLeft
+                        className="absolute top-0 left-0 cursor-pointer"
+                        onClick={customBackgroundClick}
+                      />
+                    </article>
+                  ) : (
+                    <>
+                      {backgroundUrls.map((url, index) => (
+                        <div
+                          key={index}
+                          className="relative aspect-video cursor-pointer overflow-hidden rounded-lg"
+                          onClick={() => {
+                            setBackground(url);
+                          }}
+                        >
+                          {
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={url}
+                              alt={`Background ${index + 1}`}
+                              className="object-cover w-full h-full"
+                            />
+                          }
+                        </div>
+                      ))}
+                      <div>
+                        <div
+                          className={`relative aspect-video cursor-pointer overflow-hidden rounded-lg border-2 border-dashed `}
+                        >
+                          <Input id="custom-background" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Upload
+                              className="h-8 w-8 text-gray-400 hover:animate-bounce"
+                              onClick={customBackgroundClick}
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-
                     </>
-                   
                   )}
                 </TabsContent>
               </Tabs>
