@@ -405,12 +405,6 @@ export default function MockupEditor() {
     }
   }, [customImg]);
 
-  useEffect(() => {
-    console.log("Background Image: ", backgroundImage);
-    console.log("custom Image", customImg);
-    console.log("isBackgroundLoaded: ", isBackgroundLoaded);
-    console.log("background: ", background);
-  }, [backgroundImage, customImg, isBackgroundLoaded, background]);
 
   const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
