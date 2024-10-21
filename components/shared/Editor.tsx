@@ -870,11 +870,12 @@ export default function MockupEditor() {
                           }}
                           value={customImg}
                           onPaste={(e) => {
+                            e.preventDefault();
                             const pastedValue = e.clipboardData.getData("text");
                             setCustomImg(pastedValue);
                           }}
                         />
-                        <span className="absolute text-gray-400 flex flex-row gap-1 items-center lg:right-2 md:right-52 sm:right-36 xs:right-5" onClick={()=>{setCustomImg("")}}>clear <RotateCcwIcon className="size-4" /></span>
+                        
 
 
                         {!isUrlFormat && customImg !== "" && (
