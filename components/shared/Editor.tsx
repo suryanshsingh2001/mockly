@@ -8,7 +8,6 @@ import {
   RotateCcw,
   Star,
   RotateCcwIcon,
-  ArrowLeft,
   CircleX,
 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
@@ -697,7 +696,6 @@ export default function MockupEditor() {
 
   const customBackgroundClick = () => {
     setIsCustomBackground(!isCustomBackground);
-    setCustomImg("");
   };
 
   const deleteUploadedImage = () => {
@@ -705,6 +703,10 @@ export default function MockupEditor() {
     setDisplayFileName("");
     setIsBrowsedFile(false);
   };
+
+  useEffect(()=>{
+    console.log(customImg)
+  },[customImg])
 
   const truncateFileName = (name: string, maxLength: number = 20): string => {
     if (name.length <= maxLength) return name;
@@ -861,16 +863,20 @@ export default function MockupEditor() {
                       <div className="flex flex-col ml-4 items-center justify-between w-fit h-22">
                         <Input
                           type="text"
-                          className=" w-80 h-10 mt-7 mr-1 rounded-md text-center "
+                          className=" w-80 h-10 mt-7 mr-1 rounded-md text-center relative "
                           placeholder="Paste Image Link Here"
                           onChange={(e) => {
                             setCustomImg(e.target.value);
                           }}
+                          value={customImg}
                           onPaste={(e) => {
                             const pastedValue = e.clipboardData.getData("text");
                             setCustomImg(pastedValue);
                           }}
                         />
+                        <span className="absolute text-gray-400 flex flex-row gap-1 items-center lg:right-2 md:right-52 sm:right-36 xs:right-5" onClick={()=>{setCustomImg("")}}>clear <RotateCcwIcon className="size-4" /></span>
+
+
                         {!isUrlFormat && customImg !== "" && (
                           <p className="text-red-500 text-sm font-medium leading-none mt-1">
                             Invalid URL Format
@@ -907,7 +913,7 @@ export default function MockupEditor() {
                           </>
                         )}
                       </div>
-                      <ArrowLeft
+                      <CircleX
                         className="absolute top-0 left-0 cursor-pointer"
                         onClick={customBackgroundClick}
                       />
@@ -934,14 +940,16 @@ export default function MockupEditor() {
                       ))}
                       <div>
                         <div
-                          className={`relative aspect-video cursor-pointer overflow-hidden rounded-lg border-2 border-dashed `}
+                          className={`relative aspect-video cursor-pointer overflow-hidden rounded-lg  `}
                         >
                           <Input id="custom-background" />
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <Upload
-                              className="h-8 w-8 text-gray-400 hover:animate-bounce"
-                              onClick={customBackgroundClick}
+                           <Button variant="ghost" className="w-full " onClick={customBackgroundClick}>
+                           <Upload
+                              className="h-8 w-8 text-gray-400"
+                              
                             />
+                           </Button> 
                           </div>
                         </div>
                       </div>
