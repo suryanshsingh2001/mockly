@@ -8,6 +8,8 @@ import {
   RotateCcw,
   Star,
   RotateCcwIcon,
+  CircleX,
+  LinkIcon,
 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
@@ -34,12 +36,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import Header from "@/components/layout/Header";
+import Header from "@/components/shared/Header.v2";
 import { ShadowManager, type Shadow } from "@/components/shadow-manager";
 import { ScreenSize, ValidationError } from "./types";
 import ValidatedInput from "./ValidatedInput";
 import { validateInput } from "./utils";
 import { TextManager, type TextStyle } from "../text-manager";
+import { Card, CardContent } from "../ui/card";
+import { Separator } from "@radix-ui/react-select";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -104,6 +108,9 @@ const defaultSettings = {
 export default function MockupEditor() {
   const [image, setImage] = useState<string | null>(defaultSettings.image);
   const [background, setBackground] = useState(defaultSettings.background);
+  const [isCustomBackground, setIsCustomBackground] = useState(false);
+  const [isUrlFormat, setIsUrlFormat] = useState<boolean>(true);
+  const [customImg, setCustomImg] = useState<string>("");
   const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
   const [backgroundImage, setBackgroundImage] =
     useState<HTMLImageElement | null>(null);
@@ -157,6 +164,10 @@ export default function MockupEditor() {
   const offsetRef = useRef({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
+  const [browsedFile, setIsBrowsedFile] = useState(false);
+  const [displayFileName, setDisplayFileName] = useState<string>("");
+  const linkRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<any>(null);
 
   //Complete and rating
   const [complete, setComplete] = useState(false);
@@ -184,6 +195,22 @@ export default function MockupEditor() {
     }
   }, []);
 
+  const onCustomDrop = useCallback((acceptedFiles: File[]) => {
+    // Function to handle custom Background Image drop
+
+    const file = acceptedFiles[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const newImageSrc = e.target?.result as string;
+        setBackground(newImageSrc);
+        setIsBrowsedFile(true);
+        setDisplayFileName(newImageSrc);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
   useEffect(() => {
     if (!image) {
       setLoadedImage(null);
@@ -197,6 +224,16 @@ export default function MockupEditor() {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    accept: { "image/*": [] },
+    multiple: false,
+  });
+
+  const {
+    getRootProps: getCustomRootProps,
+    getInputProps: getCustomInputProps,
+    isDragActive: isCustomDragActive,
+  } = useDropzone({
+    onDrop: onCustomDrop,
     accept: { "image/*": [] },
     multiple: false,
   });
@@ -291,6 +328,9 @@ export default function MockupEditor() {
     setTextStyle(defaultSettings.textStyle);
     setDownloadFormat(defaultSettings.format);
     setLoadedImage(null);
+    setIsCustomBackground(false);
+    setCustomImg("");
+    setDisplayFileName("");
   };
 
   const updateCanvasScale = useCallback(() => {
@@ -318,10 +358,10 @@ export default function MockupEditor() {
   }, [updateCanvasScale]);
 
   useEffect(() => {
-    if (background.startsWith("http")) {
+    if (background.startsWith("data:image/") || background.startsWith("http")) {
       const img = new Image();
-      img.setAttribute("crossOrigin", "anonymous"); // Ensure CORS before src set
-      img.src = background;
+      img.setAttribute("crossOrigin", "anonymous");
+      img.src = background; // No need to set crossOrigin for data URLs
       img.onload = () => {
         setBackgroundImage(img);
         setIsBackgroundLoaded(true);
@@ -336,6 +376,39 @@ export default function MockupEditor() {
       setIsBackgroundLoaded(false);
     }
   }, [background]);
+
+  useEffect(() => {
+    const loadImage = (src: string) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        setBackgroundImage(img); // Set the image for further use
+        setIsBackgroundLoaded(true);
+      };
+      img.onerror = () => {
+        console.error("Failed to load image");
+        setBackgroundImage(null); // Reset in case of error
+        setIsBackgroundLoaded(false);
+      };
+    };
+    if (customImg !== undefined && customImg !== null) {
+      if (customImg.trim() === "") {
+        setIsUrlFormat(true);
+        setBackground(defaultSettings.background);
+      } else if (
+        customImg?.startsWith("http") ||
+        customImg?.startsWith("data:image/")
+      ) {
+        loadImage(customImg);
+        setIsUrlFormat(true);
+        setBackground(customImg);
+      } else {
+        setIsUrlFormat(false);
+        setBackgroundImage(null);
+        setIsBackgroundLoaded(false);
+      }
+    }
+  }, [customImg]);
 
   const drawBackgroundImage = (ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -626,8 +699,57 @@ export default function MockupEditor() {
     setValidationError(defaultSettings.validationError);
   };
 
+  const customBackgroundClick = () => {
+    setIsCustomBackground(!isCustomBackground);
+  };
+
+  const deleteUploadedImage = () => {
+    setBackground(defaultSettings.background);
+    setDisplayFileName("");
+    setIsBrowsedFile(false);
+  };
+
+  const handleTextFocus = () => {
+    if (fileRef.current) {
+      fileRef.current.value = "";
+      setIsBrowsedFile(false);
+      setDisplayFileName("");
+    }
+  };
+
+  const handleFileFocus = () => {
+    setCustomImg("");
+    if (linkRef.current) {
+      linkRef.current.value = "";
+      setDisplayFileName("");
+    }
+  };
+
+  useEffect(() => {
+    if (displayFileName === "") {
+      setIsBrowsedFile(false);
+    }
+  }, [displayFileName]);
+
+  const truncateFileName = (name: string, maxLength: number = 20): string => {
+    if (name.length <= maxLength) return name;
+    const lastOfIndex = name.lastIndexOf(".");
+    if (lastOfIndex === -1) return name.substring(0, maxLength - 3) + "...";
+    const extension = name.slice(lastOfIndex + 1);
+    const nameWithoutExtension = name.slice(0, lastOfIndex);
+
+    if (nameWithoutExtension.length > maxLength - 3) {
+      return `${nameWithoutExtension}...${extension}`;
+    }
+    const truncatedName = nameWithoutExtension.substring(
+      0,
+      maxLength - extension.length - 4
+    );
+    return `${truncatedName}...${extension}`;
+  };
+
   return (
-    <div className="min-h-screen flex flex-col px-6">
+    <div className="flex flex-col px-6">
       <Header />
       <main className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -699,7 +821,7 @@ export default function MockupEditor() {
               <Label htmlFor="background" className="block mb-4">
                 Background
               </Label>
-              <Tabs defaultValue="color" className="w-full">
+              <Tabs defaultValue="image" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="color">Color</TabsTrigger>
                   <TabsTrigger value="gradient">Gradient</TabsTrigger>
@@ -714,6 +836,8 @@ export default function MockupEditor() {
                     onChange={(e) => setBackground(e.target.value)}
                     className="w-full h-10"
                   />
+
+                
                 </TabsContent>
                 <TabsContent value="gradient">
                   <div className="space-y-2">
@@ -752,25 +876,110 @@ export default function MockupEditor() {
                     </p>
                   </div>
                 </TabsContent>
-                <TabsContent value="image" className="grid grid-cols-4 gap-2">
-                  {backgroundUrls.map((url, index) => (
-                    <div
-                      key={index}
-                      className="relative aspect-video cursor-pointer overflow-hidden rounded-lg"
-                      onClick={() => {
-                        setBackground(url);
-                      }}
-                    >
-                      {
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={url}
-                          alt={`Background ${index + 1}`}
-                          className="object-cover w-full h-full"
-                        />
-                      }
-                    </div>
-                  ))}
+
+                <TabsContent value="image">
+                  <Tabs
+                    defaultValue="preset"
+                    className="w-full max-w-3xl mx-auto"
+                  >
+                    <TabsList className="grid w-full grid-cols-2 bg-primary text-slate-950 rounded-2xl ">
+                      <TabsTrigger value="preset" className="rounded-2xl">
+                        Preset
+                      </TabsTrigger>
+                      <TabsTrigger value="custom" className="rounded-2xl">
+                        Custom
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="preset" className="mt-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {backgroundUrls.map((url, index) => (
+                          <div
+                            key={index}
+                            className={`relative aspect-video cursor-pointer overflow-hidden rounded-lg ${
+                              background === url ? "ring-2 ring-primary" : ""
+                            }`}
+                            onClick={() => setBackground(url)}
+                          >
+                            <img
+                              src={url}
+                              alt={`Background ${index + 1}`}
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="custom" className="mt-4">
+                      <Card>
+                        <CardContent className="p-6">
+                          <div className="space-y-6">
+                            <div className="space-y-2">
+                              <Label
+                                htmlFor="image-url"
+                                className="text-sm font-medium"
+                              >
+                                Image URL
+                              </Label>
+                              <div className="relative">
+                                <Input
+                                  id="image-url"
+                                  type="text"
+                                  placeholder="Paste image link here"
+                                  className="pr-10"
+                                  value={customImg}
+                                  onChange={(e) => setCustomImg(e.target.value)}
+                                  onFocus={handleTextFocus}
+                                  ref={linkRef}
+                                />
+                                <LinkIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                              </div>
+                              {!isUrlFormat && customImg !== "" && (
+                                <p className="text-red-500 text-sm">
+                                  Invalid URL format
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-center">
+                              <Separator className="flex-grow" />
+                              <span className="px-3 text-sm text-gray-500">
+                                OR
+                              </span>
+                              <Separator className="flex-grow" />
+                            </div>
+
+                            <div
+                              {...getCustomRootProps()}
+                              className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors"
+                            >
+                              <input {...getCustomInputProps()} />
+                              {browsedFile ? (
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm truncate flex-1">
+                                    {truncateFileName(displayFileName)}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={deleteUploadedImage}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div>
+                                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                                  <p className="mt-2 text-sm text-gray-500">
+                                    Drag & drop or click to upload
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
                 </TabsContent>
               </Tabs>
             </div>
