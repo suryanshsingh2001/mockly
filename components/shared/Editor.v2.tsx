@@ -1,16 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import {
-  Upload,
-  X,
-  Download,
-  RotateCcw,
-  Star,
-  RotateCcwIcon,
-  CircleX,
-  LinkIcon,
-} from "lucide-react";
+import { Upload, X, RotateCcw, RotateCcwIcon, LinkIcon } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
@@ -25,17 +16,9 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/shared/Header.v2";
 import { ShadowManager, type Shadow } from "@/components/shadow-manager";
 import { ScreenSize, ValidationError } from "./types";
@@ -44,6 +27,7 @@ import { validateInput } from "./utils";
 import { TextManager, type TextStyle } from "../text-manager";
 import { Card, CardContent } from "../ui/card";
 import { Separator } from "@radix-ui/react-select";
+import ExportButton from "./buttons/ExportButton";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -242,69 +226,9 @@ export default function MockupEditor() {
     defaultSettings.format
   );
 
-  const handleDownload = (format: "png" | "jpg" | "svg" | "pdf") => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current;
-
-      let imageData: string | undefined;
-      if (format === "png" || format === "jpg") {
-        const mimeType = format === "png" ? "image/png" : "image/jpeg";
-        imageData = canvas.toDataURL(mimeType);
-        const filename = `screenshot${Date.now()}.${format}`;
-        saveAs(imageData, filename);
-      } else if (format === "svg") {
-        // Convert canvas to SVG data
-        if (!imageData) imageData = canvas.toDataURL("image/png");
-
-        const svgWidth = canvas.width;
-        const svgHeight = canvas.height;
-        const svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">
-                           <foreignObject width="100%" height="100%">
-                             <img xmlns="http://www.w3.org/1999/xhtml" src="${imageData}" width="${svgWidth}" height="${svgHeight}"/>
-                           </foreignObject>
-                         </svg>`;
-        const svgBlob = new Blob([svgData], {
-          type: "image/svg+xml;charset=utf-8",
-        });
-        const filename = `screenshot${Date.now()}.svg`;
-        saveAs(svgBlob, filename);
-      } else if (format === "pdf") {
-        if (!imageData) imageData = canvas.toDataURL("image/png");
-
-        const imgWidth = canvas.width;
-        const imgHeight = canvas.height;
-        const pdf = new jsPDF({
-          orientation: imgWidth > imgHeight ? "landscape" : "portrait",
-          unit: "px",
-          format: [imgWidth, imgHeight],
-        });
-
-        pdf.addImage(imageData, "PNG", 0, 0, imgWidth, imgHeight);
-        const filename = `screenshot${Date.now()}.pdf`;
-        pdf.save(filename);
-      }
-
-      setComplete(true);
-    }
-  };
-
   const handleClearImage = () => {
     setImage(null);
     setLoadedImage(null);
-  };
-
-  const handleCloseDialog = () => {
-    setComplete(false);
-    setRating(0);
-    setComment("");
-  };
-
-  const handleSubmitFeedback = () => {
-    // Here you would typically send the rating and comment to your backend
-    console.log("Rating:", rating);
-    console.log("Comment:", comment);
-    handleCloseDialog();
-    handleReset();
   };
 
   const handleReset = () => {
@@ -753,7 +677,7 @@ export default function MockupEditor() {
       <Header />
       <main className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
+          <div className="w-full lg:w-1/4 space-y-8  overflow-y-auto h-full p-2">
             <div className="">
               <Label htmlFor="image-upload" className="block mb-4">
                 Upload Image
@@ -836,8 +760,6 @@ export default function MockupEditor() {
                     onChange={(e) => setBackground(e.target.value)}
                     className="w-full h-10"
                   />
-
-                
                 </TabsContent>
                 <TabsContent value="gradient">
                   <div className="space-y-2">
@@ -1172,36 +1094,13 @@ export default function MockupEditor() {
               </TabsContent>
             </Tabs>
 
-            <div className="flex space-x-2">
-              <Select
-                value={format}
-                onValueChange={(value) =>
-                  setDownloadFormat(value as "png" | "jpg" | "svg" | "pdf")
-                }
-              >
-                <SelectTrigger className="mb-4 p-2 border  rounded-md">
-                  <SelectValue placeholder="Select format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="png">PNG</SelectItem>
-                  <SelectItem value="jpg">JPG</SelectItem>
-                  <SelectItem value="svg">SVG</SelectItem>
-                  <SelectItem value="pdf">PDF</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex space-x-2 w-full">
+              <ExportButton canvasRef={canvasRef} handleReset={handleReset} />
 
               <Button
-                onClick={() => handleDownload(format)}
-                className="w-full"
-                disabled={!image && !text}
-              >
-                <Download className="mr-2 h-4 w-4" /> Download
-              </Button>
-
-              <Button
-                onClick={handleReset}
+                onClick={() => handleReset()}
                 variant="outline"
-                className="w-full"
+                className="w-1/2"
               >
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
               </Button>
@@ -1231,44 +1130,6 @@ export default function MockupEditor() {
           </div>
         </div>
       </main>
-
-      <Dialog open={complete} onOpenChange={setComplete}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Thank you for using Mockly!</DialogTitle>
-            <DialogDescription>
-              We&apos;d love to hear your feedback. How was your experience?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="flex justify-center space-x-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`w-8 h-8 cursor-pointer transition-colors ${
-                    star <= rating
-                      ? "text-yellow-400 fill-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                  onClick={() => setRating(star)}
-                />
-              ))}
-            </div>
-            <Textarea
-              id="comment"
-              placeholder="Leave a comment (optional)"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmitFeedback}>Submit Feedback</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
