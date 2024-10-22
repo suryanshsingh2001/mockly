@@ -36,9 +36,9 @@ export const faqs = [
       "You can upload images in common formats like PNG, JPEG, and SVG. These formats are widely supported and make it easy to incorporate your screenshots into the tool.",
   },
   {
-    question: "How can I customize background image?",
+    question: "How can I add my own background image?",
     answer:
-      "Custom backgrounds are currently not available, but are planned for future updates. Stay tuned for updates, or if you'd like, feel free to contribute to the implementation!",
+      "Mockly now allows you to upload your own background image or choose from a selection of built-in backgrounds. You can also customize the background color to match your design needs.",
   },
   {
     question: "Can I preview my designs on multiple devices?",
