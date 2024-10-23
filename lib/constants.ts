@@ -1,3 +1,24 @@
+
+export const backgroundUrls = [
+  "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1560015534-cee980ba7e13?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1501696461415-6bd6660c6742?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557682260-96773eb01377?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557682268-e3955ed5d83f?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557683311-eac922347aa1?w=1600&h=900&fit=crop",
+];
+
+export const screenSizes = [
+  { name: "Mobile", width: 375, height: 667 },
+  { name: "Tablet", width: 768, height: 1024 },
+  { name: "Desktop", width: 1440, height: 900 },
+];
+
+
+
+
 export const FontFamilyNames: string[] = [
   "Arial",
   "Impact",
@@ -36,9 +57,9 @@ export const faqs = [
       "You can upload images in common formats like PNG, JPEG, and SVG. These formats are widely supported and make it easy to incorporate your screenshots into the tool.",
   },
   {
-    question: "How can I customize background image?",
+    question: "How can I add my own background image?",
     answer:
-      "Custom backgrounds are currently not available, but are planned for future updates. Stay tuned for updates, or if you'd like, feel free to contribute to the implementation!",
+      "Mockly now allows you to upload your own background image or choose from a selection of built-in backgrounds. You can also customize the background color to match your design needs.",
   },
   {
     question: "Can I preview my designs on multiple devices?",

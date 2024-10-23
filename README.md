@@ -177,7 +177,7 @@ You can upload images in common formats like PNG, JPEG, and SVG. These formats a
 
 <details>
 <summary>6. How can I customize background image?</summary>
-Custom backgrounds are currently not available, but are planned for future updates. Stay tuned for updates, or if you'd like, feel free to contribute to the implementation!
+You can customize the background image by uploading your own image or selecting from the available templates. You can also adjust the position, zoom, and text to create a unique mockup.
 </details>
 
 <details>
