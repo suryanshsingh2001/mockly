@@ -28,6 +28,7 @@ import { TextManager, type TextStyle } from "../text-manager";
 import { Card, CardContent } from "../ui/card";
 import { Separator } from "@radix-ui/react-select";
 import ExportButton from "./buttons/ExportButton";
+import { truncateFileName } from "@/lib/utils";
 
 const backgroundUrls = [
   "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
@@ -143,20 +144,19 @@ export default function MockupEditor() {
     defaultSettings.textPosition
   );
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
   const [browsedFile, setIsBrowsedFile] = useState(false);
   const [displayFileName, setDisplayFileName] = useState<string>("");
+
+
+  // Refs for canvas and container elements
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef({ x: 0, y: 0 });
   const linkRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<any>(null);
-
-  //Complete and rating
-  const [complete, setComplete] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
 
   const customScreenSize = {
     height: Number(customHeight),
@@ -655,22 +655,7 @@ export default function MockupEditor() {
     }
   }, [displayFileName]);
 
-  const truncateFileName = (name: string, maxLength: number = 20): string => {
-    if (name.length <= maxLength) return name;
-    const lastOfIndex = name.lastIndexOf(".");
-    if (lastOfIndex === -1) return name.substring(0, maxLength - 3) + "...";
-    const extension = name.slice(lastOfIndex + 1);
-    const nameWithoutExtension = name.slice(0, lastOfIndex);
-
-    if (nameWithoutExtension.length > maxLength - 3) {
-      return `${nameWithoutExtension}...${extension}`;
-    }
-    const truncatedName = nameWithoutExtension.substring(
-      0,
-      maxLength - extension.length - 4
-    );
-    return `${truncatedName}...${extension}`;
-  };
+  
 
   return (
     <div className="flex flex-col px-6">
