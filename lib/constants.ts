@@ -1,3 +1,24 @@
+
+export const backgroundUrls = [
+  "https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1560015534-cee980ba7e13?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1501696461415-6bd6660c6742?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557682260-96773eb01377?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557682268-e3955ed5d83f?w=1600&h=900&fit=crop",
+  "https://images.unsplash.com/photo-1557683311-eac922347aa1?w=1600&h=900&fit=crop",
+];
+
+export const screenSizes = [
+  { name: "Mobile", width: 375, height: 667 },
+  { name: "Tablet", width: 768, height: 1024 },
+  { name: "Desktop", width: 1440, height: 900 },
+];
+
+
+
+
 export const FontFamilyNames: string[] = [
   "Arial",
   "Impact",
