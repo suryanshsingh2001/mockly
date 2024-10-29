@@ -1,0 +1,137 @@
+*This is a submission for the [2024 Hacktoberfest Writing challenge](https://dev.to/challenges/hacktoberfest): Maintainer Experience*
+
+
+Hey fellow developers! 👋 
+
+Hacktoberfest is here, and rather than telling you another "how I built this" story, let me share the real, chaotic, and somehow successful journey of Mockly. Grab your favorite debug-time beverage – you'll need it!
+
+## In the Beginning: There Was Frustration 😤
+
+Picture this: It's 11 PM, you've just finished coding the next big thing, and now you need to create mockups for the documentation or your personal portfolio. Your options?
+- Figma: The professional powerhouse that makes you feel like you need a UI/UX degree just to move a rectangle
+- Canva: Where every other element is locked behind a premium paywall, and your design screams "I used a template!"
+- MS Paint: The old reliable that's been sitting there since Windows 95, waiting patiently for its moment to shine (And yes, we've all used the spray paint tool to create "textured backgrounds")
+
+That's how Mockly was born – not with a grand vision, but with a simple "I'm too tired for this" moment.
+
+## The MVP: Minimum Viable Panic 😅
+
+The first version of Mockly was like that first pancake you make – functional but questionable. Just a simple browser-based tool to wrap screenshots in device frames. The code looked like it was written by a caffeinated raccoon, but hey – it worked!
+
+```javascript
+// Actual comment from the first commit:
+// TODO: Fix this before anyone sees it
+// Narrator: Everyone saw it.
+```
+
+## Going Open Source: The Plot Twist 🎭
+
+Making Mockly open source was like inviting strangers to read your diary – terrifying but liberating. The response? Overwhelming. Turns out other developers also wanted a simple way to make their screenshots look fancy. Who knew?
+
+## Current Superpowers ✨
+
+Today, Mockly has evolved into something actually useful (shocking, I know):
+
+1. **Instant Mockups**: Upload, tweak, done. Like instant noodles, but for design.
+2. **Multi-device Preview**: Because your app should look good everywhere, even on your cousin's ancient iPad.
+3. **Zoom & Place**: Pixel-perfect positioning without needing perfect eyesight.
+4. **Text & Style**: Make it pop without making it look like a '90s GeoCities site.
+5. **No Login Required**: Because remembering another password might be the last straw.
+6. **No Watermarks**: Your designs, your glory.
+7. **Free Forever**: Like oxygen, but for mockups.
+
+## The Real Heroes: Our Contributors 🦸‍♂️🦸‍♀️
+
+
+![photo](https://contrib.rocks/image?repo=suryanshsingh2001/mockly)
+
+Every successful project has its heroes. Ours just happen to be fueled by coffee and memes:
+
+- [kvtemadden](https://github.com/kvtemadden): Turned our canvas from "it works sometimes" to "it actually works!". Fixed all major performance issues. Contributed to MVP of Video Editor.
+- [0xkafkaa](https://github.com/0xkafkaa): Added download options (including one for your grandma's Windows XP)
+- [Laikokwui](https://github.com/Laikokwui): Made text customization that doesn't make designers cry
+- [rahulchaudhary2244](https://github.com/rahulchaudhary2244): Because one size definitely doesn't fit all, created custom screen sizes
+- [kirito05](https://github.com/kirito05): Added custom backgrounds option that don't look like they're from Windows 98
+
+## The Chronicles of Chaos: Real Developer Stories 🎢
+
+### The "Works on My Machine" Saga
+We've seen code that looked like it was written during an earthquake. Variables named 'temp1', 'temp2', and the infamous 'finalFinalREALLYfinal'. Our code review comments evolved from "Please consider refactoring" to "WHO HURT YOU?"
+
+### The Ghost Stories 👻
+```
+Dev: "I'll finish it this weekend!"
+Narrator: They did not finish it that weekend.
+*or any weekend thereafter*
+```
+
+### The Utils File That Never Was 📁
+Some say our longest component file is still being scrolled to this day. Creating a utils file somehow became harder than explaining why Internet Explorer was actually useful.
+
+### How We Survived (Barely) 🛟
+
+1. **The Code Review Bingo**
+   - "Unnecessary console.log" ✓
+   - "Function longer than a CV" ✓
+   - "Variable names that tell a story (a horror story)" ✓
+
+2. **The Ghost Busters Protocol**
+   - Two weeks of silence = "friendly" reminder
+   - One month of silence = Your issue is now free real estate
+
+3. **The Great Utils Revolution**
+   - Started giving out "Most Refactored Code" awards
+   - Created a support group for those afraid of creating new files
+
+## The Road Ahead 🛣️
+
+We're not done yet! Coming soon(ish):
+- **AI-Powered Background Removal**: Because manually removing backgrounds is so 2023
+- **Template Library**: For when creativity goes on vacation
+- **Collaboration Features**: Make mockups with friends (yes, developers have friends!)
+- **Advanced Animation**: Make your mockups move like they're in a developer's version of Disney
+
+## Why Mockly? Because Life's Too Short for Bad Mockups 🎨
+
+We built Mockly because:
+- Design tools shouldn't need a 200-page manual
+- Your time is better spent coding than fighting with Photoshop
+- Sometimes, simple is better (looking at you, enterprise software)
+- Mockups shouldn't cost more than your coffee budget
+
+## Join Our Circus 🎪
+
+As we celebrate Hacktoberfest, we're looking for more brave souls to join our adventure. Whether you're:
+- A code warrior ready for battle
+- A first-time contributor (we promise we don't bite)
+- Someone who just wants to fix that one annoying bug
+- A developer who thinks our jokes need improvement
+
+We have a place for you! Check out our [GitHub repo](https://github.com/suryanshsingh2001/mockly) for open issues.
+
+or
+
+Just check out the [website](https://www.mockly.site/)
+
+## The End (For Now) 🌅
+
+What started as a weekend project has turned into a tool used by thousands of developers. The best part? The amazing community we've built – every PR, every issue, every "it works on my machine" comment has made Mockly better.
+
+Remember: Creating mockups shouldn't feel like debugging production on a Friday evening. With Mockly, it's actually... fun!
+
+Happy coding, and may your mockups be ever pixel-perfect! 🚀
+
+---
+*P.S.: If you found a bug while reading this, it's not a bug – it's an undocumented feature. But feel free to fix it anyway!* 😉
+
+---
+
+**Suryansh Singh** (Author of this cool project)
+{% github suryanshsingh2001/mockly %}
+
+
+
+
+
+
+
