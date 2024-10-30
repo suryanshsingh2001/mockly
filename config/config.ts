@@ -2,7 +2,7 @@ export type Config = typeof siteConfig;
 
 export const siteConfig = {
   name: "Mockly",
-  url: "https://mockly.vercel.app",
+  url: "https://www.mockly.site",
   ogImage: "/icon-512.png",
   description:
     "Mockly streamlines the process of creating stunning mockups for your projects. No design skills? No problem. Pick your screenshots, customize backgrounds, and add text—all without leaving your browser. Fast, easy, and fully client-side.",

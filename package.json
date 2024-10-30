@@ -27,6 +27,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^11.3.31",
     "gif.js": "^0.2.0",
+    "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.2",
     "lucide-react": "^0.437.0",
@@ -37,10 +38,15 @@
     "react-color": "^2.19.3",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
+    "rehype-pretty-code": "^0.14.0",
+    "rehype-stringify": "^10.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.1",
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.168.0"
+    "three": "^0.168.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@types/node": "^20",
