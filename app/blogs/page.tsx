@@ -26,6 +26,7 @@ export default async function BlogPage() {
         })
         .map((post, id) => (
           <Link
+            key={id}
             className="flex flex-col space-y-1 mb-4"
             href={`/blogs/${post.slug}`}
           >
