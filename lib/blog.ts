@@ -26,9 +26,11 @@ export async function markdownToHTML(markdown: string) {
       // https://rehype-pretty.pages.dev/#usage
       theme: {
         light: "min-light",
-        dark: "min-dark",
+        dark: "dark-plus",
       },
       keepBackground: false,
+    
+      
     })
     .use(rehypeStringify)
     .process(markdown);

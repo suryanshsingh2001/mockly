@@ -11,7 +11,7 @@ export default async function BlogPage() {
   const posts = await getBlogPosts();
 
   return (
-    <section className="flex flex-col items-center max-w-2xl mx-auto py-12 sm:py-24 px-6">
+    <section className="min-h-screen bg-background font-sans antialiased max-w-2xl mx-auto py-12 sm:py-24 px-6">
       <h1 className="font-medium text-2xl mb-8 tracking-tighter">
         Mockly Blog
       </h1>

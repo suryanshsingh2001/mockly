@@ -21,6 +21,7 @@
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@react-three/fiber": "^8.17.6",
     "@types/file-saver": "^2.0.7",
+    "@types/mdx": "^2.0.13",
     "@types/react-color": "^3.0.12",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -43,12 +44,14 @@
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.1",
     "sharp": "^0.33.5",
+    "shiki": "^1.7.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.168.0",
     "unified": "^11.0.5"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

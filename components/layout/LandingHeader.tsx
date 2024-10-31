@@ -60,9 +60,9 @@ export default function LandingHeader() {
 
             <Link
               className="text-sm font-medium hover:text-primary transition-colors"
-              href="#pricing"
+              href="/blogs"
             >
-              Pricing
+              Blogs
             </Link>
             <Link
               href={siteConfig.socialLinks.github}
