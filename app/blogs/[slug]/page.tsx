@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Clock, Calendar } from "lucide-react";
+import Image from "next/image";
 
 
 
@@ -66,6 +67,10 @@ export default async function Blog({
   return (
     <div className="min-h-screen ">
       <section className="max-w-3xl mx-auto py-12 sm:py-24 px-6">
+
+      <Image src={post.metadata.image} alt={post.metadata.title} width={1200} height={600} className="rounded-xl" />
+
+
         <div className="p-8 rounded-xl">
           {/* Article Header */}
           <header className="mb-12">
@@ -116,7 +121,7 @@ export default async function Blog({
 
           {/* Article Content */}
           <article
-            className="prose  dark:prose-invert"
+            className="prose dark:prose-invert"
             dangerouslySetInnerHTML={{ __html: post.source }}
           />
         </div>
