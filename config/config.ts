@@ -3,6 +3,8 @@ export type Config = typeof siteConfig;
 export const siteConfig = {
   name: "Mockly",
   url: "https://www.mockly.site",
+  author : "Suryansh Singh",
+  authorImage : "https://avatars.githubusercontent.com/u/80690023?s=96&v=4",
   ogImage: "/icon-512.png",
   description:
     "Mockly streamlines the process of creating stunning mockups for your projects. No design skills? No problem. Pick your screenshots, customize backgrounds, and add text—all without leaving your browser. Fast, easy, and fully client-side.",

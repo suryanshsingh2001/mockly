@@ -13,6 +13,11 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: 'raw.githubusercontent.com',
                 pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'avatars.githubusercontent.com',
+                pathname: '/**',
             }
         ]
     }
