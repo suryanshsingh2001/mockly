@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Upload, X, RotateCcw, RotateCcwIcon, LinkIcon } from "lucide-react";
+import {
+  Upload,
+  X,
+  RotateCcw,
+  RotateCcwIcon,
+  LinkIcon,
+  Sparkles,
+} from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
@@ -30,17 +37,22 @@ import { Separator } from "@radix-ui/react-select";
 import ExportButton from "./buttons/ExportButton";
 import { truncateFileName } from "@/lib/utils";
 import { backgroundUrls, screenSizes } from "@/lib/constants";
+import { getGradientFromImage } from "@/lib/extractColors";
 
 const validationError = {
   customHeight: "",
   customWidth: "",
 } satisfies ValidationError;
 
+type BackgroundTab = "color" | "gradient" | "image";
+
 const defaultSettings = {
   image: null,
   background: backgroundUrls[0],
+  backgroundTab: "image" as BackgroundTab,
   customColor1: "#ffffff",
   customColor2: "#000000",
+  customColor3: "#000000",
   gradientAngle: 0,
   screenSize: screenSizes[2],
   zoom: 50,
@@ -76,6 +88,10 @@ const defaultSettings = {
 
 export default function MockupEditor() {
   const [image, setImage] = useState<string | null>(defaultSettings.image);
+
+  const [backgroundTab, setBackgroundTab] = useState<BackgroundTab>(
+    defaultSettings.backgroundTab
+  );
   const [background, setBackground] = useState(defaultSettings.background);
   const [isCustomBackground, setIsCustomBackground] = useState(false);
   const [isUrlFormat, setIsUrlFormat] = useState<boolean>(true);
@@ -89,6 +105,9 @@ export default function MockupEditor() {
   );
   const [customColor2, setCustomColor2] = useState(
     defaultSettings.customColor2
+  );
+  const [customColor3, setCustomColor3] = useState(
+    defaultSettings.customColor3
   );
   const [gradientAngle, setGradientAngle] = useState(
     defaultSettings.gradientAngle
@@ -132,7 +151,6 @@ export default function MockupEditor() {
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
   const [browsedFile, setIsBrowsedFile] = useState(false);
   const [displayFileName, setDisplayFileName] = useState<string>("");
-
 
   // Refs for canvas and container elements
 
@@ -220,6 +238,7 @@ export default function MockupEditor() {
     setBackground(defaultSettings.background);
     setCustomColor1(defaultSettings.customColor1);
     setCustomColor2(defaultSettings.customColor2);
+    setCustomColor3(defaultSettings.customColor3);
     setGradientAngle(defaultSettings.gradientAngle);
     setScreenSize(defaultSettings.screenSize);
     setPresetScreenSize(defaultSettings.screenSize);
@@ -237,8 +256,25 @@ export default function MockupEditor() {
     setDownloadFormat(defaultSettings.format);
     setLoadedImage(null);
     setIsCustomBackground(false);
+    setBackgroundTab(defaultSettings.backgroundTab);
     setCustomImg("");
     setDisplayFileName("");
+  };
+
+  const autoPickColor = async () => {
+    if (!image) {
+      return;
+    }
+    getGradientFromImage(image).then((colors) => {
+      if (colors) {
+        console.log(colors);
+        setCustomColor1(colors[0]);
+        setCustomColor2(colors[1]);
+        setCustomColor3(colors[2]);
+        setBackground("gradient");
+        setBackgroundTab("gradient");
+      }
+    });
   };
 
   const updateCanvasScale = useCallback(() => {
@@ -330,7 +366,8 @@ export default function MockupEditor() {
         Math.sin((gradientAngle * Math.PI) / 180) * screenSize.height
       );
       gradient.addColorStop(0, customColor1);
-      gradient.addColorStop(1, customColor2);
+      gradient.addColorStop(0.33, customColor2);
+      gradient.addColorStop(1, customColor3);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, screenSize.width, screenSize.height);
     } else {
@@ -639,8 +676,6 @@ export default function MockupEditor() {
     }
   }, [displayFileName]);
 
-  
-
   return (
     <div className="flex flex-col px-6">
       <Header />
@@ -648,7 +683,7 @@ export default function MockupEditor() {
         <div className="flex flex-col lg:flex-row gap-8 ">
           <div className="w-full lg:w-1/4 space-y-8  overflow-y-auto h-full p-2 ">
             <div className="">
-              <Label htmlFor="image-upload" className="block mb-4">
+              <Label htmlFor="image-upload" className="block mb-4 text-md">
                 Upload Image
               </Label>
               <div
@@ -711,10 +746,32 @@ export default function MockupEditor() {
               )}
             </div>
             <div className="w-full">
-              <Label htmlFor="background" className="block mb-4">
-                Background
-              </Label>
-              <Tabs defaultValue="image" className="w-full">
+              <div className="flex items-center justify-between  mb-2">
+                <Label htmlFor="background" className="block text-md">
+                  Background
+                </Label>
+
+                <Button
+                  onClick={autoPickColor}
+                  variant={"default"}
+                  size={"sm"}
+                  className="text-white font-semibold rounded transition transform hover:scale-105"
+                >
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Auto Pick
+                  </>
+                </Button>
+              </div>
+
+              <Tabs
+                defaultValue="image"
+                value={backgroundTab}
+                onValueChange={(value) => {
+                  setBackgroundTab(value as BackgroundTab);
+                }}
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="color">Color</TabsTrigger>
                   <TabsTrigger value="gradient">Gradient</TabsTrigger>
@@ -745,6 +802,15 @@ export default function MockupEditor() {
                       <Input
                         type="color"
                         value={customColor2}
+                        onChange={(e) => {
+                          setCustomColor2(e.target.value);
+                          setBackground("gradient");
+                        }}
+                        className="w-1/2 h-10"
+                      />
+                      <Input
+                        type="color"
+                        value={customColor3}
                         onChange={(e) => {
                           setCustomColor2(e.target.value);
                           setBackground("gradient");
@@ -875,7 +941,7 @@ export default function MockupEditor() {
               </Tabs>
             </div>
             <div className="w-full">
-              <Label htmlFor="screen-size" className="block mb-4">
+              <Label htmlFor="screen-size" className="block mb-4 text-md">
                 Screen Size
               </Label>
               <Tabs defaultValue="preset" className="w-full">
