@@ -35,6 +35,7 @@ import { Badge } from "../ui/badge";
 import FeatureSection from "../sections/FeatureSection";
 import CTASection from "../sections/CTASection";
 import FAQSection from "../sections/FAQSection";
+import { PeerlistSpotlight } from "../shared/PeerlistSpotlight";
 
 export default function LandingPage() {
   return (
@@ -47,11 +48,12 @@ export default function LandingPage() {
             <div className="grid gap-6 lg:grid-cols-[1fr_1fr] xl:grid-cols-[1fr_1fr] items-center">
               <div className="flex flex-col justify-center space-y-6">
                 <div className="space-y-4">
-                  <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter max-w-[600px] animate-fade-in">
+                  <h1 className="text-4xl font-sans sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter max-w-[600px] animate-fade-in">
                     Create Stunning Screenshots in Seconds
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground text-base sm:text-lg md:text-xl animate-fade-in-up">
-                  With Mockly, just pick, place, zoom—done. Fast, stress-free mockups for developers who&apos;d rather code than design.
+                    With Mockly, just pick, place, zoom—done. Fast, stress-free
+                    mockups for developers who&apos;d rather code than design.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 animate-fade-in-up">
@@ -87,8 +89,9 @@ export default function LandingPage() {
                     Free to Use
                   </div>
                 </div>
+                <PeerlistSpotlight />
               </div>
-              <div className="flex items-center justify-center lg:justify-end mt-8 lg:mt-0">
+              <div className="flex items-center justify-center lg:justify-end mt-4 lg:mt-0">
                 <div className="relative w-full max-w-[800px] aspect-[16/9] group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl transform transition-transform duration-300 group-hover:scale-105"></div>
                   <ShowcaseImage />
@@ -98,7 +101,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-       <FeatureSection />
+        <FeatureSection />
 
         <section
           id="pricing"
@@ -166,9 +169,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-
-
-
         <section className="w-full py-12 md:py-24 lg:py-32 bg-primary text-primary-foreground">
           <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -209,44 +209,48 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+
+          
         </section>
 
-
-
         <FAQSection />
-
-      
       </main>
 
       <footer className="border-t border-border bg-background">
-      <div className="container mx-auto px-4 md:px-6 py-8">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <div className="flex items-center text-sm font-medium text-muted-foreground">
-            Made with <Heart className="inline-block h-4 w-4 mx-1 text-primary" /> by{" "}
-            <Link
-              href="https://www.linkedin.com/in/suryanshsingh2001/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-1 text-foreground hover:text-primary transition-colors"
-            >
-              Suryansh
-            </Link>
-          </div>
-          <nav className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-            <Link href="/terms" className="hover:text-foreground transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/privacy" className="hover:text-foreground transition-colors">
-              Privacy Policy
-            </Link>
-          
-          </nav>
-          <div className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Mockly. All rights reserved.
+        <div className="container mx-auto px-4 md:px-6 py-8">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="flex items-center text-sm font-medium text-muted-foreground">
+              Made with{" "}
+              <Heart className="inline-block h-4 w-4 mx-1 text-primary" /> by{" "}
+              <Link
+                href="https://www.linkedin.com/in/suryanshsingh2001/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-1 text-foreground hover:text-primary transition-colors"
+              >
+                Suryansh
+              </Link>
+            </div>
+            <nav className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+              <Link
+                href="/terms"
+                className="hover:text-foreground transition-colors"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                href="/privacy"
+                className="hover:text-foreground transition-colors"
+              >
+                Privacy Policy
+              </Link>
+            </nav>
+            <div className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} Mockly. All rights reserved.
+            </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
     </div>
   );
 }
