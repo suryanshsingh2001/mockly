@@ -1,20 +1,21 @@
-import arcjet, { slidingWindow } from "@arcjet/next";
+import arcjet, { tokenBucket } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
   characteristics: ["ip.src"], // track requests by IP address
   rules: [
-    slidingWindow({
+    tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      interval: 60, // 60 second sliding window
-      max: 5, // allow a maximum of 100 requests
+      refillRate: 2, // refill 10 tokens per interval
+      interval: 60, // 60 second interval
+      capacity: 2, // bucket maximum capacity of 100 tokens
     }),
   ],
 });
 
 export async function POST(req: Request, res: Response) {
-    const decision = await aj.protect(req);
+    const decision = await aj.protect(req, { requested: 1 });
 
     if(decision.isDenied()) {
         return NextResponse.json(
@@ -24,11 +25,11 @@ export async function POST(req: Request, res: Response) {
             },
             {
               status: 429,
-              
-            },
-          );
+            }
+        );
     }
+
     return NextResponse.json({
         message: "Hello world",
-      });
+    });
 }
