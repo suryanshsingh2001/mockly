@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BackgroundGradient } from "@/components/layout/background-gradient";
 import Image from "next/image";
+import { siteConfig } from "@/config/config";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,14 +40,16 @@ export function Header() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Image
-                src="/icon-512.png"
-                alt="Logo"
-                width={32}
-                height={32}
-                className="h-8 w-8 rounded-full"
-              />
-              Mockly
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src="/icon-512.png"
+                  alt="Logo"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 rounded-full"
+                />
+                Mockly
+              </Link>
             </motion.div>
 
             {/* Desktop Navigation */}
@@ -96,7 +99,7 @@ export function Header() {
                 transition={{ duration: 0.3, delay: 0.4 }}
               >
                 <Link
-                  href="#"
+                  href="/blogs"
                   className="text-sm font-medium hover:text-primary transition-colors"
                 >
                   Blog
@@ -116,9 +119,11 @@ export function Header() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: 0.6 }}
               >
-                <Button size="sm" className="bg-primary hover:bg-primary/90">
-                  Get Started
-                </Button>
+                <Link href="/editor">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90">
+                    Get Started
+                  </Button>
+                </Link>
               </motion.div>
             </nav>
 
@@ -224,7 +229,7 @@ function MobileSideMenu({
                   FAQ
                 </Link>
                 <Link
-                  href="#"
+                  href="/blogs"
                   className="text-lg font-medium hover:text-primary transition-colors"
                   onClick={onClose}
                 >
@@ -234,9 +239,12 @@ function MobileSideMenu({
                   <span className="text-sm font-medium">Toggle theme</span>
                   <ThemeToggle />
                 </div>
-                <Button className="w-full mt-4" onClick={onClose}>
-                  Get Started
-                </Button>
+                <Link href="/editor">
+                  <Button className="w-full mt-4" onClick={onClose}>
+                    Get Started
+                  </Button>
+                </Link>
+               
               </nav>
 
               {/* Decorative elements */}
