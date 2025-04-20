@@ -38,6 +38,7 @@ import ExportButton from "./buttons/ExportButton";
 import { truncateFileName } from "@/lib/utils";
 import { backgroundUrls, screenSizes } from "@/lib/constants";
 import { getGradientFromImage } from "@/lib/extractColors";
+import { useEditorState } from "../context/useEditor";
 
 const validationError = {
   customHeight: "",
@@ -87,70 +88,71 @@ const defaultSettings = {
 };
 
 export default function MockupEditor() {
-  const [image, setImage] = useState<string | null>(defaultSettings.image);
+  const {
+    image,
+    setImage,
+    loadedImage,
+    imagePosition,
+    setImagePosition,
+    zoom,
+    setZoom,
+    transparency,
+    setTransparency,
+    borderRadius,
+    setBorderRadius,
+    shadow,
+    setShadow,
+    text,
+    setText,
+    textPosition,
+    setTextPosition,
+    textStyle,
+    setTextStyle,
+    screenSize,
+    setScreenSize,
+    presetScreenSize,
+    setPresetScreenSize,
+    customHeight,
+    setCustomHeight,
+    customWidth,
+    setCustomWidth,
+    gradientAngle,
+    setGradientAngle,
+    customColor1,
+    setCustomColor1,
+    customColor2,
+    setCustomColor2,
+    customColor3,
+    setCustomColor3,
+    background,
+    setBackground,
+    backgroundTab,
+    setBackgroundTab,
+    validationError,
+    setValidationError,
+    isCustomBackground,
+    setIsCustomBackground,
+    isUrlFormat,
+    setIsUrlFormat,
+    customImg,
+    setCustomImg,
+    backgroundImage,
+    setBackgroundImage,
+    isBackgroundLoaded,
+    setIsBackgroundLoaded,
+    isDragging,
+    setIsDragging,
+    dragTarget,
+    setDragTarget,
+    setLoadedImage,
+    setIsBrowsedFile,
+    scale,
+    setScale,
+    setDisplayFileName,
+    displayFileName,
+    browsedFile,
 
-  const [backgroundTab, setBackgroundTab] = useState<BackgroundTab>(
-    defaultSettings.backgroundTab
-  );
-  const [background, setBackground] = useState(defaultSettings.background);
-  const [isCustomBackground, setIsCustomBackground] = useState(false);
-  const [isUrlFormat, setIsUrlFormat] = useState<boolean>(true);
-  const [customImg, setCustomImg] = useState<string>("");
-  const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
-  const [backgroundImage, setBackgroundImage] =
-    useState<HTMLImageElement | null>(null);
-  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
-  const [customColor1, setCustomColor1] = useState(
-    defaultSettings.customColor1
-  );
-  const [customColor2, setCustomColor2] = useState(
-    defaultSettings.customColor2
-  );
-  const [customColor3, setCustomColor3] = useState(
-    defaultSettings.customColor3
-  );
-  const [gradientAngle, setGradientAngle] = useState(
-    defaultSettings.gradientAngle
-  );
-  const [screenSize, setScreenSize] = useState<ScreenSize>(
-    defaultSettings.screenSize
-  );
-  const [customWidth, setCustomWidth] = useState(
-    defaultSettings.screenSize.width.toString()
-  );
-  const [customHeight, setCustomHeight] = useState(
-    defaultSettings.screenSize.height.toString()
-  );
-  const [presetScreenSize, setPresetScreenSize] = useState(
-    defaultSettings.screenSize
-  );
-  const [validationError, setValidationError] = useState<ValidationError>(
-    defaultSettings.validationError
-  );
-  const [zoom, setZoom] = useState(defaultSettings.zoom);
-  const [transparency, setTransparency] = useState(
-    defaultSettings.transparency
-  );
-  const [borderRadius, setBorderRadius] = useState(
-    defaultSettings.borderRadius
-  );
-  const [shadow, setShadow] = useState<Shadow>(defaultSettings.shadow);
-  const [scale, setScale] = useState(1);
-  const [imagePosition, setImagePosition] = useState(
-    defaultSettings.imagePosition
-  );
-  const [text, setText] = useState(defaultSettings.text);
-  const [textStyle, setTextStyle] = useState<TextStyle>(
-    defaultSettings.textStyle
-  );
-  const [textPosition, setTextPosition] = useState(
-    defaultSettings.textPosition
-  );
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
-  const [browsedFile, setIsBrowsedFile] = useState(false);
-  const [displayFileName, setDisplayFileName] = useState<string>("");
+  } = useEditorState();
 
   // Refs for canvas and container elements
 
