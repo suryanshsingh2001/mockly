@@ -688,8 +688,8 @@ export default function MockupEditor() {
       />
       <Header />
       <main className="container mx-auto flex-1 relative z-10">
-        <div className="flex flex-col lg:flex-row gap-8 py-4">
-          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full  bg-background/60 ">
+        <div className="flex flex-col lg:flex-row gap-8 py-8">
+          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
             <div className="">
               <Label htmlFor="image-upload" className="block mb-4 text-md">
                 Upload Image
