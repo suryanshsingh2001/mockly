@@ -15,7 +15,7 @@ export default function FAQSection() {
   }
 
   return (
-    <section className="relative w-full py-12 md:py-24 lg:py-32">
+    <section id='faq' className="relative w-full py-12 md:py-24 lg:py-32">
       {/* Custom background with diagonal grid pattern */}
       <BackgroundGradient 
         primaryColor="blue-600" 
