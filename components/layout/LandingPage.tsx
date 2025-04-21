@@ -169,10 +169,14 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-5xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+              className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
             >
-              Beautiful mockups <br className="hidden sm:inline" />
+              Beautiful mockups{" "}
+              <span className="sm:hidden">
               <span className="text-primary">without the stress</span>
+              </span>
+              <br className="hidden sm:inline" />
+              <span className="hidden sm:inline text-primary">without the stress</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
