@@ -73,10 +73,42 @@ export default function Home() {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="flex items-center justify-center gap-2 mb-6"
             >
-              <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+              <motion.span 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                delay: 0.3, 
+                duration: 0.4,
+                type: "spring",
+                stiffness: 200
+              }}
+              whileHover={{ scale: 1.05 }}
+              className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary relative overflow-hidden"
+              >
+              <motion.div 
+                className="absolute inset-0 bg-primary/5"
+                animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0, 0.3, 0]
+                }}
+                transition={{
+                duration: 2,
+                repeat: Infinity,
+                repeatType: "loop"
+                }}
+              />
+              <motion.span 
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ 
+                duration: 2, 
+                repeat: Infinity, 
+                repeatDelay: 3
+                }}
+              >
                 <Sparkles className="mr-1 h-3 w-3" />
-                Open Source
-              </span>
+              </motion.span>
+              Open Source
+              </motion.span>
             </motion.div>
             <motion.div
               initial={{ opacity: 0 }}

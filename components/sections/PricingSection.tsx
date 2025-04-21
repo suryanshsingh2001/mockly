@@ -12,10 +12,8 @@ export function PricingSection() {
     <section id="pricing" className="relative py-24">
         <BackgroundGradient
             className="z-0"
-            primaryColor="purple-500"
-            secondaryColor="violet-400"
-            accentColor="indigo-600"
-            gridOpacity="0.03"
+            accentColor="bg-gradient-to-b from-primary/5 to-transparent"
+          
         />
       <div className="container mx-auto">
         <motion.div
