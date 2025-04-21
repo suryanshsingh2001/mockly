@@ -26,7 +26,7 @@ import { Label } from "@/components/ui/label";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import Header from "@/components/shared/Header.v2";
+import { Header } from "@/components/layout/LandingHeader";
 import { ShadowManager, type Shadow } from "@/components/shadow-manager";
 import { ScreenSize, ValidationError } from "./types";
 import ValidatedInput from "./ValidatedInput";
@@ -38,6 +38,7 @@ import ExportButton from "./buttons/ExportButton";
 import { truncateFileName } from "@/lib/utils";
 import { backgroundUrls, screenSizes } from "@/lib/constants";
 import { getGradientFromImage } from "@/lib/extractColors";
+import { BackgroundGradient } from "../layout/background-gradient";
 
 const validationError = {
   customHeight: "",
@@ -677,11 +678,19 @@ export default function MockupEditor() {
   }, [displayFileName]);
 
   return (
-    <div className="flex flex-col px-6">
+    <div className="flex flex-col min-h-screen relative">
+      <BackgroundGradient
+        primaryColor="indigo-600"
+        secondaryColor="blue-500"
+        accentColor="violet-400"
+        gridOpacity="0.02"
+        disableShapes
+        className="absolute inset-0"
+      />
       <Header />
-      <main className="container mx-auto h-screen ">
-        <div className="flex flex-col lg:flex-row gap-8 ">
-          <div className="w-full lg:w-1/4 space-y-8  overflow-y-auto h-full p-2 ">
+      <main className="container mx-auto flex-1 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-8 py-8">
+          <div className="w-full lg:w-1/4 space-y-8 overflow-y-auto h-full p-2">
             <div className="">
               <Label htmlFor="image-upload" className="block mb-4 text-md">
                 Upload Image

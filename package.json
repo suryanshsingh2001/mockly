@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.7",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
@@ -28,7 +29,7 @@
     "clsx": "^2.1.1",
     "extract-colors": "^4.1.0",
     "file-saver": "^2.0.5",
-    "framer-motion": "^11.3.31",
+    "framer-motion": "^11.18.2",
     "gif.js": "^0.2.0",
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",

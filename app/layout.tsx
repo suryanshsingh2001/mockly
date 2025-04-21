@@ -61,7 +61,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <body className={cn("min-h-screen bg-background antialiased", raleway.className)}>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
           >
