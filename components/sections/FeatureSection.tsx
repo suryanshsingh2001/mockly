@@ -120,6 +120,11 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
+            whileHover={{
+              scale: 1.02,
+              transition: { duration: 0.3 }
+            }}
+
             className="md:col-span-2 row-span-2 relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 p-6 md:p-8"
           >
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-primary/10 blur-xl"></div>
@@ -147,6 +152,11 @@ export function FeaturesSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            whileHover={{
+              scale: 1.02,
+              transition: { duration: 0.3 }
+            }}
+
             transition={{ duration: 0.5, delay: 0.1 }}
             className="relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-500/5 to-violet-500/10 p-6"
           >
@@ -166,6 +176,11 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
+            whileHover={{
+              scale: 1.02,
+              transition: { duration: 0.3 }
+            }}
+
             className="relative overflow-hidden rounded-xl bg-gradient-to-br from-fuchsia-500/5 to-fuchsia-500/10 p-6"
           >
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-16 w-16 rounded-full bg-fuchsia-500/10 blur-xl"></div>
@@ -184,6 +199,11 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
+            whileHover={{
+              scale: 1.02,
+              transition: { duration: 0.3 }
+            }}
+
             className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500/5 to-blue-500/10 p-6"
           >
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-16 w-16 rounded-full bg-blue-500/10 blur-xl"></div>
@@ -202,6 +222,11 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.4 }}
+            whileHover={{
+              scale: 1.02,
+              transition: { duration: 0.3 }
+            }}
+
             className="md:col-span-2 relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500/5 to-indigo-500/10 p-6"
           >
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-16 w-16 rounded-full bg-indigo-500/10 blur-xl"></div>
@@ -223,6 +248,11 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.5 }}
+            whileHover={{
+              scale: 1.02,
+              transition: { duration: 0.3 }
+            }}
+
             className="relative overflow-hidden rounded-xl bg-gradient-to-br from-cyan-500/5 to-cyan-500/10 p-6"
           >
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-16 w-16 rounded-full bg-cyan-500/10 blur-xl"></div>
@@ -241,6 +271,11 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.6 }}
+            whileHover={{
+              scale: 1.02,
+              transition: { duration: 0.3 }
+            }}
+
             className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/5 to-amber-500/10 p-6"
           >
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-16 w-16 rounded-full bg-amber-500/10 blur-xl"></div>
@@ -259,6 +294,11 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.7 }}
+            whileHover={{
+              scale: 1.02,
+              transition: { duration: 0.3 }
+            }}
+
             className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-500/5 to-rose-500/10 p-6"
           >
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-16 w-16 rounded-full bg-rose-500/10 blur-xl"></div>
