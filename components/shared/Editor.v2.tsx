@@ -684,6 +684,7 @@ export default function MockupEditor() {
         secondaryColor="blue-500"
         accentColor="violet-400"
         gridOpacity="0.02"
+        disableShapes
         className="absolute inset-0"
       />
       <Header />
