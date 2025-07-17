@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Upload,
   X,
@@ -39,6 +45,7 @@ import { truncateFileName } from "@/lib/utils";
 import { backgroundUrls, screenSizes } from "@/lib/constants";
 import { getGradientFromImage } from "@/lib/extractColors";
 import { BackgroundGradient } from "../layout/background-gradient";
+
 
 const validationError = {
   customHeight: "",
@@ -152,6 +159,12 @@ export default function MockupEditor() {
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
   const [browsedFile, setIsBrowsedFile] = useState(false);
   const [displayFileName, setDisplayFileName] = useState<string>("");
+  const [dirtyRegions, setDirtyRegions] = useState<Set<string>>(new Set());
+
+  const [textMetrics, setTextMetrics] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
 
   // Refs for canvas and container elements
 
@@ -325,7 +338,6 @@ export default function MockupEditor() {
   useEffect(() => {
     const loadImage = (src: string) => {
       const img = new Image();
-      img.src = src;
       img.onload = () => {
         setBackgroundImage(img); // Set the image for further use
         setIsBackgroundLoaded(true);
@@ -335,6 +347,7 @@ export default function MockupEditor() {
         setBackgroundImage(null); // Reset in case of error
         setIsBackgroundLoaded(false);
       };
+      img.src = src;
     };
     if (customImg !== undefined && customImg !== null) {
       if (customImg.trim() === "") {
@@ -379,6 +392,27 @@ export default function MockupEditor() {
     drawText(ctx);
   };
 
+  const shadowDeps = useMemo(
+    () => [shadow.color, shadow.x, shadow.y, shadow.blur],
+    [shadow.color, shadow.x, shadow.y, shadow.blur]
+  );
+
+  const textStyleDeps = useMemo(
+    () => [
+      textStyle.textColor,
+      textStyle.fontFamily,
+      textStyle.fontSize,
+      textStyle.bold,
+      textStyle.italic,
+      textStyle.underline,
+      textStyle.applyStroke,
+      textStyle.strokeColor,
+      textStyle.strokeWidth,
+      textStyle.letterSpacing,
+    ],
+    [textStyle]
+  );
+
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -387,7 +421,18 @@ export default function MockupEditor() {
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
 
-      drawBackgroundImage(ctx);
+      // Only redraw what's needed
+      if (dirtyRegions.has("background") || dirtyRegions.size === 0) {
+        drawBackgroundImage(ctx);
+      }
+      if (dirtyRegions.has("image") || dirtyRegions.size === 0) {
+        drawImage(ctx);
+      }
+      if (dirtyRegions.has("text") || dirtyRegions.size === 0) {
+        drawText(ctx);
+      }
+
+      setDirtyRegions(new Set());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -398,7 +443,8 @@ export default function MockupEditor() {
     background,
     borderRadius,
     loadedImage,
-    textStyle,
+    ...textStyleDeps,
+    ...shadowDeps,
     text,
     textPosition.x,
     textPosition.y,
@@ -409,7 +455,6 @@ export default function MockupEditor() {
     transparency,
     imagePosition.x,
     imagePosition.y,
-    shadow,
   ]);
 
   useEffect(() => {
@@ -418,88 +463,33 @@ export default function MockupEditor() {
 
   const drawImage = (ctx: CanvasRenderingContext2D) => {
     if (loadedImage) {
-      const scale = zoom / 100;
-      const w = loadedImage.width * scale;
-      const h = loadedImage.height * scale;
-      const x = imagePosition.x;
-      const y = imagePosition.y;
+      if (loadedImage) {
+        ctx.save(); // Single save
 
-      // Draw shadow
-      if (shadow.blur > 0) {
-        ctx.save();
+        const scale = zoom / 100;
+        const w = loadedImage.width * scale;
+        const h = loadedImage.height * scale;
+        const x = imagePosition.x;
+        const y = imagePosition.y;
 
-        ctx.shadowColor = shadow.color;
-        ctx.shadowBlur = shadow.blur;
-        ctx.shadowOffsetX = shadow.x;
-        ctx.shadowOffsetY = shadow.y;
+        // Apply all transformations at once
+        ctx.globalAlpha = transparency / 100;
+
+        if (shadow.blur > 0) {
+          ctx.shadowColor = shadow.color;
+          ctx.shadowBlur = shadow.blur;
+          ctx.shadowOffsetX = shadow.x;
+          ctx.shadowOffsetY = shadow.y;
+        }
 
         if (borderRadius > 0) {
-          // Shadow the image with border radius
           ctx.beginPath();
           ctx.roundRect(x, y, w, h, borderRadius);
-          ctx.fillStyle = shadow.color;
-          ctx.fill();
-        } else {
-          // Shadow the image without border radius
-          // Allows for a more accurate shadow on transparent images
-          ctx.globalAlpha = transparency / 100;
-          ctx.drawImage(loadedImage, x, y, w, h);
+          ctx.clip();
         }
 
-        ctx.restore();
-      }
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(x, y, w, h, borderRadius);
-      ctx.clip();
-      ctx.globalAlpha = transparency / 100;
-      ctx.drawImage(loadedImage, x, y, w, h);
-      ctx.restore();
-    }
-  };
-
-  const drawText = (ctx: CanvasRenderingContext2D) => {
-    if (text) {
-      const fontWeight = textStyle.bold ? "bold" : "normal";
-      const fontStyle = textStyle.italic ? "italic" : "normal";
-      const fontSize = `${textStyle.fontSize}px`;
-      const fontFamily = textStyle.fontFamily;
-
-      ctx.font = `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
-      ctx.fillStyle = textStyle.textColor; // Text fill color
-
-      const letterSpacing = textStyle.letterSpacing;
-      let currentX = textPosition.x; // Store a copy of the x position
-
-      // Draw each character individually with spacing
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-
-        // Conditionally apply the border (stroke) if applyStroke is true
-        if (textStyle.applyStroke) {
-          ctx.strokeStyle = textStyle.strokeColor; // Border color
-          ctx.lineWidth = textStyle.strokeWidth; // Border width
-          ctx.strokeText(char, currentX, textPosition.y);
-        }
-
-        // Draw the filled text
-        ctx.fillText(char, currentX, textPosition.y);
-
-        currentX += ctx.measureText(char).width + letterSpacing; // Move to the next position
-      }
-
-      // Draw underline (if applicable)
-      if (textStyle.underline) {
-        const totalTextWidth = currentX - textPosition.x; // Total width of the spaced text
-        const underlineY = textPosition.y + 3; // Position of the underline
-
-        ctx.beginPath(); // Begin a new path for the underline
-        ctx.moveTo(textPosition.x, underlineY);
-        ctx.lineTo(textPosition.x + totalTextWidth, underlineY);
-        ctx.strokeStyle = ctx.fillStyle;
-        ctx.lineWidth = 3;
-        ctx.stroke();
+        ctx.drawImage(loadedImage, x, y, w, h);
+        ctx.restore(); // Single restore
       }
     }
   };
@@ -582,11 +572,9 @@ export default function MockupEditor() {
   };
 
   const isPointInImage = (x: number, y: number) => {
-    if (image) {
-      const img = new Image();
-      img.src = image;
-      const w = img.width * (zoom / 100);
-      const h = img.height * (zoom / 100);
+    if (loadedImage) {
+      const w = loadedImage.width * (zoom / 100);
+      const h = loadedImage.height * (zoom / 100);
       return (
         x >= imagePosition.x &&
         x <= imagePosition.x + w &&
@@ -597,26 +585,78 @@ export default function MockupEditor() {
     return false;
   };
 
-  const isPointInText = (x: number, y: number) => {
-    if (text) {
-      const canvas = canvasRef.current;
-      const ctx = canvas?.getContext("2d");
-      const fontWeight = textStyle.bold ? "bold" : "normal";
-      const fontStyle = textStyle.italic ? "italic" : "normal";
-      const fontSize = `${textStyle.fontSize}px`;
-      const fontFamily = textStyle.fontFamily;
-
+  // Update metrics when text or style changes
+  useEffect(() => {
+    if (text && canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
       if (ctx) {
-        ctx.font = `${fontFamily}${fontStyle} ${fontWeight} ${fontSize} `;
+        const fontWeight = textStyle.bold ? "bold" : "normal";
+        const fontStyle = textStyle.italic ? "italic" : "normal";
+        ctx.font = `${fontStyle} ${fontWeight} ${textStyle.fontSize}px ${textStyle.fontFamily}`;
         const metrics = ctx.measureText(text);
-
-        return (
-          x >= textPosition.x &&
-          x <= textPosition.x + metrics.width &&
-          y >= textPosition.y - textStyle.fontSize &&
-          y <= textPosition.y
-        );
+        setTextMetrics({
+          width: metrics.width + (text.length - 1) * textStyle.letterSpacing,
+          height: textStyle.fontSize,
+        });
       }
+    }
+  }, [text, textStyle]);
+
+  const drawText = (ctx: CanvasRenderingContext2D) => {
+    if (!text) return;
+
+    ctx.save();
+
+    const fontWeight = textStyle.bold ? "bold" : "normal";
+    const fontStyle = textStyle.italic ? "italic" : "normal";
+    ctx.font = `${fontStyle} ${fontWeight} ${textStyle.fontSize}px ${textStyle.fontFamily}`;
+    ctx.fillStyle = textStyle.textColor;
+
+    // If no letter spacing, use optimized single draw
+    if (textStyle.letterSpacing === 0) {
+      if (textStyle.applyStroke) {
+        ctx.strokeStyle = textStyle.strokeColor;
+        ctx.lineWidth = textStyle.strokeWidth;
+        ctx.strokeText(text, textPosition.x, textPosition.y);
+      }
+      ctx.fillText(text, textPosition.x, textPosition.y);
+    } else {
+      // Use character-by-character only when needed
+      let currentX = textPosition.x;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (textStyle.applyStroke) {
+          ctx.strokeStyle = textStyle.strokeColor;
+          ctx.lineWidth = textStyle.strokeWidth;
+          ctx.strokeText(char, currentX, textPosition.y);
+        }
+        ctx.fillText(char, currentX, textPosition.y);
+        currentX += ctx.measureText(char).width + textStyle.letterSpacing;
+      }
+    }
+
+    // Optimized underline
+    if (textStyle.underline) {
+      const textWidth = textMetrics?.width || ctx.measureText(text).width;
+      ctx.beginPath();
+      ctx.moveTo(textPosition.x, textPosition.y + 3);
+      ctx.lineTo(textPosition.x + textWidth, textPosition.y + 3);
+      ctx.strokeStyle = textStyle.textColor;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  };
+
+  const isPointInText = (x: number, y: number) => {
+    if (textMetrics) {
+      return (
+        x >= textPosition.x &&
+        x <= textPosition.x + textMetrics.width &&
+        y >= textPosition.y - textMetrics.height &&
+        y <= textPosition.y
+      );
     }
     return false;
   };
