@@ -88,7 +88,7 @@ We have exciting plans for the future of Mockly, and we welcome contributions in
 
 We encourage contributors to think creatively about these future directions and propose innovative solutions to help bring these ideas to life.
 
-## 🎉 Hacktoberfest 2024
+## 🎉 Hacktoberfest 2025
 
 We're excited to participate in Hacktoberfest 2024! Here's how you can contribute:
 
