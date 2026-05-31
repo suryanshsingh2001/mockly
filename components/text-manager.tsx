@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 import {
   Popover,
   PopoverContent,
@@ -28,12 +29,16 @@ export type TextStyle = {
   letterSpacing: number;
 };
 
-export const TextManager = (props: any) => {
-  const { value, onChange } = props;
+interface TextManagerProps {
+  value: TextStyle;
+  onChange: (value: TextStyle) => void;
+}
+
+export const TextManager = ({ value, onChange }: TextManagerProps) => {
 
   const [popoverVisible, setPopoverVisible] = useState(false);
   const [textStyleValue, setTextStyleValue] = useState<TextStyle>(value);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setTextStyleValue(value);
@@ -55,18 +60,6 @@ export const TextManager = (props: any) => {
     };
     onChange(updatedTextStyle);
   };
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   return (
     <Popover open={popoverVisible} onOpenChange={setPopoverVisible}>

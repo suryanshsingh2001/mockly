@@ -1,6 +1,7 @@
 export type ScreenSize = {
-    height:number;
-    width:number
+    height: number;
+    width: number;
+    name?: string;
 }
 
 export type ValidationError = {
