@@ -159,8 +159,6 @@ export default function MockupEditor() {
   const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
   const [browsedFile, setIsBrowsedFile] = useState(false);
   const [displayFileName, setDisplayFileName] = useState<string>("");
-  const [dirtyRegions, setDirtyRegions] = useState<Set<string>>(new Set());
-
   const [textMetrics, setTextMetrics] = useState<{
     width: number;
     height: number;
@@ -172,7 +170,7 @@ export default function MockupEditor() {
   const containerRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef({ x: 0, y: 0 });
   const linkRef = useRef<HTMLInputElement>(null);
-  const fileRef = useRef<any>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const customScreenSize = {
     height: Number(customHeight),
@@ -281,7 +279,6 @@ export default function MockupEditor() {
     }
     getGradientFromImage(image).then((colors) => {
       if (colors) {
-        console.log(colors);
         setCustomColor1(colors[0]);
         setCustomColor2(colors[1]);
         setCustomColor3(colors[2]);
@@ -410,7 +407,18 @@ export default function MockupEditor() {
       textStyle.strokeWidth,
       textStyle.letterSpacing,
     ],
-    [textStyle]
+    [
+      textStyle.textColor,
+      textStyle.fontFamily,
+      textStyle.fontSize,
+      textStyle.bold,
+      textStyle.italic,
+      textStyle.underline,
+      textStyle.applyStroke,
+      textStyle.strokeColor,
+      textStyle.strokeWidth,
+      textStyle.letterSpacing,
+    ]
   );
 
   const drawCanvas = useCallback(() => {
@@ -421,18 +429,7 @@ export default function MockupEditor() {
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
 
-      // Only redraw what's needed
-      if (dirtyRegions.has("background") || dirtyRegions.size === 0) {
-        drawBackgroundImage(ctx);
-      }
-      if (dirtyRegions.has("image") || dirtyRegions.size === 0) {
-        drawImage(ctx);
-      }
-      if (dirtyRegions.has("text") || dirtyRegions.size === 0) {
-        drawText(ctx);
-      }
-
-      setDirtyRegions(new Set());
+      drawBackgroundImage(ctx);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -451,6 +448,7 @@ export default function MockupEditor() {
     gradientAngle,
     customColor1,
     customColor2,
+    customColor3,
     zoom,
     transparency,
     imagePosition.x,
@@ -861,7 +859,7 @@ export default function MockupEditor() {
                         type="color"
                         value={customColor3}
                         onChange={(e) => {
-                          setCustomColor2(e.target.value);
+                          setCustomColor3(e.target.value);
                           setBackground("gradient");
                         }}
                         className="w-1/2 h-10"
