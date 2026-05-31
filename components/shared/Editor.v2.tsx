@@ -14,8 +14,6 @@ import {
   RotateCcwIcon,
   LinkIcon,
   Sparkles,
-  Plus,
-  Minus,
 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { saveAs } from "file-saver";
@@ -186,13 +184,6 @@ export default function MockupEditor() {
   const textPositionRef = useRef(textPosition);
   const textMetricsRef = useRef(textMetrics);
 
-  // Hover state for overlay visibility
-  const [hoveredTarget, setHoveredTarget] = useState<"image" | "text" | null>(null);
-  const hoveredTargetRef = useRef<"image" | "text" | null>(null);
-
-  // Ref for the inner preview div (non-passive wheel listener)
-  const innerDivRef = useRef<HTMLDivElement>(null);
-
   const customScreenSize = {
     height: Number(customHeight),
     width: Number(customWidth),
@@ -292,7 +283,6 @@ export default function MockupEditor() {
     setBackgroundTab(defaultSettings.backgroundTab);
     setCustomImg("");
     setDisplayFileName("");
-    setHoveredTarget(null);
   };
 
   const autoPickColor = async () => {
@@ -420,18 +410,6 @@ export default function MockupEditor() {
   useEffect(() => { imagePositionRef.current = imagePosition; }, [imagePosition]);
   useEffect(() => { textPositionRef.current = textPosition; }, [textPosition]);
   useEffect(() => { textMetricsRef.current = textMetrics; }, [textMetrics]);
-  useEffect(() => { hoveredTargetRef.current = hoveredTarget; }, [hoveredTarget]);
-
-  useEffect(() => {
-    const el = innerDivRef.current;
-    if (!el) return;
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      setZoom(prev => Math.max(10, Math.min(200, prev + (e.deltaY < 0 ? 10 : -10))));
-    };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, []);
 
   const shadowDeps = useMemo(
     () => [shadow.color, shadow.x, shadow.y, shadow.blur],
@@ -546,7 +524,6 @@ export default function MockupEditor() {
       if (imageRef.current && isPointInImage(x, y)) {
         isDraggingRef.current = true;
         dragTargetRef.current = "image";
-        setHoveredTarget("image");
         offsetRef.current = {
           x: x - imagePositionRef.current.x,
           y: y - imagePositionRef.current.y,
@@ -555,7 +532,6 @@ export default function MockupEditor() {
       } else if (textRef.current && isPointInText(x, y)) {
         isDraggingRef.current = true;
         dragTargetRef.current = "text";
-        setHoveredTarget("text");
         offsetRef.current = {
           x: x - textPositionRef.current.x,
           y: y - textPositionRef.current.y,
@@ -566,29 +542,24 @@ export default function MockupEditor() {
   }, []);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / scaleRef.current;
-    const y = (e.clientY - rect.top) / scaleRef.current;
-
     if (isDraggingRef.current) {
-      if (dragTargetRef.current === "image" && loadedImageRef.current) {
-        setImagePosition({
-          x: x - offsetRef.current.x,
-          y: y - offsetRef.current.y,
-        });
-      } else if (dragTargetRef.current === "text") {
-        setTextPosition({
-          x: x - offsetRef.current.x,
-          y: y - offsetRef.current.y,
-        });
-      }
-    } else {
-      const hit: "image" | "text" | null =
-        isPointInImage(x, y) ? "image" : isPointInText(x, y) ? "text" : null;
-      if (hit !== hoveredTargetRef.current) {
-        setHoveredTarget(hit);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / scaleRef.current;
+        const y = (e.clientY - rect.top) / scaleRef.current;
+
+        if (dragTargetRef.current === "image" && loadedImageRef.current) {
+          setImagePosition({
+            x: x - offsetRef.current.x,
+            y: y - offsetRef.current.y,
+          });
+        } else if (dragTargetRef.current === "text") {
+          setTextPosition({
+            x: x - offsetRef.current.x,
+            y: y - offsetRef.current.y,
+          });
+        }
       }
     }
   }, []);
@@ -1237,8 +1208,7 @@ export default function MockupEditor() {
             className="w-full lg:w-3/4 border rounded-lg flex items-center justify-center bg-secondary h-[calc(100vh-12rem)] overflow-hidden"
           >
             <div
-              ref={innerDivRef}
-              className={`relative overflow-hidden ${hoveredTarget !== null ? "cursor-grab active:cursor-grabbing" : ""}`}
+              className="relative overflow-hidden"
               style={{
                 width: `${screenSize.width * scale}px`,
                 height: `${screenSize.height * scale}px`,
@@ -1252,60 +1222,6 @@ export default function MockupEditor() {
                   transformOrigin: "top left",
                 }}
               />
-
-              {/* Image selection overlay */}
-              {loadedImage && (
-                <div
-                  className={`absolute pointer-events-none border-2 border-dashed transition-colors duration-150 ${
-                    hoveredTarget === "image" ? "border-white/90" : "border-white/25"
-                  }`}
-                  style={{
-                    left: imagePosition.x * scale,
-                    top: imagePosition.y * scale,
-                    width: loadedImage.width * (zoom / 100) * scale,
-                    height: loadedImage.height * (zoom / 100) * scale,
-                  }}
-                >
-                  <div className="absolute -top-1 -left-1 w-2.5 h-2.5 bg-white rounded-sm shadow-sm" />
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white rounded-sm shadow-sm" />
-                  <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-white rounded-sm shadow-sm" />
-                  <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-white rounded-sm shadow-sm" />
-                </div>
-              )}
-
-              {/* Text selection overlay */}
-              {text && textMetrics && (
-                <div
-                  className={`absolute pointer-events-none border-2 border-dashed transition-colors duration-150 ${
-                    hoveredTarget === "text" ? "border-blue-400/90" : "border-blue-400/25"
-                  }`}
-                  style={{
-                    left: textPosition.x * scale,
-                    top: (textPosition.y - textMetrics.height) * scale,
-                    width: textMetrics.width * scale,
-                    height: textMetrics.height * scale,
-                  }}
-                />
-              )}
-
-              {/* In-preview zoom controls */}
-              {loadedImage && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-black/60 backdrop-blur-sm text-white rounded-full px-1 py-1 z-10 select-none">
-                  <button
-                    onClick={() => setZoom(prev => Math.max(10, prev - 10))}
-                    className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors"
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <span className="text-xs font-medium tabular-nums w-10 text-center">{zoom}%</span>
-                  <button
-                    onClick={() => setZoom(prev => Math.min(200, prev + 10))}
-                    className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors"
-                  >
-                    <Plus size={14} />
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>
