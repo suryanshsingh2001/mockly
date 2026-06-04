@@ -38,7 +38,7 @@ export async function generateMetadata({
       description,
       type: "article",
       publishedTime,
-      url: `${siteConfig.url}/blog/${post.slug}`,
+      url: `${siteConfig.url}/blogs/${post.slug}`,
       images: [
         {
           url: siteConfig.ogImage,
