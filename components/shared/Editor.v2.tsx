@@ -5,7 +5,6 @@ import React, {
   useRef,
   useEffect,
   useCallback,
-  useMemo,
 } from "react";
 import {
   Upload,
@@ -401,47 +400,16 @@ export default function MockupEditor() {
     drawText(ctx);
   };
 
-  // Keep handler refs in sync with latest state
-  useEffect(() => { scaleRef.current = scale; }, [scale]);
-  useEffect(() => { imageRef.current = image; }, [image]);
-  useEffect(() => { textRef.current = text; }, [text]);
-  useEffect(() => { loadedImageRef.current = loadedImage; }, [loadedImage]);
-  useEffect(() => { zoomRef.current = zoom; }, [zoom]);
-  useEffect(() => { imagePositionRef.current = imagePosition; }, [imagePosition]);
-  useEffect(() => { textPositionRef.current = textPosition; }, [textPosition]);
-  useEffect(() => { textMetricsRef.current = textMetrics; }, [textMetrics]);
-
-  const shadowDeps = useMemo(
-    () => [shadow.color, shadow.x, shadow.y, shadow.blur],
-    [shadow.color, shadow.x, shadow.y, shadow.blur]
-  );
-
-  const textStyleDeps = useMemo(
-    () => [
-      textStyle.textColor,
-      textStyle.fontFamily,
-      textStyle.fontSize,
-      textStyle.bold,
-      textStyle.italic,
-      textStyle.underline,
-      textStyle.applyStroke,
-      textStyle.strokeColor,
-      textStyle.strokeWidth,
-      textStyle.letterSpacing,
-    ],
-    [
-      textStyle.textColor,
-      textStyle.fontFamily,
-      textStyle.fontSize,
-      textStyle.bold,
-      textStyle.italic,
-      textStyle.underline,
-      textStyle.applyStroke,
-      textStyle.strokeColor,
-      textStyle.strokeWidth,
-      textStyle.letterSpacing,
-    ]
-  );
+  // Keep handler refs in sync — updated inline so event handlers always read
+  // the latest value without waiting for a useEffect to fire after paint
+  scaleRef.current = scale;
+  imageRef.current = image;
+  textRef.current = text;
+  loadedImageRef.current = loadedImage;
+  zoomRef.current = zoom;
+  imagePositionRef.current = imagePosition;
+  textPositionRef.current = textPosition;
+  textMetricsRef.current = textMetrics;
 
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -462,8 +430,20 @@ export default function MockupEditor() {
     background,
     borderRadius,
     loadedImage,
-    ...textStyleDeps,
-    ...shadowDeps,
+    textStyle.textColor,
+    textStyle.fontFamily,
+    textStyle.fontSize,
+    textStyle.bold,
+    textStyle.italic,
+    textStyle.underline,
+    textStyle.applyStroke,
+    textStyle.strokeColor,
+    textStyle.strokeWidth,
+    textStyle.letterSpacing,
+    shadow.color,
+    shadow.x,
+    shadow.y,
+    shadow.blur,
     text,
     textPosition.x,
     textPosition.y,
