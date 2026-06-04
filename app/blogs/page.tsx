@@ -37,13 +37,15 @@ export default async function BlogPage() {
                 className="border-b border-gray-200 dark:border-gray-700 pb-8 last:border-b-0"
               >
                 <Link href={`/blogs/${post.slug}`}>
-                  <Image
-                    src={post.metadata.image}
-                    alt={post.metadata.title}
-                    width={800}
-                    height={400}
-                    className="rounded-lg w-full h-48 object-cover mb-4"
-                  />
+                  {post.metadata.image && (
+                    <Image
+                      src={post.metadata.image}
+                      alt={post.metadata.title}
+                      width={800}
+                      height={400}
+                      className="rounded-lg w-full h-48 object-cover mb-4"
+                    />
+                  )}
                   <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
                     {post.metadata.title}
                   </h2>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -7,6 +7,7 @@ import {
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Settings2Icon } from "lucide-react";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 export type Shadow = {
   color: string;
@@ -25,7 +26,7 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
   setShadowValue,
 }) => {
   const [popoverVisible, setPopoverVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleInputChange = (newValues: Partial<Shadow>) => {
     const updatedShadow = {
@@ -37,18 +38,6 @@ export const ShadowManager: React.FC<ShadowManagerProps> = ({
     };
     setShadowValue(updatedShadow);
   };
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   const handleBlur = () => {
     const updatedShadow = {

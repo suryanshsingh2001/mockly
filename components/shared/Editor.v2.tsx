@@ -5,7 +5,6 @@ import React, {
   useRef,
   useEffect,
   useCallback,
-  useMemo,
 } from "react";
 import {
   Upload,
@@ -155,12 +154,8 @@ export default function MockupEditor() {
     defaultSettings.textPosition
   );
 
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragTarget, setDragTarget] = useState<"image" | "text" | null>(null);
   const [browsedFile, setIsBrowsedFile] = useState(false);
   const [displayFileName, setDisplayFileName] = useState<string>("");
-  const [dirtyRegions, setDirtyRegions] = useState<Set<string>>(new Set());
-
   const [textMetrics, setTextMetrics] = useState<{
     width: number;
     height: number;
@@ -172,7 +167,21 @@ export default function MockupEditor() {
   const containerRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef({ x: 0, y: 0 });
   const linkRef = useRef<HTMLInputElement>(null);
-  const fileRef = useRef<any>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Drag state as refs — never rendered, no re-render needed
+  const isDraggingRef = useRef(false);
+  const dragTargetRef = useRef<"image" | "text" | null>(null);
+
+  // Mirrors of state values read inside event handlers
+  const scaleRef = useRef(scale);
+  const imageRef = useRef(image);
+  const textRef = useRef(text);
+  const loadedImageRef = useRef(loadedImage);
+  const zoomRef = useRef(zoom);
+  const imagePositionRef = useRef(imagePosition);
+  const textPositionRef = useRef(textPosition);
+  const textMetricsRef = useRef(textMetrics);
 
   const customScreenSize = {
     height: Number(customHeight),
@@ -281,7 +290,6 @@ export default function MockupEditor() {
     }
     getGradientFromImage(image).then((colors) => {
       if (colors) {
-        console.log(colors);
         setCustomColor1(colors[0]);
         setCustomColor2(colors[1]);
         setCustomColor3(colors[2]);
@@ -392,26 +400,16 @@ export default function MockupEditor() {
     drawText(ctx);
   };
 
-  const shadowDeps = useMemo(
-    () => [shadow.color, shadow.x, shadow.y, shadow.blur],
-    [shadow.color, shadow.x, shadow.y, shadow.blur]
-  );
-
-  const textStyleDeps = useMemo(
-    () => [
-      textStyle.textColor,
-      textStyle.fontFamily,
-      textStyle.fontSize,
-      textStyle.bold,
-      textStyle.italic,
-      textStyle.underline,
-      textStyle.applyStroke,
-      textStyle.strokeColor,
-      textStyle.strokeWidth,
-      textStyle.letterSpacing,
-    ],
-    [textStyle]
-  );
+  // Keep handler refs in sync — updated inline so event handlers always read
+  // the latest value without waiting for a useEffect to fire after paint
+  scaleRef.current = scale;
+  imageRef.current = image;
+  textRef.current = text;
+  loadedImageRef.current = loadedImage;
+  zoomRef.current = zoom;
+  imagePositionRef.current = imagePosition;
+  textPositionRef.current = textPosition;
+  textMetricsRef.current = textMetrics;
 
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -421,18 +419,7 @@ export default function MockupEditor() {
       canvas.width = screenSize.width;
       canvas.height = screenSize.height;
 
-      // Only redraw what's needed
-      if (dirtyRegions.has("background") || dirtyRegions.size === 0) {
-        drawBackgroundImage(ctx);
-      }
-      if (dirtyRegions.has("image") || dirtyRegions.size === 0) {
-        drawImage(ctx);
-      }
-      if (dirtyRegions.has("text") || dirtyRegions.size === 0) {
-        drawText(ctx);
-      }
-
-      setDirtyRegions(new Set());
+      drawBackgroundImage(ctx);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -443,14 +430,27 @@ export default function MockupEditor() {
     background,
     borderRadius,
     loadedImage,
-    ...textStyleDeps,
-    ...shadowDeps,
+    textStyle.textColor,
+    textStyle.fontFamily,
+    textStyle.fontSize,
+    textStyle.bold,
+    textStyle.italic,
+    textStyle.underline,
+    textStyle.applyStroke,
+    textStyle.strokeColor,
+    textStyle.strokeWidth,
+    textStyle.letterSpacing,
+    shadow.color,
+    shadow.x,
+    shadow.y,
+    shadow.blur,
     text,
     textPosition.x,
     textPosition.y,
     gradientAngle,
     customColor1,
     customColor2,
+    customColor3,
     zoom,
     transparency,
     imagePosition.x,
@@ -494,69 +494,47 @@ export default function MockupEditor() {
     }
   };
 
-  useEffect(() => {
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-
-    // Cleanup event listeners
-    return () => {
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    image,
-    text,
-    scale,
-    loadedImage,
-    imagePosition.x,
-    imagePosition.y,
-    textPosition.x,
-    textPosition.y,
-    isDragging,
-    dragTarget,
-  ]);
-
-  const handleMouseDown = (e: MouseEvent) => {
+  const handleMouseDown = useCallback((e: MouseEvent) => {
     const canvas = canvasRef.current;
     if (canvas) {
       const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / scale;
-      const y = (e.clientY - rect.top) / scale;
+      const x = (e.clientX - rect.left) / scaleRef.current;
+      const y = (e.clientY - rect.top) / scaleRef.current;
 
-      if (image && isPointInImage(x, y)) {
-        setIsDragging(true);
-        setDragTarget("image");
+      if (imageRef.current && isPointInImage(x, y)) {
+        isDraggingRef.current = true;
+        dragTargetRef.current = "image";
         offsetRef.current = {
-          x: x - imagePosition.x,
-          y: y - imagePosition.y,
+          x: x - imagePositionRef.current.x,
+          y: y - imagePositionRef.current.y,
         };
         e.preventDefault();
-      } else if (text && isPointInText(x, y)) {
-        setIsDragging(true);
-        setDragTarget("text");
-        offsetRef.current = { x: x - textPosition.x, y: y - textPosition.y };
+      } else if (textRef.current && isPointInText(x, y)) {
+        isDraggingRef.current = true;
+        dragTargetRef.current = "text";
+        offsetRef.current = {
+          x: x - textPositionRef.current.x,
+          y: y - textPositionRef.current.y,
+        };
         e.preventDefault();
       }
     }
-  };
+  }, []);
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging) {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (isDraggingRef.current) {
       const canvas = canvasRef.current;
       if (canvas) {
         const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / scale;
-        const y = (e.clientY - rect.top) / scale;
+        const x = (e.clientX - rect.left) / scaleRef.current;
+        const y = (e.clientY - rect.top) / scaleRef.current;
 
-        if (dragTarget === "image" && loadedImage) {
+        if (dragTargetRef.current === "image" && loadedImageRef.current) {
           setImagePosition({
             x: x - offsetRef.current.x,
             y: y - offsetRef.current.y,
           });
-        } else if (dragTarget === "text") {
+        } else if (dragTargetRef.current === "text") {
           setTextPosition({
             x: x - offsetRef.current.x,
             y: y - offsetRef.current.y,
@@ -564,22 +542,35 @@ export default function MockupEditor() {
         }
       }
     }
-  };
+  }, []);
 
-  const handleMouseUp = (e: MouseEvent) => {
-    setIsDragging(false);
-    setDragTarget(null);
-  };
+  const handleMouseUp = useCallback((_e: MouseEvent) => {
+    isDraggingRef.current = false;
+    dragTargetRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [handleMouseDown, handleMouseMove, handleMouseUp]);
 
   const isPointInImage = (x: number, y: number) => {
-    if (loadedImage) {
-      const w = loadedImage.width * (zoom / 100);
-      const h = loadedImage.height * (zoom / 100);
+    const img = loadedImageRef.current;
+    if (img) {
+      const w = img.width * (zoomRef.current / 100);
+      const h = img.height * (zoomRef.current / 100);
       return (
-        x >= imagePosition.x &&
-        x <= imagePosition.x + w &&
-        y >= imagePosition.y &&
-        y <= imagePosition.y + h
+        x >= imagePositionRef.current.x &&
+        x <= imagePositionRef.current.x + w &&
+        y >= imagePositionRef.current.y &&
+        y <= imagePositionRef.current.y + h
       );
     }
     return false;
@@ -650,12 +641,13 @@ export default function MockupEditor() {
   };
 
   const isPointInText = (x: number, y: number) => {
-    if (textMetrics) {
+    const metrics = textMetricsRef.current;
+    if (metrics) {
       return (
-        x >= textPosition.x &&
-        x <= textPosition.x + textMetrics.width &&
-        y >= textPosition.y - textMetrics.height &&
-        y <= textPosition.y
+        x >= textPositionRef.current.x &&
+        x <= textPositionRef.current.x + metrics.width &&
+        y >= textPositionRef.current.y - metrics.height &&
+        y <= textPositionRef.current.y
       );
     }
     return false;
@@ -861,7 +853,7 @@ export default function MockupEditor() {
                         type="color"
                         value={customColor3}
                         onChange={(e) => {
-                          setCustomColor2(e.target.value);
+                          setCustomColor3(e.target.value);
                           setBackground("gradient");
                         }}
                         className="w-1/2 h-10"
