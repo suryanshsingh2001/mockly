@@ -60,7 +60,7 @@ export function Header() {
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
                 <Link
-                  href="#features"
+                  href="/#features"
                   className="text-sm font-medium hover:text-primary transition-colors"
                 >
                   Features
@@ -73,7 +73,7 @@ export function Header() {
                 transition={{ duration: 0.3, delay: 0.2 }}
               >
                 <Link
-                  href="#pricing"
+                  href="/#pricing"
                   className="text-sm font-medium hover:text-primary transition-colors"
                 >
                   Pricing
@@ -86,7 +86,7 @@ export function Header() {
                 transition={{ duration: 0.3, delay: 0.3 }}
               >
                 <Link
-                  href="#faq"
+                  href="/#faq"
                   className="text-sm font-medium hover:text-primary transition-colors"
                 >
                   FAQ
@@ -208,21 +208,21 @@ function MobileSideMenu({
               </div>
               <nav className="flex flex-col gap-6">
                 <Link
-                  href="#features"
+                  href="/#features"
                   className="text-lg font-medium hover:text-primary transition-colors"
                   onClick={onClose}
                 >
                   Features
                 </Link>
                 <Link
-                  href="#pricing"
+                  href="/#pricing"
                   className="text-lg font-medium hover:text-primary transition-colors"
                   onClick={onClose}
                 >
                   Pricing
                 </Link>
                 <Link
-                  href="#faq"
+                  href="/#faq"
                   className="text-lg font-medium hover:text-primary transition-colors"
                   onClick={onClose}
                 >

@@ -169,7 +169,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-5xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+              className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-balance"
             >
               Beautiful mockups <br className="hidden sm:inline" />
               <span className="text-primary">without the stress</span>
@@ -178,7 +178,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="mt-6 text-lg text-muted-foreground md:text-xl"
+              className="mt-6 text-base text-muted-foreground md:text-xl max-w-sm mx-auto sm:max-w-none text-pretty"
             >
               Create professional-looking screenshots and mockups with ease.
               Designed for developers who&apos;d rather code than design.
