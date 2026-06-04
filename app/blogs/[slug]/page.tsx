@@ -22,11 +22,12 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getPost(slug);
 
+  if (!post) return undefined;
+
   const {
     title,
     publishedAt: publishedTime,
     summary: description,
-    image,
   } = post.metadata;
 
   return {
@@ -86,14 +87,16 @@ export default async function Blog({
         </Link>
         </div>
 
-        <div className="relative h-96 w-full mb-8">
-          <Image
-            src={post.metadata.image}
-            alt={post.metadata.title}
-            fill
-            className="rounded-lg object-cover"
-          />
-        </div>
+        {post.metadata.image && (
+          <div className="relative h-96 w-full mb-8">
+            <Image
+              src={post.metadata.image}
+              alt={post.metadata.title}
+              fill
+              className="rounded-lg object-cover"
+            />
+          </div>
+        )}
 
         <header className="mb-8">
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl mb-4">
