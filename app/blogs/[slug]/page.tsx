@@ -15,11 +15,12 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 export async function generateMetadata({
   params,
 }: {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }): Promise<Metadata | undefined> {
-  const post = await getPost(params.slug);
+  const { slug } = await params;
+  const post = await getPost(slug);
 
   const {
     title,
@@ -55,11 +56,12 @@ export async function generateMetadata({
 export default async function Blog({
   params,
 }: {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }) {
-  const post = await getPost(params.slug);
+  const { slug } = await params;
+  const post = await getPost(slug);
 
 
   
@@ -88,9 +90,8 @@ export default async function Blog({
           <Image
             src={post.metadata.image}
             alt={post.metadata.title}
-            layout="fill"
-            objectFit="cover"
-            className="rounded-lg"
+            fill
+            className="rounded-lg object-cover"
           />
         </div>
 
